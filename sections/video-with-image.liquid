@@ -427,6 +427,7 @@
   if section.settings.video_hosted_mobile != blank
     assign has_hosted_video_mob = true
   endif
+  assign lcp_optimization = section.settings.enable_lcp_optimization
 -%}
 
 <div id="vis-{{ section.id }}" data-vis-root>
@@ -508,15 +509,28 @@
 
         <div class="vis-image-wrap">
           {%- if section.settings.image != blank -%}
-            {{
-              section.settings.image
-              | image_url: width: 1400
-              | image_tag:
-                loading: 'lazy',
-                alt: section.settings.heading | default: '',
-                widths: '400, 600, 800, 1000, 1200, 1400',
-                sizes: '(max-width: 989px) 100vw, 50vw'
-            }}
+            {%- if lcp_optimization -%}
+              {{
+                section.settings.image
+                | image_url: width: 1400
+                | image_tag:
+                  loading: 'eager',
+                  fetchpriority: 'high',
+                  alt: section.settings.heading | default: '',
+                  widths: '400, 600, 800, 1000, 1200, 1400',
+                  sizes: '(max-width: 989px) 100vw, 50vw'
+              }}
+            {%- else -%}
+              {{
+                section.settings.image
+                | image_url: width: 1400
+                | image_tag:
+                  loading: 'lazy',
+                  alt: section.settings.heading | default: '',
+                  widths: '400, 600, 800, 1000, 1200, 1400',
+                  sizes: '(max-width: 989px) 100vw, 50vw'
+              }}
+            {%- endif -%}
           {%- else -%}
             {{ 'collection-apparel-1' | placeholder_svg_tag: 'vis-video-placeholder' }}
           {%- endif -%}
@@ -634,6 +648,17 @@
   "class": "vis-section-wrapper",
   "disabled_on": { "groups": ["header", "footer"] },
   "settings": [
+    {
+      "type": "header",
+      "content": "Performance"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_lcp_optimization",
+      "label": "Enable LCP optimization",
+      "default": true,
+      "info": "Prioritizes the panel image for fastest paint: loads it eagerly with fetchpriority=\"high\" instead of lazily, while keeping accurate responsive sizes/srcset. Turn off if this section sits further down the page (below the fold), since lazy-loading is better there."
+    },
     {
       "type": "header",
       "content": "Section label"
