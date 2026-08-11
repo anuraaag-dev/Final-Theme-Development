@@ -1,0 +1,485 @@
+{% comment %}
+  Section: Content Glass Grid (Fully Responsive)
+  Description: Desktop grid, Mobile flex column. Same blur-fades-from-bottom-up
+  treatment as the Collection Glass Grid, but each card is fully custom content
+  (heading, description, button) instead of pulling from a collection.
+{% endcomment %}
+
+{%- liquid
+  assign overlay_opacity_base = section.settings.overlay_opacity | times: 1.0 | divided_by: 100.0
+  assign overlay_opacity_hover_pct = section.settings.overlay_opacity | plus: 10 | at_most: 100
+  assign overlay_opacity_hover = overlay_opacity_hover_pct | times: 1.0 | divided_by: 100.0
+  assign overlay_rgba_base = section.settings.overlay_color | color_modify: 'alpha', overlay_opacity_base
+  assign overlay_rgba_hover = section.settings.overlay_color | color_modify: 'alpha', overlay_opacity_hover
+-%}
+
+<div class="content-glass-section page-width" data-section-id="{{ section.id }}">
+  {%- if section.settings.heading != blank -%}
+    <div class="section-header text-center">
+      <h2 class="section-heading">{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.subheading != blank -%}
+        <p class="section-subheading">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="content-grid-wrapper">
+    <div class="content-grid"
+         style="--per-row: {{ section.settings.per_row }}; --gap: {{ section.settings.gap }}px;">
+
+      {%- for block in section.blocks -%}
+        <div class="content-card" {{ block.shopify_attributes }} style="--anim-delay: {{ forloop.index0 | times: 0.1 }}s;">
+          <div class="card-image-wrapper">
+            {%- if block.settings.image != blank -%}
+              {{ block.settings.image | image_url: width: 800, height: 1000, crop: 'center' | image_tag:
+                 loading: 'lazy',
+                 sizes: '(min-width: 1200px) calc((1200px - 80px) / 3), (min-width: 750px) calc((100vw - 80px) / 2), calc(100vw - 40px)',
+                 widths: '400, 600, 800, 1000',
+                 class: 'content-img'
+              }}
+            {%- else -%}
+              {{ 'collection-' | append: forloop.index | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- endif -%}
+          </div>
+
+          <!-- Gradient Blur Overlay (fades from bottom up) -->
+          <div class="blur-overlay">
+            <div class="overlay-content">
+              {%- if block.settings.heading != blank -%}
+                <h3 class="card-title">{{ block.settings.heading | escape }}</h3>
+              {%- endif -%}
+
+              {%- if section.settings.show_description and block.settings.description != blank -%}
+                <p class="card-desc">{{ block.settings.description | truncate: 100 }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.button_link != blank -%}
+                <a href="{{ block.settings.button_link }}" class="btn btn--primary">
+                  {{- block.settings.button_label | default: section.settings.default_button_label | default: 'Shop Now' -}}
+                  <span class="btn-arrow">→</span>
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Content Glass Grid",
+  "class": "section-content-glass-grid",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section heading",
+      "default": "Explore our collections"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Find the perfect style for every moment"
+    },
+    {
+      "type": "range",
+      "id": "per_row",
+      "label": "Cards per row",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "default": 25,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show card description",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "default_button_label",
+      "label": "Default button label",
+      "default": "Discover",
+      "info": "Used when a card's own button label is left empty."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading color",
+      "default": "#6b6b7b"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card placeholder background",
+      "default": "#f0f0f0",
+      "info": "Shows while the image loads, or when a card has no image."
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay tint color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay tint strength",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "default": 35,
+      "unit": "%"
+    },
+    {
+      "type": "color",
+      "id": "overlay_text_color",
+      "label": "Heading / description color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text",
+      "default": "#1a1a2a"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background_color",
+      "label": "Button hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Button hover text",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "A short line about this card. Keep it brief."
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "info": "Leave empty to use the section's default button label."
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Content Glass Grid",
+      "blocks": [
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{% style %}
+.content-glass-section {
+  padding: 50px;
+}
+
+.section-header {
+  margin-bottom: 45px;
+}
+.section-heading {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+.section-subheading {
+  font-size: 1.1rem;
+  color: {{ section.settings.subheading_color }};
+  margin: 0;
+}
+
+/* ----- Grid ----- */
+.content-grid-wrapper {
+  overflow: hidden;
+}
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--per-row, 3), 1fr);
+  gap: var(--gap, 25px);
+}
+
+/* ----- Card ----- */
+.content-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: {{ section.settings.card_background_color }};
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  opacity: 0;
+  transform: translateY(40px) scale(0.97);
+  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--anim-delay, 0s);
+}
+
+.content-card:hover {
+  transform: scale(1.02) translateY(-6px);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  z-index: 2;
+}
+
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(40px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ----- Image ----- */
+.card-image-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.content-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.content-card:hover .content-img {
+  transform: scale(1.08);
+}
+.placeholder-svg {
+  width: 100%;
+  height: 100%;
+  background: {{ section.settings.card_background_color }};
+}
+
+/* ----- Gradient Blur Overlay (Text is 100% opaque) ----- */
+.blur-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 80px 18px 18px 18px;
+  min-height: 50%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: {{ section.settings.overlay_text_color }};
+}
+
+/* The blur and gradient live in a pseudo-element */
+.blur-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background: linear-gradient(to top, {{ overlay_rgba_base }} 0%, transparent 100%);
+
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+
+  -webkit-mask-image: linear-gradient(to top,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 40%,
+    rgba(0,0,0,0) 100%
+  );
+  mask-image: linear-gradient(to top,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 40%,
+    rgba(0,0,0,0) 100%
+  );
+}
+
+.content-card:hover .blur-overlay::before {
+  backdrop-filter: blur(14px) saturate(200%);
+  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  background: linear-gradient(to top, {{ overlay_rgba_hover }} 0%, transparent 100%);
+}
+
+/* Fallback for older browsers */
+@supports not (backdrop-filter: blur(10px)) {
+  .blur-overlay::before {
+    background: linear-gradient(to top, {{ overlay_rgba_hover }} 0%, transparent 100%);
+  }
+}
+
+/* ----- Content inside the overlay (100% opaque) ----- */
+.overlay-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 90%;
+  opacity: 1;
+}
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: {{ section.settings.overlay_text_color }};
+  opacity: 1;
+}
+.card-desc {
+  font-size: 0.85rem;
+  margin: 4px 0 10px;
+  opacity: 1;
+  line-height: 1.5;
+  color: {{ section.settings.overlay_text_color }};
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ----- Button ----- */
+.btn--primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px 10px 26px;
+  background: {{ section.settings.button_background_color }};
+  color: {{ section.settings.button_text_color }};
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 60px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  width: fit-content;
+  margin-top: 2px;
+  opacity: 1;
+}
+.btn--primary .btn-arrow {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+.btn--primary:hover {
+  background: {{ section.settings.button_hover_background_color }};
+  color: {{ section.settings.button_hover_text_color }};
+  box-shadow: 0 8px 24px rgba(0,0,0,0.30);
+  transform: scale(1.04);
+}
+.btn--primary:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ================================================================ */
+/*  RESPONSIVE: TABLET & MOBILE (EXPLICIT FLEX COLUMN ON MOBILE)  */
+/* ================================================================ */
+
+@media (max-width: 1024px) {
+  .content-grid {
+    --per-row: 2;
+  }
+}
+
+@media (max-width: 749px) {
+  .content-glass-section {
+    padding: 20px;
+  }
+  .section-heading {
+    font-size: 1.8rem;
+  }
+
+  /* ----- MOBILE: OVERRIDE GRID -> FLEX COLUMN ----- */
+  .content-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap, 20px);
+    grid-template-columns: unset;
+  }
+
+  .content-card {
+    max-width: 480px;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+  }
+
+  .blur-overlay {
+    padding: 60px 20px 20px 20px;
+    min-height: 45%;
+  }
+  .card-title {
+    font-size: 1.2rem;
+  }
+  .btn--primary {
+    padding: 8px 18px 8px 20px;
+    font-size: 0.7rem;
+  }
+}
+{% endstyle %}
+
+{% javascript %}
+document.addEventListener('DOMContentLoaded', function() {
+  // All animations are handled by CSS.
+});
+{% endjavascript %}

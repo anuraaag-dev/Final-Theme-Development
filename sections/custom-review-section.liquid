@@ -1,0 +1,613 @@
+{% comment %}
+  Section: Testimonials Carousel (Fully responsive, narrow layout)
+{% endcomment %}
+
+<div class="testimonials-container page-width" id="shopify-section-{{ section.id }}"
+     style="background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}'); 
+            background-size: cover; 
+            background-position: center;">
+  
+  <!-- HEADING -->
+  <div class="section-header text-center">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="section-heading">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+    {%- if section.settings.subheading != blank -%}
+      <p class="section-subheading">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+  </div>
+
+  <!-- BACKGROUND IMAGE SECTION (carousel only) -->
+  <div class="testimonials-section" 
+       data-section-id="{{ section.id }}" 
+       data-autoplay="{{ section.settings.autoplay }}"
+       data-speed="{{ section.settings.speed }}">
+
+    <div class="testimonials-overlay">
+      <div class="carousel-wrapper">
+        <div class="carousel-track" id="carouselTrack">
+          {%- for block in section.blocks -%}
+            <div class="testimonial-slide" {{ block.shopify_attributes }}>
+              <div class="glass-card">
+                <div class="testimonial-text">
+                  {{ block.settings.testimonial | escape }}
+                </div>
+                {%- if block.settings.rating != blank -%}
+                  <div class="stars">
+                    {%- assign star_count = block.settings.rating | times: 1 -%}
+                    {%- for i in (1..5) -%}
+                      {%- if i <= star_count -%}
+                        <span class="star filled">★</span>
+                      {%- else -%}
+                        <span class="star">★</span>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+                <div class="author-info">
+                  <div class="author-avatar">
+                    {%- if block.settings.avatar != blank -%}
+                      {{ block.settings.avatar | image_url: width: 60, height: 60, crop: 'center' | image_tag: loading: 'lazy', class: 'avatar-img' }}
+                    {%- else -%}
+                      <div class="avatar-placeholder">👤</div>
+                    {%- endif -%}
+                  </div>
+                  <div class="author-details">
+                    <span class="author-name">{{ block.settings.author_name | escape }}</span>
+                    <span class="author-title">{{ block.settings.author_title | escape }}</span>
+                    {%- if block.settings.company != blank -%}
+                      <span class="author-company">{{ block.settings.company | escape }}</span>
+                    {%- endif -%}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        <!-- Navigation -->
+        <button class="carousel-btn prev-btn" aria-label="Previous">‹</button>
+        <button class="carousel-btn next-btn" aria-label="Next">›</button>
+
+        <div class="carousel-dots" id="carouselDots"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DYNAMIC STYLES ===== -->
+{% style %}
+  #shopify-section-{{ section.id }} .testimonial-text {
+    font-size: {{ section.settings.testimonial_text_size }}px;
+    color: {{ section.settings.testimonial_text_color }};
+  }
+  #shopify-section-{{ section.id }} .author-name,
+  #shopify-section-{{ section.id }} .author-title,
+  #shopify-section-{{ section.id }} .author-company {
+    color: {{ section.settings.testimonial_text_color }};
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Testimonials Carousel",
+  "class": "section-testimonials-carousel",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "Full‑width background behind the carousel."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What Our Clients Say"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real stories from real people"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Autoplay speed (seconds)",
+      "min": 2,
+      "max": 8,
+      "step": 0.5,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Testimonial Text Styling"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_text_size",
+      "label": "Font size (px)",
+      "min": 16,
+      "max": 28,
+      "step": 1,
+      "default": 22,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "testimonial_text_color",
+      "label": "Text color (applies to testimonial & author info)",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "testimonial",
+          "label": "Testimonial text",
+          "default": "They brought clarity to complex problems, breaking down barriers and delivering innovative solutions."
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author name",
+          "default": "John Doe"
+        },
+        {
+          "type": "text",
+          "id": "author_title",
+          "label": "Author title",
+          "default": "CEO"
+        },
+        {
+          "type": "text",
+          "id": "company",
+          "label": "Company (optional)",
+          "default": "Tech Innovations"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Rating (stars)",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "default": 5,
+          "info": "Set to 0 to hide stars."
+        },
+        {
+          "type": "image_picker",
+          "id": "avatar",
+          "label": "Author avatar (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials Carousel",
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{% style %}
+/* ----- Container for heading + background section ----- */
+.testimonials-container {
+  padding: 20px 0 0;
+}
+
+/* Heading */
+.testimonials-container .section-header {
+  padding: 20px 20px 10px;
+  margin-bottom: 10px;
+  color: #1a1a2a;
+  text-align: center;
+}
+.testimonials-container .section-heading {
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #1a1a2a;
+  text-shadow: none;
+}
+.testimonials-container .section-subheading {
+  font-size: 1.2rem;
+  color: #555;
+  text-shadow: none;
+}
+
+/* ----- Background section (carousel only) ----- */
+.testimonials-section {
+  position: relative;
+  padding: 20px 10px;
+  background-size: cover;
+  background-position: center;
+  min-height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.testimonials-overlay {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Carousel wrapper */
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+  padding: 10px 45px; /* space for arrows */
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.testimonial-slide {
+  flex: 0 0 100%;
+  padding: 0 15px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+/* ----- Glass card – responsive width ----- */
+.glass-card {
+  width: 100%;
+  max-width: 75%; /* comfortable on desktop */
+  border-radius: 40px;
+  padding: 10px 20px;
+  text-align: center;
+  color: #fff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  
+  /* Fade edges */
+  mask-image: radial-gradient(ellipse at center, black 70%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 70%, transparent 100%);
+  
+  border: none;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25), 0 0 80px rgba(0, 0, 0, 0.1);
+}
+
+.glass-card::after {
+  display: none;
+}
+
+.testimonial-text {
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.stars {
+  margin-bottom: 10px;
+  letter-spacing: 4px;
+}
+.star {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 1.4rem;
+}
+.star.filled {
+  color: #000; /* your custom black stars */
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.author-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+}
+
+.author-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+.author-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.author-title {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+.author-company {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Navigation arrows – white background, black text */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: black;
+  font-size: 2.4rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+.carousel-btn:hover {
+  background: rgba(255,255,255,0.9);
+  transform: translateY(-50%) scale(1.05);
+}
+.prev-btn {
+  left: 0;
+}
+.next-btn {
+  right: 0;
+}
+
+/* Dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+.dot.active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+/* ========== RESPONSIVE TWEAKS ========== */
+
+/* Tablets and small desktops */
+@media (max-width: 1024px) {
+  .glass-card {
+    max-width: 85%;
+    padding: 30px 32px;
+  }
+  .testimonial-text {
+    font-size: 1.2rem;
+  }
+  .carousel-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 2rem;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 749px) {
+  .testimonials-container .section-heading {
+    font-size: 1.8rem;
+  }
+  .testimonials-section {
+    padding: 20px 5px;
+    border-radius: 20px;
+  }
+  .carousel-wrapper {
+    padding: 10px 10px; /* less side space for arrows */
+  }
+  .testimonial-slide {
+    padding: 0 5px;
+  }
+  .glass-card {
+    max-width: 100%;          /* full width on mobile */
+    padding: 24px 18px;
+  }
+  .testimonial-text {
+    font-size: 1rem;
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+  .stars {
+    margin-bottom: 12px;
+  }
+  .carousel-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.6rem;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .prev-btn {
+    left: 2px;
+  }
+  .next-btn {
+    right: 2px;
+  }
+  .author-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .author-details {
+    align-items: center;
+    text-align: center;
+  }
+  .author-avatar {
+    width: 50px;
+    height: 50px;
+  }
+  .carousel-dots {
+    margin-top: 12px;
+    gap: 8px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Very small phones (<= 400px) */
+@media (max-width: 400px) {
+  .glass-card {
+    padding: 18px 14px;
+  }
+  .testimonial-text {
+    font-size: 0.9rem;
+  }
+  .carousel-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+  }
+}
+{% endstyle %}
+
+{% javascript %}
+document.addEventListener('DOMContentLoaded', function() {
+  const section = document.querySelector('.testimonials-section');
+  if (!section) return;
+
+  const track = section.querySelector('#carouselTrack');
+  const slides = section.querySelectorAll('.testimonial-slide');
+  const dotsContainer = section.querySelector('#carouselDots');
+  const prevBtn = section.querySelector('.prev-btn');
+  const nextBtn = section.querySelector('.next-btn');
+  const autoplay = section.dataset.autoplay === 'true';
+  const speed = parseFloat(section.dataset.speed) * 1000 || 4000;
+
+  if (!slides.length) return;
+
+  let currentIndex = 0;
+  let intervalId = null;
+
+  // Create dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.classList.add('dot');
+    if (i === 0) dot.classList.add('active');
+    dot.dataset.index = i;
+    dot.addEventListener('click', () => goToSlide(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  const dots = dotsContainer.querySelectorAll('.dot');
+
+  function goToSlide(index) {
+    if (index < 0) index = slides.length - 1;
+    if (index >= slides.length) index = 0;
+    currentIndex = index;
+    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+  }
+
+  function nextSlide() {
+    goToSlide(currentIndex + 1);
+  }
+
+  function prevSlide() {
+    goToSlide(currentIndex - 1);
+  }
+
+  prevBtn.addEventListener('click', () => {
+    clearInterval(intervalId);
+    prevSlide();
+    if (autoplay) startAutoplay();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    clearInterval(intervalId);
+    nextSlide();
+    if (autoplay) startAutoplay();
+  });
+
+  function startAutoplay() {
+    if (intervalId) clearInterval(intervalId);
+    if (autoplay) {
+      intervalId = setInterval(nextSlide, speed);
+    }
+  }
+
+  startAutoplay();
+
+  section.addEventListener('mouseenter', () => {
+    clearInterval(intervalId);
+  });
+  section.addEventListener('mouseleave', () => {
+    if (autoplay) startAutoplay();
+  });
+
+  // Touch swipe support
+  let startX = 0;
+  let isDragging = false;
+  track.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  });
+  track.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const diff = startX - e.touches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+      isDragging = false;
+    }
+  });
+  track.addEventListener('touchend', () => {
+    isDragging = false;
+  });
+});
+{% endjavascript %}

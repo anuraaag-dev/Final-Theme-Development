@@ -1,0 +1,1416 @@
+{%- comment -%}
+============================================================================
+  COUNTDOWN PRODUCT SHOWCASE
+  Heading + description on the left, large countdown timer on the right,
+  with a product grid/slider below. Built with Liquid, HTML, CSS and
+  vanilla JavaScript only. Shopify Online Store 2.0 compatible.
+============================================================================
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign sec_id = section.id
+  assign products = s.products
+-%}
+
+<section
+  id="CountdownShowcase-{{ sec_id }}"
+  class="cps reveal-on-scroll"
+  data-countdown-showcase
+>
+  {%- if s.background_image != blank -%}
+    <img
+      class="cps__bg-image"
+      src="{{ s.background_image | image_url: width: 1600 }}"
+      srcset="{{ s.background_image | image_url: width: 800 }} 800w, {{ s.background_image | image_url: width: 1600 }} 1600w, {{ s.background_image | image_url: width: 2000 }} 2000w"
+      sizes="100vw"
+      alt=""
+      loading="lazy"
+      width="{{ s.background_image.width }}"
+      height="{{ s.background_image.height }}"
+    >
+    {%- if s.enable_overlay -%}
+      <div class="cps__overlay" aria-hidden="true"></div>
+    {%- endif -%}
+  {%- endif -%}
+
+  <div class="cps__inner">
+
+    <div class="cps__top">
+      <div class="cps__content">
+        {%- if s.subtitle != blank -%}
+          <span class="cps__subtitle">{{ s.subtitle }}</span>
+        {%- endif -%}
+        {%- if s.heading != blank -%}
+          <h2 class="cps__heading">{{ s.heading }}</h2>
+        {%- endif -%}
+        {%- if s.description != blank -%}
+          <div class="cps__description">{{ s.description }}</div>
+        {%- endif -%}
+        {%- if s.button_text != blank -%}
+          <a href="{{ s.button_link | default: '#' }}" class="cps__button">{{ s.button_text }}</a>
+        {%- endif -%}
+      </div>
+
+      {%- if s.enable_countdown -%}
+        <div
+          class="cps__timer"
+          id="CountdownTimer-{{ sec_id }}"
+          data-countdown
+          data-end-date="{{ s.countdown_end_date }}"
+          data-end-time="{{ s.countdown_end_time }}"
+          data-timezone-offset="{{ s.timezone_offset }}"
+          data-show-days="{{ s.show_days }}"
+          data-show-labels="true"
+          data-leading-zeros="{{ s.leading_zeros }}"
+          data-expiry-message="{{ s.expiry_message | escape }}"
+          role="timer"
+          aria-live="polite"
+          aria-label="Countdown timer"
+        >
+          <div class="cps__timer-units" data-countdown-units>
+            {%- if s.show_days -%}
+              <div class="cps__unit" data-unit="days">
+                <span class="cps__number" data-days>00</span>
+                <span class="cps__label">Days</span>
+              </div>
+              <span class="cps__separator" aria-hidden="true">:</span>
+            {%- endif -%}
+            {%- if s.show_hours -%}
+              <div class="cps__unit" data-unit="hours">
+                <span class="cps__number" data-hours>00</span>
+                <span class="cps__label">Hours</span>
+              </div>
+              <span class="cps__separator" aria-hidden="true">:</span>
+            {%- endif -%}
+            {%- if s.show_minutes -%}
+              <div class="cps__unit" data-unit="minutes">
+                <span class="cps__number" data-minutes>00</span>
+                <span class="cps__label">Mins</span>
+              </div>
+              <span class="cps__separator" aria-hidden="true">:</span>
+            {%- endif -%}
+            {%- if s.show_seconds -%}
+              <div class="cps__unit" data-unit="seconds">
+                <span class="cps__number" data-seconds>00</span>
+                <span class="cps__label">Sec</span>
+              </div>
+            {%- endif -%}
+          </div>
+          <p class="cps__expiry-message" data-expiry-text hidden>{{ s.expiry_message | escape }}</p>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- if products.size > 0 -%}
+      <div class="cps__products-wrap">
+        <div class="cps__products" data-cps-track style="--cps-mobile-per-view: {{ s.mobile_products_per_view }};">
+          {%- for product in products -%}
+            <div class="cps__card" data-cps-card style="transition-delay: {{ forloop.index0 | times: 60 }}ms;">
+              <div class="cps__card-media">
+                {%- if product.tags contains 'new' -%}
+                  <span class="cps__badge cps__badge--new">New</span>
+                {%- elsif s.enable_badge and product.compare_at_price > product.price -%}
+                  <span class="cps__badge">Sale</span>
+                {%- endif -%}
+
+                <a href="{{ product.url }}" class="cps__card-image">
+                  {%- if product.featured_image -%}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 300 }}"
+                      srcset="{{ product.featured_image | image_url: width: 150 }} 150w, {{ product.featured_image | image_url: width: 300 }} 300w"
+                      sizes="80px"
+                      alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                      loading="lazy"
+                      width="{{ product.featured_image.width }}"
+                      height="{{ product.featured_image.height }}"
+                    >
+                  {%- else -%}
+                    <div class="cps__card-placeholder">{{ 'product-1' | placeholder_svg_tag: 'cps__placeholder-svg' }}</div>
+                  {%- endif -%}
+                </a>
+              </div>
+
+              <div class="cps__card-info">
+                {%- if product.type != blank -%}
+                  <span class="cps__card-type">{{ product.type }}</span>
+                {%- endif -%}
+
+                {%- if s.enable_rating -%}
+                  {%- assign rating = product.metafields.reviews.rating.value -%}
+                  {%- if rating -%}
+                    <div class="cps__rating" aria-label="Rated {{ rating }} out of 5">
+                      {%- for i in (1..5) -%}
+                        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+                {%- endif -%}
+
+                <div class="cps__card-price-row">
+                  {%- if product.price_varies -%}
+                    <span class="cps__price-prefix">From</span>
+                  {%- endif -%}
+                  <span class="cps__price-current">{{ product.price | money }}</span>
+                </div>
+                {%- if product.compare_at_price > product.price -%}
+                  <s class="cps__price-compare">{{ product.compare_at_price | money }}</s>
+                {%- endif -%}
+
+                <a href="{{ product.url }}" class="cps__card-title">{{ product.title }}</a>
+
+                <div class="cps__card-actions">
+                  {%- if s.enable_wishlist -%}
+                    <button type="button" class="cps__wishlist" data-wishlist-toggle data-product-id="{{ product.id }}" aria-label="Add {{ product.title | escape }} to wishlist">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6.7-4.35-9.3-8.28C1 10.1 1.5 6.5 4.6 5 7 3.8 9.6 4.7 12 7c2.4-2.3 5-3.2 7.4-2 3.1 1.5 3.6 5.1 1.9 7.72C18.7 16.65 12 21 12 21z"/></svg>
+                    </button>
+                  {%- endif -%}
+
+                  {%- if s.enable_quick_add -%}
+                    <form class="cps__quick-add-form" data-quick-add-form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
+                      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                      <button type="submit" class="cps__quick-add-button" {% unless product.available %}disabled{% endunless %}>
+                        {%- if product.available -%}Quick Add{%- else -%}Sold Out{%- endif -%}
+                      </button>
+                    </form>
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+
+      <div class="cps__mobile-nav" data-cps-slider-nav>
+        <button type="button" class="cps__mobile-nav-btn cps__mobile-nav-btn--prev" data-cps-prev aria-label="Previous product">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="cps__mobile-nav-dots" data-cps-dots aria-hidden="true"></div>
+        <button type="button" class="cps__mobile-nav-btn cps__mobile-nav-btn--next" data-cps-next aria-label="Next product">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  #CountdownShowcase-{{ sec_id }} {
+    --cps-bg: {{ s.background_color }};
+    --cps-overlay-color: {{ s.overlay_color }};
+    --cps-overlay-opacity: {{ s.overlay_opacity | divided_by: 100.0 }};
+    --cps-heading-color: {{ s.heading_color }};
+    --cps-text-color: {{ s.text_color }};
+    --cps-accent-color: {{ s.accent_color }};
+    --cps-timer-bg: {{ s.timer_bg_color }};
+    --cps-timer-text: {{ s.timer_text_color }};
+    --cps-timer-label: {{ s.timer_label_color }};
+    --cps-timer-radius: {{ s.timer_border_radius }}px;
+    --cps-card-bg: {{ s.card_bg_color }};
+    --cps-card-text: {{ s.card_text_color }};
+    --cps-card-radius: {{ s.card_border_radius }}px;
+    --cps-padding-top: {{ s.padding_top }}px;
+    --cps-padding-bottom: {{ s.padding_bottom }}px;
+    --cps-padding-top-mobile: {{ s.padding_top_mobile }}px;
+    --cps-padding-bottom-mobile: {{ s.padding_bottom_mobile }}px;
+
+    position: relative;
+    overflow: hidden;
+    background-color: var(--cps-bg);
+    padding-block: var(--cps-padding-top-mobile) var(--cps-padding-bottom-mobile);
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  #CountdownShowcase-{{ sec_id }}.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media screen and (min-width: 750px) {
+    #CountdownShowcase-{{ sec_id }} {
+      padding-block: var(--cps-padding-top) var(--cps-padding-bottom);
+    }
+  }
+
+  #CountdownShowcase-{{ sec_id }} * {
+    box-sizing: border-box;
+  }
+
+  .cps__bg-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+  }
+
+  .cps__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: var(--cps-overlay-color, #000000);
+    opacity: var(--cps-overlay-opacity, 0.3);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .cps__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-inline: 24px;
+  }
+
+  /* ---- Top: heading/description left, timer right ---- */
+  .cps__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  .cps__content {
+    flex: 1 1 320px;
+    max-width: 560px;
+  }
+
+  .cps__subtitle {
+    display: block;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--cps-text-color);
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+
+  .cps__heading {
+    font-size: clamp(1.8rem, 2.4rem, 2.4rem);
+     {% comment %} font-size: 1.8rem; {% endcomment %}
+    font-weight: 700;
+    color: var(--cps-heading-color);
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .cps__description {
+    font-size: 0.95rem;
+    color: var(--cps-text-color);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .cps__button {
+    display: inline-block;
+    padding: 12px 26px;
+    border-radius: 4px;
+    background: var(--cps-accent-color);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .cps__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  }
+
+  /* ---- Countdown timer ---- */
+  .cps__timer {
+    flex: 0 0 auto;
+  }
+
+  .cps__timer-units {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cps__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 68px;
+    padding: 14px 10px;
+    background: var(--cps-timer-bg);
+    border-radius: var(--cps-timer-radius);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  }
+
+  .cps__number {
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+    font-weight: 700;
+    color: var(--cps-timer-text);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .cps__number.is-updating {
+    animation: cps-flip 0.4s ease;
+  }
+
+  @keyframes cps-flip {
+    0% { opacity: 0.3; transform: translateY(-6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .cps__label {
+    margin-top: 4px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cps-timer-label);
+  }
+
+  .cps__separator {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--cps-timer-text);
+    align-self: center;
+  }
+
+  .cps__expiry-message {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--cps-timer-text);
+    background: var(--cps-timer-bg);
+    padding: 14px 24px;
+    border-radius: var(--cps-timer-radius);
+    margin: 0;
+  }
+
+  /* ---- Product grid / slider ---- */
+  .cps__products-wrap {
+    width: 100%;
+  }
+
+  .cps__products {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    cursor: grab;
+  }
+
+  .cps__products::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cps__products.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+
+  .cps__card {
+    flex: 0 0 calc((100% - 3 * 20px) / 4);
+    scroll-snap-align: start;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--cps-card-bg);
+    border-radius: var(--cps-card-radius);
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease, translate 0.35s ease;
+  }
+
+  #CountdownShowcase-{{ sec_id }}.is-visible .cps__card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .cps__card:hover {
+    box-shadow: 0 16px 34px rgba(0,0,0,0.12);
+    translate: 0 -4px;
+  }
+
+  .cps__card-media {
+    position: relative;
+    flex: 0 0 64px;
+    width: 64px;
+  }
+
+  .cps__badge {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    z-index: 2;
+    background: #1a56db;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .cps__badge--new {
+    background: #1a56db;
+  }
+
+  .cps__card-image {
+    display: block;
+    aspect-ratio: 1 / 1;
+    border-radius: calc(var(--cps-card-radius) * 0.5);
+    overflow: hidden;
+    background: #f2f2f3;
+  }
+
+  .cps__card-image img,
+  .cps__card-placeholder,
+  .cps__placeholder-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .cps__card:hover .cps__card-image img {
+    transform: scale(1.06);
+  }
+
+  .cps__card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .cps__card-type {
+    font-size: 0.72rem;
+    color: #999;
+    margin-bottom: 2px;
+  }
+
+  .cps__rating {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 2px;
+  }
+
+  .cps__rating svg {
+    width: 11px;
+    height: 11px;
+    fill: #f5a623;
+  }
+
+  .cps__card-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cps-card-text);
+  }
+
+  .cps__price-prefix {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #888;
+  }
+
+  .cps__price-compare {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #d64545;
+    text-decoration: line-through;
+    margin-bottom: 2px;
+  }
+
+  .cps__card-title {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--cps-card-text);
+    text-decoration: none;
+    line-height: 1.35;
+    margin-top: 4px;
+  }
+
+  .cps__card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .cps__wishlist {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #f2f2f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .cps__wishlist:hover {
+    transform: scale(1.1);
+  }
+
+  .cps__wishlist svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .cps__wishlist.is-active svg {
+    fill: #e0455b;
+    stroke: #e0455b;
+  }
+
+  .cps__quick-add-form {
+    flex: 1;
+  }
+
+  .cps__quick-add-button {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    background: #111;
+    color: #fff;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.25s ease;
+  }
+
+  .cps__quick-add-button:hover {
+    opacity: 0.85;
+  }
+
+  .cps__quick-add-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  /* ---- Mobile slider navigation (hidden on tablet/desktop) ---- */
+  .cps__mobile-nav {
+    display: none;
+  }
+
+  /* ---- Tablet ---- */
+  @media screen and (max-width: 989px) {
+    .cps__card {
+      flex: 0 0 calc((100% - 2 * 16px) / 3);
+    }
+    .cps__products {
+      gap: 16px;
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media screen and (max-width: 749px) {
+    .cps__top {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10;
+      margin-bottom: 24px;
+    }
+
+    .cps__content {
+      flex: 0 0 auto;
+      max-width: 100%;
+      width: 100%;
+      margin-bottom: 0;
+    }
+
+    .cps__timer {
+      width: 100%;
+    }
+
+    .cps__timer-units {
+      justify-content: left;
+    }
+
+    .cps__unit {
+      min-width: 56px;
+      padding: 10px 6px;
+    }
+
+    .cps__products-wrap {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .cps__products {
+      gap: 0;
+      overflow: visible;
+      scroll-snap-type: none;
+      cursor: default;
+      -webkit-overflow-scrolling: unset;
+      transition: transform 0.4s ease-in-out;
+      will-change: transform;
+    }
+
+    .cps__card {
+      flex: 0 0 100%;
+      width: 100%;
+      scroll-snap-align: none;
+    }
+
+    .cps__mobile-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .cps__mobile-nav-btn {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--cps-accent-color);
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.25s ease, transform 0.2s ease;
+    }
+
+    .cps__mobile-nav-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .cps__mobile-nav-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .cps__mobile-nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .cps__mobile-nav-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cps__mobile-nav-dots .cps__mobile-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cps-text-color);
+      opacity: 0.25;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .cps__mobile-nav-dots .cps__mobile-dot.is-active {
+      opacity: 1;
+      transform: scale(1.3);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #CountdownShowcase-{{ sec_id }},
+    .cps__card,
+    .cps__number,
+    .cps__card-image img,
+    .cps__button,
+    .cps__products {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  var section = document.getElementById('CountdownShowcase-{{ sec_id }}');
+  if (!section) return;
+
+  /* ------------------------------------------------------------------
+     Countdown timer
+     ------------------------------------------------------------------ */
+  function pad(num, useLeadingZeros) {
+    if (!useLeadingZeros) return String(num);
+    return String(num).padStart(2, '0');
+  }
+
+  function parseEndDate(timerEl) {
+    var dateStr = timerEl.getAttribute('data-end-date');
+    var timeStr = timerEl.getAttribute('data-end-time') || '00:00';
+    var offsetStr = timerEl.getAttribute('data-timezone-offset');
+
+    if (!dateStr) return null;
+
+    var dateParts = dateStr.split('-').map(Number);
+    var timeParts = timeStr.split(':').map(Number);
+    if (dateParts.length !== 3 || dateParts.some(isNaN)) return null;
+
+    var year = dateParts[0];
+    var month = dateParts[1] - 1;
+    var day = dateParts[2];
+    var hour = timeParts[0] || 0;
+    var minute = timeParts[1] || 0;
+
+    if (offsetStr && offsetStr.trim() !== '') {
+      var offsetHours = parseFloat(offsetStr);
+      if (!isNaN(offsetHours)) {
+        var utcMillis = Date.UTC(year, month, day, hour, minute, 0);
+        utcMillis -= offsetHours * 60 * 60 * 1000;
+        return new Date(utcMillis);
+      }
+    }
+
+    return new Date(year, month, day, hour, minute, 0);
+  }
+
+  function initCountdown(timerEl) {
+    var endDate = parseEndDate(timerEl);
+    if (!endDate || isNaN(endDate.getTime())) {
+      timerEl.setAttribute('hidden', 'hidden');
+      return;
+    }
+
+    var showDays = timerEl.getAttribute('data-show-days') === 'true';
+    var useLeadingZeros = timerEl.getAttribute('data-leading-zeros') === 'true';
+    var expiryMessage = timerEl.getAttribute('data-expiry-message') || 'Offer Ended';
+
+    var unitsWrap = timerEl.querySelector('[data-countdown-units]');
+    var expiryTextEl = timerEl.querySelector('[data-expiry-text]');
+    var daysEl = timerEl.querySelector('[data-days]');
+    var hoursEl = timerEl.querySelector('[data-hours]');
+    var minutesEl = timerEl.querySelector('[data-minutes]');
+    var secondsEl = timerEl.querySelector('[data-seconds]');
+
+    var previous = { days: null, hours: null, minutes: null, seconds: null };
+    var intervalId = null;
+
+    function animateChange(el, value, key) {
+      if (!el) return;
+      var formatted = pad(value, useLeadingZeros);
+      if (previous[key] !== formatted) {
+        el.textContent = formatted;
+        el.classList.remove('is-updating');
+        void el.offsetWidth;
+        el.classList.add('is-updating');
+        previous[key] = formatted;
+      }
+    }
+
+    function showExpired() {
+      if (unitsWrap) unitsWrap.setAttribute('hidden', 'hidden');
+      if (expiryTextEl) {
+        expiryTextEl.removeAttribute('hidden');
+        expiryTextEl.textContent = expiryMessage;
+      }
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    }
+
+    function tick() {
+      var now = new Date();
+      var diff = endDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        showExpired();
+        return;
+      }
+
+      var totalSeconds = Math.floor(diff / 1000);
+      var days = Math.floor(totalSeconds / 86400);
+      var hours = Math.floor((totalSeconds % 86400) / 3600);
+      var minutes = Math.floor((totalSeconds % 3600) / 60);
+      var seconds = totalSeconds % 60;
+
+      if (!showDays) {
+        hours += days * 24;
+      } else {
+        animateChange(daysEl, days, 'days');
+      }
+
+      animateChange(hoursEl, hours, 'hours');
+      animateChange(minutesEl, minutes, 'minutes');
+      animateChange(secondsEl, seconds, 'seconds');
+    }
+
+    tick();
+    intervalId = setInterval(tick, 1000);
+  }
+
+  var timerEl = section.querySelector('[data-countdown]');
+  if (timerEl) initCountdown(timerEl);
+
+  /* ------------------------------------------------------------------
+     Section + card reveal on scroll
+     ------------------------------------------------------------------ */
+  if ('IntersectionObserver' in window) {
+    var revealObserver = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealObserver.observe(section);
+  } else {
+    section.classList.add('is-visible');
+  }
+
+  /* ------------------------------------------------------------------
+     Drag-to-scroll for the product slider (native touch scroll already
+     works; this adds mouse-drag support on desktop/trackpad).
+     Disabled on mobile, where the track is controlled exclusively by
+     the Previous / Next buttons (see mobile slider block below).
+     ------------------------------------------------------------------ */
+  var track = section.querySelector('[data-cps-track]');
+  var MOBILE_BREAKPOINT = 749;
+
+  function isMobileViewport() {
+    return window.matchMedia('(max-width: ' + MOBILE_BREAKPOINT + 'px)').matches;
+  }
+
+  if (track) {
+    var isDown = false;
+    var startX = 0;
+    var scrollStart = 0;
+    var moved = false;
+
+    track.addEventListener('mousedown', function (e) {
+      if (isMobileViewport()) return;
+      isDown = true;
+      moved = false;
+      track.classList.add('is-dragging');
+      startX = e.pageX;
+      scrollStart = track.scrollLeft;
+    });
+
+    window.addEventListener('mousemove', function (e) {
+      if (!isDown || isMobileViewport()) return;
+      var delta = e.pageX - startX;
+      if (Math.abs(delta) > 4) moved = true;
+      track.scrollLeft = scrollStart - delta;
+    });
+
+    window.addEventListener('mouseup', function () {
+      isDown = false;
+      track.classList.remove('is-dragging');
+    });
+
+    track.addEventListener('click', function (e) {
+      if (moved) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  }
+
+  /* ------------------------------------------------------------------
+     Mobile slider: one product card at a time, moved only via the
+     Previous / Next buttons with a smooth ease-in-out slide.
+     ------------------------------------------------------------------ */
+  var sliderNav = section.querySelector('[data-cps-slider-nav]');
+  var prevBtn = section.querySelector('[data-cps-prev]');
+  var nextBtn = section.querySelector('[data-cps-next]');
+  var dotsWrap = section.querySelector('[data-cps-dots]');
+  var cards = track ? Array.prototype.slice.call(track.children) : [];
+  var currentIndex = 0;
+
+  function buildDots() {
+    if (!dotsWrap) return;
+    dotsWrap.innerHTML = '';
+    cards.forEach(function (_, idx) {
+      var dot = document.createElement('span');
+      dot.className = 'cps__mobile-dot' + (idx === currentIndex ? ' is-active' : '');
+      dotsWrap.appendChild(dot);
+    });
+  }
+
+  function updateDots() {
+    if (!dotsWrap) return;
+    var dots = dotsWrap.querySelectorAll('.cps__mobile-dot');
+    dots.forEach(function (dot, idx) {
+      dot.classList.toggle('is-active', idx === currentIndex);
+    });
+  }
+
+  function updateNavButtons() {
+    if (!prevBtn || !nextBtn) return;
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex >= cards.length - 1;
+  }
+
+  function goToSlide(index, animate) {
+    if (!track || !cards.length) return;
+
+    if (!isMobileViewport()) {
+      track.style.transition = '';
+      track.style.transform = '';
+      return;
+    }
+
+    currentIndex = Math.max(0, Math.min(index, cards.length - 1));
+    track.style.transition = animate === false ? 'none' : '';
+    track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+    updateNavButtons();
+    updateDots();
+  }
+
+  if (track && cards.length && sliderNav) {
+    buildDots();
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        goToSlide(currentIndex - 1);
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        goToSlide(currentIndex + 1);
+      });
+    }
+
+    goToSlide(0, false);
+
+    var resizeTimeout;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(function () {
+        currentIndex = 0;
+        goToSlide(0, false);
+      }, 150);
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Wishlist (localStorage based, shared key so it persists across
+     sections that also implement the same pattern)
+     ------------------------------------------------------------------ */
+  var WISHLIST_KEY = 'cps_wishlist_ids';
+
+  function getWishlist() {
+    try {
+      return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setWishlist(ids) {
+    try {
+      localStorage.setItem(WISHLIST_KEY, JSON.stringify(ids));
+    } catch (e) { /* storage unavailable */ }
+  }
+
+  function updateWishlistUI() {
+    var ids = getWishlist();
+    section.querySelectorAll('[data-wishlist-toggle]').forEach(function (btn) {
+      var pid = btn.getAttribute('data-product-id');
+      btn.classList.toggle('is-active', ids.indexOf(pid) !== -1);
+    });
+  }
+
+  section.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-wishlist-toggle]');
+    if (!btn) return;
+    e.preventDefault();
+    var pid = btn.getAttribute('data-product-id');
+    var ids = getWishlist();
+    var idx = ids.indexOf(pid);
+    if (idx === -1) {
+      ids.push(pid);
+    } else {
+      ids.splice(idx, 1);
+    }
+    setWishlist(ids);
+    updateWishlistUI();
+  });
+
+  updateWishlistUI();
+
+  /* ------------------------------------------------------------------
+     Quick Add to Cart
+     ------------------------------------------------------------------ */
+  section.addEventListener('submit', function (e) {
+    var form = e.target.closest('[data-quick-add-form]');
+    if (!form) return;
+    e.preventDefault();
+
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var originalText = submitBtn ? submitBtn.textContent : '';
+    if (submitBtn) {
+      submitBtn.textContent = 'Adding...';
+      submitBtn.disabled = true;
+    }
+
+    var formData = new FormData(form);
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+      body: formData
+    })
+      .then(function (res) { return res.json(); })
+      .then(function () {
+        if (submitBtn) submitBtn.textContent = 'Added!';
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+      })
+      .catch(function (err) {
+        console.error('Quick add failed', err);
+        if (submitBtn) submitBtn.textContent = 'Error';
+      })
+      .finally(function () {
+        setTimeout(function () {
+          if (submitBtn) {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+          }
+        }, 1200);
+      });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Countdown Showcase",
+  "tag": "section",
+  "class": "section section--countdown-product-showcase",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle (optional)",
+      "default": "Grab Them Before They're Gone!"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Top Tech Deals"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "info": "Leave blank to hide"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Countdown"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_countdown",
+      "label": "Enable countdown timer",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "countdown_end_date",
+      "label": "Countdown end date",
+      "info": "Format: YYYY-MM-DD",
+      "default": "2026-12-31"
+    },
+    {
+      "type": "text",
+      "id": "countdown_end_time",
+      "label": "Countdown end time (24hr)",
+      "info": "Format: HH:MM",
+      "default": "23:59"
+    },
+    {
+      "type": "text",
+      "id": "timezone_offset",
+      "label": "Timezone offset (hours from UTC)",
+      "info": "e.g. -5 for EST, 5.5 for IST. Leave blank to use visitor's local time."
+    },
+    {
+      "type": "text",
+      "id": "expiry_message",
+      "label": "Expiry message",
+      "default": "Offer Ended"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_days",
+      "label": "Show days",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_hours",
+      "label": "Show hours",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_minutes",
+      "label": "Show minutes",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_seconds",
+      "label": "Show seconds",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "leading_zeros",
+      "label": "Use leading zeros",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Select products (choose at least 4)",
+      "limit": 12,
+      "info": "Products are shown in the order selected here"
+    },
+    {
+      "type": "range",
+      "id": "mobile_products_per_view",
+      "label": "Products per view (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_badge",
+      "label": "Show sale badge",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_quick_add",
+      "label": "Show Quick Add to Cart button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_wishlist",
+      "label": "Show wishlist icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_rating",
+      "label": "Show product rating",
+      "info": "Only displays for products with review data",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image (optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_overlay",
+      "label": "Enable overlay on background image",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Text & Accent Colors"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Description/text color",
+      "default": "#555555"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Button / accent color",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Timer Style"
+    },
+    {
+      "type": "color",
+      "id": "timer_bg_color",
+      "label": "Timer box background",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "timer_text_color",
+      "label": "Timer number color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "timer_label_color",
+      "label": "Timer label color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "range",
+      "id": "timer_border_radius",
+      "label": "Timer box corner radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Product Card Style"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card price color",
+      "default": "#111111"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding (desktop)",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding (desktop)",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Top padding (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Bottom padding (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown Showcase",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

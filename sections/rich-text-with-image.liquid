@@ -1,0 +1,422 @@
+{% assign background_rgb = section.settings.background_color | color_to_rgb %}
+{% assign text_rgb = section.settings.color-body-text | color_to_rgb %}
+
+<style>
+    [data-section-id="{{ section.id }}"] {
+      --section-margin-top: {{ section.settings.margin-top }}px;
+      --section-margin-bottom: {{ section.settings.margin-bottom }}px;
+      {% if background_rgb != 'rgba(0, 0, 0, 0.0)' %}
+        --section-bg: {{ section.settings.background_color }};
+      {% endif %}
+      {% if text_rgb != 'rgba(0, 0, 0, 0.0)' %}
+        --section-text: {{ section.settings.color-body-text }};
+      {% endif %}
+    }
+
+    .richTextWithImage {
+      margin-top: var(--section-margin-top);
+      margin-bottom: var(--section-margin-bottom);
+      background-color: var(--section-bg, transparent);
+      color: var(--section-text, inherit);
+      display: flex;
+      justify-content: {{ section.settings.desktop_text_horizontal_position }};
+    }
+
+    .richTextWithImage-container {
+      padding: 40px 80px;
+      width: 100%;
+      max-width: 1200px;
+      text-align: {{ section.settings.desktop_text_horizontal_position }};
+    }
+
+    .inline-icon {
+      display: inline-block;
+      vertical-align: middle;
+      height: 1.2em;
+      width: auto;
+      margin: 0 4px;
+    }
+
+    .icon-link {
+      display: inline-block;
+      line-height: 0;
+    }
+
+    .main-text img {
+      border-radius: 50%;
+      border: 1px solid black;
+      padding: 2px;
+    }
+
+    @media(width < 1000px){
+      .main-text{
+        font-size: var(--font-size-mobile) !important;
+      }
+      .richTextWithImage-container {
+        padding: 40px 30px;
+      }
+    }
+
+    /* --- Scroll reveal: text starts faint/light, eases up to its real color/opacity in view --- */
+    .richTextWithImage [data-scroll-reveal] {
+      opacity: 0.15;
+      transform: translateY(18px);
+      transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+
+    .richTextWithImage [data-scroll-reveal].is-inview {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .richTextWithImage [data-scroll-reveal] {
+        transition: none;
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+</style>
+
+<div class="richTextWithImage" data-section-id="{{ section.id }}">
+    <div class="richTextWithImage-container">
+        {%- for block in section.blocks -%}
+            {%- case block.type -%}
+                {%- when 'heading' -%}
+                    <div
+                      class="subheading"
+                      style="text-transform: {{ block.settings.font_uppercase }};"
+                      {% if section.settings.enable_scroll_reveal %}data-scroll-reveal{% endif %}
+                    >
+                        {{ block.settings.subheading }}
+                    </div>
+
+                {%- when 'text' -%}
+                    {%- liquid
+                        assign main_text = block.settings.text | newline_to_br
+                        
+                        if block.settings.picture1 != blank
+                            capture pic1_html
+                                if block.settings.button_link1 != blank
+                                    echo '<a href="' | append: block.settings.button_link1 | append: '" class="icon-link">'
+                                endif
+                                echo block.settings.picture1 | image_url: width: 200 | image_tag: class: 'inline-icon'
+                                if block.settings.button_link1 != blank
+                                    echo '</a>'
+                                endif
+                            endcapture
+                            assign main_text = main_text | replace: 'PICTURE1', pic1_html
+                        endif
+
+                        if block.settings.picture2 != blank
+                            capture pic2_html
+                                if block.settings.button_link2 != blank
+                                    echo '<a href="' | append: block.settings.button_link2 | append: '" class="icon-link">'
+                                endif
+                                echo block.settings.picture2 | image_url: width: 200 | image_tag: class: 'inline-icon'
+                                if block.settings.button_link2 != blank
+                                    echo '</a>'
+                                endif
+                            endcapture
+                            assign main_text = main_text | replace: 'PICTURE2', pic2_html
+                        endif
+
+                        if block.settings.picture3 != blank
+                            capture pic3_html
+                                if block.settings.button_link3 != blank
+                                    echo '<a href="' | append: block.settings.button_link3 | append: '" class="icon-link">'
+                                endif
+                                echo block.settings.picture3 | image_url: width: 200 | image_tag: class: 'inline-icon'
+                                if block.settings.button_link3 != blank
+                                    echo '</a>'
+                                endif
+                            endcapture
+                            assign main_text = main_text | replace: 'PICTURE3', pic3_html
+                        endif
+                    -%}
+
+                    <h2 class="main-text" 
+                         style="
+                            text-transform: {{ block.settings.font_uppercase }};
+                            line-height: {{ block.settings.line_height }};
+                            --font-size-desk: {{ block.settings.size_heading }}%;
+                            --font-size-mobile: {{ block.settings.size_heading_mobile }}%;
+                            font-size: var(--font-size-desk);
+                         "
+                         {% if section.settings.enable_scroll_reveal %}data-scroll-reveal{% endif %}
+                    >
+                        {{ main_text }}
+                    </h2>
+            {%- endcase -%}
+        {%- endfor -%}
+    </div>
+</div>
+
+{% if section.settings.enable_scroll_reveal %}
+<script>
+  (function () {
+    var root = document.querySelector('[data-section-id="{{ section.id }}"]');
+    if (!root) return;
+
+    var targets = Array.prototype.slice.call(root.querySelectorAll('[data-scroll-reveal]'));
+    if (!targets.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(function (el) { el.classList.add('is-inview'); });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-inview');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -10% 0px' });
+
+    targets.forEach(function (el) { observer.observe(el); });
+  })();
+</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Rich Text with Image",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "desktop_text_horizontal_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "label": "Desktop Text Alignment"
+    },
+    {
+      "type": "header",
+      "content": "Section Colors"
+    },
+    {
+      "type": "color",
+      "id": "color-body-text",
+      "default": "transparent",
+      "label": "Text Color"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "default": "transparent",
+      "label": "Background Color"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "margin-top",
+      "min": 0,
+      "max": 100,
+      "unit": "px",
+      "step": 4,
+      "default": 20,
+      "label": "Top Margin"
+    },
+    {
+      "type": "range",
+      "id": "margin-bottom",
+      "min": 0,
+      "max": 100,
+      "unit": "px",
+      "step": 4,
+      "default": 20,
+      "label": "Bottom Margin"
+    },
+    {
+      "type": "header",
+      "content": "Scroll Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_scroll_reveal",
+      "default": true,
+      "label": "Fade text in on scroll",
+      "info": "Text starts faint and eases into its full color/opacity as it enters the viewport."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Subheading Block",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "subheading",
+          "default": "<p>Customize Your Visual Layout</p>",
+          "label": "Subheading Text"
+        },
+        {
+          "type": "select",
+          "id": "font_uppercase",
+          "default": "none",
+          "options": [
+            {
+              "value": "none",
+              "label": "Normal"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            }
+          ],
+          "label": "Text Transformation"
+        },
+        {
+          "type": "checkbox",
+          "id": "disable_on_mobile",
+          "label": "Hide on Mobile",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Main Text & Icons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "text",
+          "default": "Type PICTURE1 to insert the first icon – place it where you want a visual cue. Insert PICTURE2 by typing it where a second visual element is needed. Use PICTURE3 for adding a third icon – ensure it has its own space.",
+          "label": "Main Content (use PICTURE1, PICTURE2, PICTURE3 as placeholders)"
+        },
+        {
+          "type": "select",
+          "id": "font_uppercase",
+          "default": "none",
+          "options": [
+            {
+              "value": "none",
+              "label": "Normal"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            }
+          ],
+          "label": "Text Transformation"
+        },
+        {
+          "type": "checkbox",
+          "id": "disable_on_mobile",
+          "label": "Hide on Mobile",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "size_heading",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 100,
+          "label": "Desktop Font Scale",
+          "unit": "%"
+        },
+        {
+          "type": "range",
+          "id": "size_heading_mobile",
+          "min": 80,
+          "max": 300,
+          "step": 10,
+          "default": 100,
+          "label": "Mobile Font Scale",
+          "unit": "%"
+        },
+        {
+          "type": "range",
+          "id": "line_height",
+          "min": 1,
+          "max": 2,
+          "step": 0.1,
+          "default": 1.5,
+          "label": "Line Height"
+        },
+        {
+          "type": "header",
+          "content": "Icon Image 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "picture1",
+          "label": "Select Image 1"
+        },
+        {
+          "type": "url",
+          "id": "button_link1",
+          "label": "Image 1 Link"
+        },
+        {
+          "type": "header",
+          "content": "Icon Image 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "picture2",
+          "label": "Select Image 2"
+        },
+        {
+          "type": "url",
+          "id": "button_link2",
+          "label": "Image 2 Link"
+        },
+        {
+          "type": "header",
+          "content": "Icon Image 3"
+        },
+        {
+          "type": "image_picker",
+          "id": "picture3",
+          "label": "Select Image 3"
+        },
+        {
+          "type": "url",
+          "id": "button_link3",
+          "label": "Image 3 Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rich Text with Image",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}

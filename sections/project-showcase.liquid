@@ -1,0 +1,518 @@
+{% comment %}
+  Section: Project Showcase
+  Stacked "polaroid" preview images per project, with dynamic title,
+  description and a call-to-action button. Fully self-contained — no
+  external fonts or assets. Font inherits from the theme; colors are
+  schema-driven.
+{% endcomment %}
+
+<div class="project-showcase-{{ section.id }} page-width">
+
+  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+    <div class="ps-header text-center">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="ps-heading">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="ps-subheading">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="project-container">
+    {%- for block in section.blocks -%}
+      <div class="project {% if block.settings.full_width %}full{% endif %}" {{ block.shopify_attributes }}>
+
+        <div class="preview-container">
+          <picture tabindex="0">
+            {%- if block.settings.image_1 != blank -%}
+              {{ block.settings.image_1 | image_url: width: 1200 | image_tag: loading: 'lazy', class: 'fill', alt: block.settings.image_1_alt | default: block.settings.title | escape }}
+            {%- else -%}
+              {{ 'product-1' | placeholder_svg_tag: 'fill placeholder-img' }}
+            {%- endif -%}
+          </picture>
+          <picture tabindex="0">
+            {%- if block.settings.image_2 != blank -%}
+              {{ block.settings.image_2 | image_url: width: 1200 | image_tag: loading: 'lazy', class: 'fill', alt: block.settings.image_2_alt | default: block.settings.title | escape }}
+            {%- else -%}
+              {{ 'product-2' | placeholder_svg_tag: 'fill placeholder-img' }}
+            {%- endif -%}
+          </picture>
+          <picture tabindex="0">
+            {%- if block.settings.image_3 != blank -%}
+              {{ block.settings.image_3 | image_url: width: 1200 | image_tag: loading: 'lazy', class: 'fill', alt: block.settings.image_3_alt | default: block.settings.title | escape }}
+            {%- else -%}
+              {{ 'product-3' | placeholder_svg_tag: 'fill placeholder-img' }}
+            {%- endif -%}
+          </picture>
+        </div>
+
+        <div class="content-container">
+          <hgroup>
+            {%- if block.settings.title != blank -%}
+              <h1>{{ block.settings.title | escape }}</h1>
+            {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <p>{{ block.settings.description | escape }}</p>
+            {%- endif -%}
+          </hgroup>
+
+          {%- if block.settings.button_label != blank -%}
+            <a
+              {% if block.settings.button_link != blank %}href="{{ block.settings.button_link }}"{% else %}href="#" role="link" aria-disabled="true"{% endif %}
+              class="ps-btn"
+            >
+              {{ block.settings.button_label | escape }}
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% style %}
+  /* ===== Per-instance, schema-driven values ===== */
+  .project-showcase-{{ section.id }} {
+    --ps-radius: {{ section.settings.corner_radius }}px;
+    --ps-card-bg-1: {{ section.settings.card_bg_color_1 }};
+    --ps-card-bg-2: {{ section.settings.card_bg_color_2 }};
+    --ps-shadow-color: {{ section.settings.shadow_color }};
+    --ps-btn-bg: {{ section.settings.button_bg_color }};
+    --ps-btn-text: {{ section.settings.button_text_color }};
+    --ps-btn-border: {{ section.settings.button_border_color }};
+    --ps-btn-bg-hover: {{ section.settings.button_bg_hover_color }};
+    --ps-btn-text-hover: {{ section.settings.button_text_hover_color }};
+    --ps-btn-radius: {{ section.settings.button_radius }}px;
+  }
+  {%- if section.settings.heading_color != blank %}
+  .project-showcase-{{ section.id }} .ps-heading { color: {{ section.settings.heading_color }}; }
+  {%- endif %}
+  {%- if section.settings.subheading_color != blank %}
+  .project-showcase-{{ section.id }} .ps-subheading { color: {{ section.settings.subheading_color }}; }
+  {%- endif %}
+  {%- if section.settings.text_color != blank %}
+  .project-showcase-{{ section.id }} .content-container { color: {{ section.settings.text_color }}; }
+  .project-showcase-{{ section.id }} .content-container hgroup h1 { color: {{ section.settings.text_color }}; }
+  {%- endif %}
+{% endstyle %}
+
+{% style %}
+  /* ===== Layout & component styles (static, theme-agnostic) ===== */
+  .project-showcase-{{ section.id }} {
+    --spacer-x: 1.75dvw;
+    --spacer-y: 18px;
+    --spacer: min(var(--spacer-x), var(--spacer-y));
+    padding: var(--spacer-y) 0;
+  }
+
+  .project-showcase-{{ section.id }} .ps-header {
+    padding: 20px 20px 10px;
+    margin-bottom: 10px;
+  }
+  .project-showcase-{{ section.id }} .ps-heading {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  .project-showcase-{{ section.id }} .ps-subheading {
+    font-size: 1.2rem;
+    opacity: .75;
+  }
+
+  .project-showcase-{{ section.id }} .project-container {
+    --col-w--min: calc(max(390px, 50cqw) - var(--spacer-x));
+    container: project-container / inline-size;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--col-w--min), 100%), 1fr));
+    gap: calc(var(--spacer-y) * 2) var(--spacer-x);
+    margin: 0 auto;
+  }
+
+  .project-showcase-{{ section.id }} .project {
+    --preview-x: var(--x-init);
+    background: linear-gradient(var(--ps-card-bg-1), var(--ps-card-bg-2));
+    border-radius: var(--ps-radius);
+    container: project / inline-size;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    min-height: 50cqh;
+  }
+  .project-showcase-{{ section.id }} .project:not(.full) {
+    --x-init: 6cqw;
+    --x-hover: -1cqw;
+  }
+  .project-showcase-{{ section.id }} .project:not(.full) .preview-container picture {
+    aspect-ratio: 9 / 16;
+    height: 100cqh;
+  }
+  .project-showcase-{{ section.id }} .project:not(.full) .preview-container picture:nth-of-type(2) {
+    height: 110cqh;
+  }
+  .project-showcase-{{ section.id }} .project.full {
+    --x-init: 2cqw;
+    --x-hover: -4cqw;
+    grid-column: 1 / -1;
+  }
+  .project-showcase-{{ section.id }} .project.full .preview-container picture {
+    aspect-ratio: 16 / 9;
+    height: 100cqh;
+  }
+  .project-showcase-{{ section.id }} .project.full .preview-container picture:nth-of-type(2) {
+    height: 110cqh;
+    width: 75%;
+    position: absolute;
+  }
+
+  .project-showcase-{{ section.id }} .preview-container {
+    border-radius: calc(var(--ps-radius) * 0.85);
+    container: preview-container / size;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: var(--spacer) var(--spacer) 0 var(--spacer);
+    padding: calc(var(--spacer) / 3);
+    min-height: 150px;
+    height: 60cqw;
+    max-height: 60dvh;
+    transition: height .3s ease-out;
+    position: relative;
+  }
+  .project-showcase-{{ section.id }} .preview-container:before {
+    background: linear-gradient(var(--ps-card-bg-1), transparent);
+    border-bottom: 1px solid rgba(255, 255, 255, .2);
+    border-radius: inherit;
+    content: "";
+    inset: 0;
+    position: absolute;
+  }
+
+  .project-showcase-{{ section.id }} .preview-container picture {
+    --rotate: 0deg;
+    border-radius: calc(var(--ps-radius) * 0.85);
+    box-shadow: 0 4px 25px 0 var(--ps-shadow-color);
+    container: picture / size;
+    display: grid;
+    place-items: stretch;
+    min-height: 0;
+    overflow: hidden;
+    rotate: var(--rotate);
+    transition: box-shadow .3s ease-in-out, filter .3s ease-in-out, translate .3s ease-in-out;
+    position: relative;
+  }
+  .project-showcase-{{ section.id }} .preview-container picture * { grid-area: 1 / 1; }
+  .project-showcase-{{ section.id }} .preview-container picture img,
+  .project-showcase-{{ section.id }} .preview-container picture svg {
+    border-radius: inherit;
+    pointer-events: none;
+    user-select: none;
+    width: 100%;
+    height: 100%;
+  }
+  .project-showcase-{{ section.id }} .preview-container picture img.fill,
+  .project-showcase-{{ section.id }} .preview-container picture svg.fill {
+    object-fit: cover;
+  }
+  .project-showcase-{{ section.id }} .preview-container picture .placeholder-img {
+    background: #e5e0d8;
+    color: #b8b0a2;
+  }
+
+  .project-showcase-{{ section.id }} .preview-container picture:nth-of-type(1) {
+    translate: var(--preview-x, 0) 1.25cqh;
+  }
+  .project-showcase-{{ section.id }} .preview-container picture:nth-of-type(2) {
+    translate: 0 -1.25cqh;
+    z-index: 500;
+  }
+  .project-showcase-{{ section.id }} .preview-container picture:nth-of-type(3) {
+    translate: calc(var(--preview-x, 0) * -1) 1.25cqh;
+  }
+
+  @media (min-width: 481px) {
+    .project-showcase-{{ section.id }} .preview-container picture:nth-of-type(1) { --rotate: -2deg; }
+    .project-showcase-{{ section.id }} .preview-container picture:nth-of-type(3) { --rotate: 2deg; }
+  }
+  @media (min-width: 751px) {
+    .project-showcase-{{ section.id }} .preview-container picture:nth-of-type(1) { --rotate: -3deg; }
+    .project-showcase-{{ section.id }} .preview-container picture:nth-of-type(3) { --rotate: 3deg; }
+  }
+
+  .project-showcase-{{ section.id }} .project:has(:hover, :focus) .preview-container picture {
+    --preview-x: var(--x-hover);
+    filter: unset;
+    mix-blend-mode: unset;
+  }
+  .project-showcase-{{ section.id }} .preview-container:has(:hover) picture:not(:hover),
+  .project-showcase-{{ section.id }} .preview-container picture:first-of-type,
+  .project-showcase-{{ section.id }} .preview-container picture:last-of-type {
+    mix-blend-mode: luminosity;
+    filter: grayscale(100%) opacity(55%);
+  }
+  .project-showcase-{{ section.id }} .preview-container picture:focus,
+  .project-showcase-{{ section.id }} .preview-container picture:hover {
+    filter: unset;
+    mix-blend-mode: unset;
+    z-index: 600;
+  }
+  .project-showcase-{{ section.id }} .preview-container picture:focus {
+    outline: 4px solid var(--ps-btn-bg);
+    outline-offset: 3px;
+  }
+
+  @media (orientation: portrait) {
+    .project-showcase-{{ section.id }} .preview-container { max-height: 360px; }
+  }
+  @media (max-width: 880px) {
+    .project-showcase-{{ section.id }} .preview-container { max-height: 720px; }
+  }
+
+  .project-showcase-{{ section.id }} .content-container {
+    display: grid;
+    gap: 1lh;
+    padding: 15px;
+    margin-top: 20px;
+  }
+
+  .project-showcase-{{ section.id }} hgroup {
+    color: black !important;
+  }
+
+  .project-showcase-{{ section.id }} .content-container hgroup {
+    display: grid;
+    gap: .5ex;
+    margin-block: .5ex;
+  }
+  .project-showcase-{{ section.id }} .content-container hgroup h1 {
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .project-showcase-{{ section.id }} .content-container hgroup p {
+    margin-top: 0px;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .project-showcase-{{ section.id }} .ps-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    background: var(--ps-btn-bg);
+    color: var(--ps-btn-text);
+    border: 1px solid var(--ps-btn-border);
+    border-radius: var(--ps-btn-radius);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 22px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .project-showcase-{{ section.id }} .ps-btn:hover,
+  .project-showcase-{{ section.id }} .ps-btn:focus {
+    background: var(--ps-btn-bg-hover);
+    color: var(--ps-btn-text-hover);
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Project Showcase",
+  "class": "section-project-showcase",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Work"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "A look at recent projects"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "info": "Leave blank to inherit the theme's default heading color."
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading color",
+      "info": "Leave blank to inherit the theme's default text color."
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Project title & description color",
+      "info": "Leave blank to inherit the theme's default text color."
+    },
+    {
+      "type": "header",
+      "content": "Card styling"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius (px)",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color_1",
+      "label": "Card gradient - top color",
+      "default": "#f2ede6"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color_2",
+      "label": "Card gradient - bottom color",
+      "default": "#e7ddd0"
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Image shadow color",
+      "default": "#00000026"
+    },
+    {
+      "type": "header",
+      "content": "Button styling"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Button corner radius (px)",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button background",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Button border",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_hover_color",
+      "label": "Button background (hover)",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_text_hover_color",
+      "label": "Button text color (hover)",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "project",
+      "name": "Project",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Project / client name",
+          "default": "Project Name"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "A short summary of the project and the work involved."
+        },
+        {
+          "type": "checkbox",
+          "id": "full_width",
+          "label": "Feature full width",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Preview images"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Image 1 (back, left)"
+        },
+        {
+          "type": "text",
+          "id": "image_1_alt",
+          "label": "Image 1 alt text"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image 2 (front, center)"
+        },
+        {
+          "type": "text",
+          "id": "image_2_alt",
+          "label": "Image 2 alt text"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_3",
+          "label": "Image 3 (back, right)"
+        },
+        {
+          "type": "text",
+          "id": "image_3_alt",
+          "label": "Image 3 alt text"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "View Project"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Project Showcase",
+      "blocks": [
+        { "type": "project", "settings": { "full_width": true } },
+        { "type": "project" },
+        { "type": "project" }
+      ]
+    }
+  ]
+}
+{% endschema %}

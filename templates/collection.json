@@ -1,0 +1,597 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero_ahWJqg": {
+      "type": "hero",
+      "blocks": {
+        "text_Yxd9VB": {
+          "type": "text",
+          "settings": {
+            "text": "<p>{{ closest.collection.title }}</p>",
+            "width": "fit-content",
+            "max_width": "narrow",
+            "alignment": "left",
+            "type_preset": "h1",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "text_color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_xCed3p": {
+          "type": "text",
+          "settings": {
+            "text": "{{ closest.collection.description }}",
+            "width": "fit-content",
+            "max_width": "narrow",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "text_color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 32,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_Yxd9VB",
+        "text_xCed3p"
+      ],
+      "name": "t:names.hero",
+      "settings": {
+        "media_type_1": "image",
+        "image_1": "shopify://shop_images/ChatGPT_Image_Jul_31_2026_12_15_44_PM.png",
+        "media_type_2": "image",
+        "stack_media_on_mobile": false,
+        "custom_mobile_media": false,
+        "media_type_1_mobile": "image",
+        "media_type_2_mobile": "image",
+        "link": "",
+        "open_in_new_tab": false,
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 16,
+        "section_width": "page-width",
+        "section_height": "medium",
+        "section_height_custom": 50,
+        "background_color": "",
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "gradient",
+        "gradient_direction": "to top",
+        "blurred_reflection": false,
+        "reflection_opacity": 75,
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "main": {
+      "type": "main-collection",
+      "blocks": {
+        "filters": {
+          "type": "filters",
+          "static": true,
+          "settings": {
+            "enable_filtering": true,
+            "filter_style": "horizontal",
+            "filter_width": "centered",
+            "text_label_case": "default",
+            "show_swatch_label": false,
+            "show_filter_label": false,
+            "enable_sorting": true,
+            "enable_grid_density": true,
+            "background_color": "",
+            "text_color": "",
+            "padding-block-start": 8,
+            "padding-block-end": 8,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "facets_margin_bottom": 8,
+            "facets_margin_right": 20
+          },
+          "blocks": {}
+        },
+        "product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 4,
+            "background_color": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color": "",
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "card-gallery": {
+              "type": "_product-card-gallery",
+              "settings": {
+                "image_ratio": "adapt",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_color": "",
+                "border_radius": 20,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "product_title_4nY4eT": {
+              "type": "product-title",
+              "name": "t:names.product_title",
+              "settings": {
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "text_color": "",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "price_EzJzMm": {
+              "type": "price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "h6",
+                "width": "100%",
+                "alignment": "left",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "text_color": "",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "card-gallery",
+            "product_title_4nY4eT",
+            "price_EzJzMm"
+          ]
+        }
+      },
+      "settings": {
+        "layout_type": "grid",
+        "product_card_size": "large",
+        "mobile_product_card_size": "small",
+        "enable_infinite_scroll": true,
+        "products_per_page": 24,
+        "product_grid_width": "centered",
+        "full_width_on_mobile": true,
+        "columns_gap_horizontal": 16,
+        "columns_gap_vertical": 24,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0,
+        "background_color": "{{ settings.color_palette.background }}",
+        "padding-block-start": 0,
+        "padding-block-end": 32
+      }
+    },
+    "project_showcase_GGCMWw": {
+      "type": "project-showcase",
+      "blocks": {
+        "project_g7Tp7t": {
+          "type": "project",
+          "disabled": true,
+          "settings": {
+            "title": "Project Name",
+            "description": "A short summary of the project and the work involved.",
+            "full_width": true,
+            "image_1": "shopify://shop_images/ChatGPT_Image_Jul_29_2026_04_14_06_PM.png",
+            "image_1_alt": "",
+            "image_2": "shopify://shop_images/mens_collection.png",
+            "image_2_alt": "",
+            "image_3": "shopify://shop_images/women_ban.png",
+            "image_3_alt": "",
+            "button_label": "View Project",
+            "button_link": ""
+          }
+        },
+        "project_HqXB9j": {
+          "type": "project",
+          "settings": {
+            "title": "Modern Men's Collection",
+            "description": "Discover contemporary essentials designed for confidence and comfort. From everyday casual wear to refined statement pieces, our men's collection blends timeless style with modern versatility.",
+            "full_width": false,
+            "image_1": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_02_41_44_PM.png",
+            "image_1_alt": "",
+            "image_2": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_02_45_10_PM.png",
+            "image_2_alt": "",
+            "image_3": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_02_43_44_PM.png",
+            "image_3_alt": "",
+            "button_label": "View Products",
+            "button_link": ""
+          }
+        },
+        "project_3BGEpb": {
+          "type": "project",
+          "settings": {
+            "title": "Elegant Women's Collection",
+            "description": "Celebrate effortless elegance with thoughtfully designed pieces that transition seamlessly from day to night. Fashion that complements your individuality and everyday lifestyle.",
+            "full_width": false,
+            "image_1": "shopify://shop_images/walter-o-rqLWwP9c-sI-unsplash_f59e8199-5eb1-4211-854b-a5d9c606b466.jpg",
+            "image_1_alt": "",
+            "image_2": "shopify://shop_images/gaspar-zaldo-KByo-C0urNg-unsplash.jpg",
+            "image_2_alt": "",
+            "image_3": "shopify://shop_images/a-product-has-the-title-floral-midi-dress-and-description-p-embrace-effortless-elegance-with-the-strong-floral-midi-dress-strong-designed-to-bring-charm-comfort-and-timeless-style-to_27653f38-b706-4250-9a3d-2decc1fa576b.png",
+            "image_3_alt": "",
+            "button_label": "View Products",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "project_g7Tp7t",
+        "project_HqXB9j",
+        "project_3BGEpb"
+      ],
+      "name": "Project Showcase",
+      "settings": {
+        "heading": "Explore Men's & Women's Fashion",
+        "subheading": "Discover thoughtfully curated collections for men and women.",
+        "heading_color": "",
+        "subheading_color": "{{ settings.color_palette.foreground }}",
+        "text_color": "",
+        "corner_radius": 18,
+        "card_bg_color_1": "#f2ede6",
+        "card_bg_color_2": "#e7ddd0",
+        "shadow_color": "#00000026",
+        "button_radius": 8,
+        "button_bg_color": "#1a1a1a",
+        "button_text_color": "#ffffff",
+        "button_border_color": "#1a1a1a",
+        "button_bg_hover_color": "#333333",
+        "button_text_hover_color": "#ffffff"
+      }
+    },
+    "section_yGHe6M": {
+      "type": "section",
+      "blocks": {
+        "text_WKbm3e": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2>Level up How You Look</h2>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "text_color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "comparison_slider_XmFefc": {
+          "type": "comparison-slider",
+          "name": "t:names.comparison_slider",
+          "settings": {
+            "before_image": "shopify://shop_images/ChatGPT_Image_Jul_31_2026_01_01_41_PM.png",
+            "after_image": "shopify://shop_images/ChatGPT_Image_Jul_31_2026_12_42_34_PM.png",
+            "slider_style": "horizontal",
+            "show_text": false,
+            "before_text": "",
+            "after_text": "",
+            "text_preset": "",
+            "text_position_horizontal": "start",
+            "text_position_vertical": "start",
+            "text_background": false,
+            "text_background_color": "{{ settings.color_palette.background }}",
+            "text_corner_radius": 0,
+            "text_color": "{{ settings.color_palette.foreground }}",
+            "image_ratio": "landscape",
+            "width": "fill",
+            "custom_width": 65,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "slider_bg_color": "",
+            "slider_handle_color": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color": "",
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_WKbm3e",
+        "comparison_slider_XmFefc"
+      ],
+      "custom_css": [],
+      "name": "t:names.image_compare",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "space-between",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 46,
+        "section_width": "page-width",
+        "section_height": "small",
+        "section_height_custom": 50,
+        "background_media": "none",
+        "background_color": "",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_color": "",
+        "border_radius": 0,
+        "padding-block-start": 40,
+        "padding-block-end": 40
+      }
+    },
+    "custom_review_section_cGizCV": {
+      "type": "custom-review-section",
+      "blocks": {
+        "testimonial_4x9Bef": {
+          "type": "testimonial",
+          "settings": {
+            "testimonial": "\"They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.\"",
+            "author_name": "John Doe",
+            "author_title": "CEO",
+            "company": "Tech Innovations",
+            "rating": 5,
+            "avatar": "shopify://shop_images/a-product-has-the-title-premium-v-neck-tee-and-description-p-refresh-your-everyday-essentials-with-the-strong-premium-v-neck-tee-strong-designed-to-offer-the-perfect-combination-of-co_d2de4b6c-63e6-420e-a70f-a0ba6efcb43c.png"
+          }
+        },
+        "testimonial_MMYi8A": {
+          "type": "testimonial",
+          "settings": {
+            "testimonial": "\"They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.\"",
+            "author_name": "John Doe",
+            "author_title": "CEO",
+            "company": "Tech Innovations",
+            "rating": 5,
+            "avatar": "shopify://shop_images/mohamad-khosravi-yMpZJvTEspk-unsplash_1.png"
+          }
+        },
+        "testimonial_ttRHtr": {
+          "type": "testimonial",
+          "settings": {
+            "testimonial": "\"They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.\"",
+            "author_name": "John Doe",
+            "author_title": "CEO",
+            "company": "Tech Innovations",
+            "rating": 5,
+            "avatar": "shopify://shop_images/a-product-has-the-title-classic-cotton-t-shirt-and-description-p-refresh-your-everyday-wardrobe-with-the-strong-classic-cotton-t-shirt-strong-a-timeless-essential-designed-to-deliver_29c2cee3-d182-4cc2-9457-741c657e1395.png"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_4x9Bef",
+        "testimonial_MMYi8A",
+        "testimonial_ttRHtr"
+      ],
+      "name": "Review Carousel",
+      "settings": {
+        "background_image": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_11_48_30_AM.png",
+        "heading": "What Our Clients Say",
+        "subheading": "Real stories from real people",
+        "autoplay": true,
+        "speed": 4,
+        "testimonial_text_size": 25,
+        "testimonial_text_color": "{{ settings.color_palette.foreground }}"
+      }
+    },
+    "section_LkTJcW": {
+      "type": "section",
+      "blocks": {
+        "text_E8q8Hd": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2>Subscribe to our emails</h2>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "text_color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_gaz66D": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Be the first to know about new collections and special offers. </p>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "paragraph",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "text_color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "email_signup_NJQBWb": {
+          "type": "email-signup",
+          "settings": {
+            "width": "custom",
+            "custom_width": 50,
+            "heading": "",
+            "heading_text_color": "",
+            "heading_preset": "h3",
+            "border_style": "all",
+            "input_style": "default",
+            "border_width": 1,
+            "border_radius": 100,
+            "input_background_color": "",
+            "input_text_color": "",
+            "input_border_color": "",
+            "input_type_preset": "paragraph",
+            "style_class": "button-unstyled",
+            "custom_button_background": "{{ settings.color_palette.foreground }}",
+            "custom_button_text": "{{ settings.color_palette.background }}",
+            "custom_button_border": "{{ settings.color_palette.background }}",
+            "link_text_color": "",
+            "display_type": "arrow",
+            "label": "Sign up",
+            "integrated_button": true,
+            "button_type_preset": "paragraph",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_E8q8Hd",
+        "text_gaz66D",
+        "email_signup_NJQBWb"
+      ],
+      "name": "t:names.email_signup",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 16,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "background_media": "none",
+        "background_color": "",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_color": "",
+        "border_radius": 0,
+        "padding-block-start": 40,
+        "padding-block-end": 40
+      }
+    }
+  },
+  "order": [
+    "hero_ahWJqg",
+    "main",
+    "project_showcase_GGCMWw",
+    "section_yGHe6M",
+    "custom_review_section_cGizCV",
+    "section_LkTJcW"
+  ]
+}
