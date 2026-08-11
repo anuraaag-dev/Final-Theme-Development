@@ -36,6 +36,64 @@
   endif
 %}
 
+<script>
+  console.log({{ closest.product | json }});
+  function handleRequestInfoBtnClick() {
+      document.getElementById("request-info-modal").style.display = "flex";
+  }
+
+  function closeRequestInfoModal() {
+      document.getElementById("request-info-modal").style.display = "none";
+  }
+</script>
+
+<style>
+  .req-product-info-button{
+    width: 100%;
+  }
+  .request-info-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+  }
+
+  .request-info-modal__content{
+      background:#fff;
+      padding:24px;
+      border-radius:10px;
+      width:400px;
+      max-width:90%;
+  }
+
+  .request-info-modal input{
+      width:100%;
+      margin-bottom:16px;
+  }
+
+  .request-info-modal button{
+      cursor:pointer;
+  }
+
+  .as-email-input{
+    height: 2.25rem;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid black;
+    background-color: transparent;
+    font-size: 0.875rem;
+    tansition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0m 1px 2px 0 rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    padding: 0.25rem 0.75rem;
+    margin-top: 20px;
+
+  }
+</style>
+
 <span
   class="buy-buttons-block buy-buttons-block--{{ block.id }}"
   {% if block_settings.text_color != blank %}
@@ -45,6 +103,87 @@
 >
   {%- if product != blank -%}
     {%- assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id -%}
+
+    {% comment %} 
+      1. add a ifelse condition that run based on whether the value of a product metafield is true or not.
+      2. If the value is true then the custom button that i created show
+      3. Otherwise, the default button show. 
+    {% endcomment %}
+
+    {% if closest.product.metafields.custom.request_product_info.value %}
+    
+        <button
+          class="button"
+          onclick="handleRequestInfoBtnClick()"
+          style="width: 100%"
+        >
+          Request Product Info
+        </button>
+
+
+        {% comment %} THIS IS POPUP CODE {% endcomment %}
+         <div id="request-info-modal" style="display:none;" class="request-info-modal">
+          <div class="request-info-modal__content">
+
+            <div style="width: 100%; display: flex; justify-content: end;">
+              <button 
+                type="button" 
+                onclick="closeRequestInfoModal()"
+                style=" border-radius: 100%; width: 20px;"
+                
+              >
+                ✕
+              </button>
+            </div>
+
+
+            {% form 'contact' %}
+
+              <h4>Request Product Information</h4>
+
+              <input
+                class="as-email-input"
+                type="email"
+                name="contact[email]"
+                placeholder="Enter your email"
+                required
+              >
+
+              <input
+                type="hidden"
+                name="contact[Product Title]"
+                value="{{ closest.product.title }}"
+              >
+
+              <input
+                type="hidden"
+                name="contact[Product ID]"
+                value="{{ closest.product.id }}"
+              >
+
+              <input
+                type="hidden"
+                name="contact[Product URL]"
+                value="{{ shop.url }}{{ closest.product.url }}"
+              >
+
+              <input
+                type="hidden"
+                name="contact[Message]"
+                value="Customer requested product information."
+              >
+
+              <button type="submit" class="button button--primary " style="width: 100%;">
+                Submit
+              </button>
+
+            {% endform %}
+
+          </div>
+        </div>
+    
+    {% else %}
+    {% comment %} --------------- THIS HERE PRINTING THE PRODUCT COUNT + ADD TO CART + BUY BUTTON ---------------- {% endcomment %}
     <product-form-component
       data-section-id="{{ section.id }}"
       data-product-id="{{ product.id }}"
@@ -240,6 +379,7 @@
         {%- endif -%}
       {%- endform -%}
     </product-form-component>
+    {% endif %}
   {%- else -%}
     <div class="product-form-buttons">
       <button
