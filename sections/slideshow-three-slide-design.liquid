@@ -13,6 +13,7 @@
   endif
   assign rounded_desktop = section.settings.rounded_corner_desktop
   assign rounded_mobile  = section.settings.rounded_corner_mobile
+  assign lcp_optimization = section.settings.enable_lcp_optimization
 -%}
 
 {%- style -%}
@@ -798,7 +799,8 @@
                         <img src="https://i.ytimg.com/vi/{{ video_id }}/maxresdefault.jpg"
                           alt="{{ block.settings.video_alt | escape }}"
                           width="1280" height="720"
-                          loading="{% if is_first %}eager{% else %}lazy{% endif %}">
+                          loading="{% if is_first %}eager{% else %}lazy{% endif %}"
+                          {% if is_first and lcp_optimization %}fetchpriority="high"{% endif %}>
                         <button class="sc-play-btn" aria-label="Play video">
                           <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         </button>
@@ -817,6 +819,7 @@
                           srcset="{{ img_mobile | image_url: width: 375 }} 375w,
                                   {{ img_mobile | image_url: width: 750 }} 750w,
                                   {{ img_mobile | image_url: width: 1100 }} 1100w"
+                          sizes="100vw"
                           width="{{ img_mobile.width }}" height="{{ img_mobile.height }}">
                       {%- endif -%}
                       <img
@@ -825,12 +828,13 @@
                                 {{ block.settings.image | image_url: width: 1500 }} 1500w,
                                 {{ block.settings.image | image_url: width: 2000 }} 2000w,
                                 {{ block.settings.image | image_url: width: 3000 }} 3000w"
+                        sizes="100vw"
                         src="{{ block.settings.image | image_url: width: 2000 }}"
                         alt="{{ block.settings.image.alt | escape }}"
                         width="{{ block.settings.image.width }}"
                         height="{{ block.settings.image.height }}"
                         loading="{% if is_first %}eager{% else %}lazy{% endif %}"
-                        {% if is_first %}fetchpriority="high"{% endif %}
+                        {% if is_first and lcp_optimization %}fetchpriority="high"{% endif %}
                         style="object-position: {{ block.settings.image.presentation.focal_point }};"
                       >
                     </picture>
@@ -900,6 +904,7 @@
                         <source media="(max-width: 767px)"
                           srcset="{{ img_mobile | image_url: width: 375 }} 375w,
                                   {{ img_mobile | image_url: width: 750 }} 750w"
+                          sizes="100vw"
                           width="{{ img_mobile.width }}" height="{{ img_mobile.height }}">
                       {%- endif -%}
                       <img
@@ -907,11 +912,13 @@
                                 {{ block.settings.image | image_url: width: 900 }} 900w,
                                 {{ block.settings.image | image_url: width: 1200 }} 1200w,
                                 {{ block.settings.image | image_url: width: 1600 }} 1600w"
+                        sizes="(max-width: 767px) 100vw, 55vw"
                         src="{{ block.settings.image | image_url: width: 900 }}"
                         alt="{{ block.settings.image.alt | escape }}"
                         width="{{ block.settings.image.width }}"
                         height="{{ block.settings.image.height }}"
                         loading="{% if is_first %}eager{% else %}lazy{% endif %}"
+                        {% if is_first and lcp_optimization %}fetchpriority="high"{% endif %}
                         style="object-position: {{ block.settings.image.presentation.focal_point }};"
                       >
                     </picture>
@@ -980,14 +987,17 @@
                     <picture>
                       {%- if img1_mobile != block.settings.image_1 -%}
                         <source media="(max-width: 767px)"
-                          srcset="{{ img1_mobile | image_url: width: 375 }} 375w, {{ img1_mobile | image_url: width: 750 }} 750w">
+                          srcset="{{ img1_mobile | image_url: width: 375 }} 375w, {{ img1_mobile | image_url: width: 750 }} 750w"
+                          sizes="100vw">
                       {%- endif -%}
                       <img
                         srcset="{{ block.settings.image_1 | image_url: width: 600 }} 600w, {{ block.settings.image_1 | image_url: width: 900 }} 900w, {{ block.settings.image_1 | image_url: width: 1200 }} 1200w"
+                        sizes="(max-width: 767px) 100vw, 33vw"
                         src="{{ block.settings.image_1 | image_url: width: 900 }}"
                         alt="{{ block.settings.image_1.alt | escape }}"
                         width="{{ block.settings.image_1.width }}" height="{{ block.settings.image_1.height }}"
                         loading="{% if is_first %}eager{% else %}lazy{% endif %}"
+                        {% if is_first and lcp_optimization %}fetchpriority="high"{% endif %}
                         style="object-position: {{ block.settings.image_1.presentation.focal_point }};"
                       >
                     </picture>
@@ -1039,10 +1049,12 @@
                     <picture>
                       {%- if img2_mobile != block.settings.image_2 -%}
                         <source media="(max-width: 767px)"
-                          srcset="{{ img2_mobile | image_url: width: 375 }} 375w, {{ img2_mobile | image_url: width: 750 }} 750w">
+                          srcset="{{ img2_mobile | image_url: width: 375 }} 375w, {{ img2_mobile | image_url: width: 750 }} 750w"
+                          sizes="100vw">
                       {%- endif -%}
                       <img
                         srcset="{{ block.settings.image_2 | image_url: width: 600 }} 600w, {{ block.settings.image_2 | image_url: width: 900 }} 900w, {{ block.settings.image_2 | image_url: width: 1200 }} 1200w"
+                        sizes="(max-width: 767px) 100vw, 33vw"
                         src="{{ block.settings.image_2 | image_url: width: 900 }}"
                         alt="{{ block.settings.image_2.alt | escape }}"
                         width="{{ block.settings.image_2.width }}" height="{{ block.settings.image_2.height }}"
@@ -1243,6 +1255,8 @@
   "max_blocks": 6,
   "disabled_on": { "groups": ["header","footer","aside"] },
   "settings": [
+    { "type": "header",   "content": "Performance" },
+    { "type": "checkbox", "id": "enable_lcp_optimization", "label": "Enable LCP optimization", "default": true, "info": "Prioritizes the first slide's image for fastest paint: adds fetchpriority=\"high\" to it, keeps responsive sizes/srcset accurate per breakpoint, and leaves every other slide lazy-loaded. Turn off only for troubleshooting." },
     { "type": "header",   "content": "Slideshow Settings" },
     { "type": "checkbox", "id": "auto_play",           "label": "Auto-play slides",    "default": true  },
     { "type": "range",    "id": "change_slides_speed", "min": 3, "max": 12, "step": 1, "unit": "s", "label": "Slide duration", "default": 5 },
