@@ -72,6 +72,12 @@
   endif
 -%}
 
+
+{% if product_resource.metafields.custom.request_product_info.value %}
+
+    <div>You can request product information</div>
+    
+{% else %}
 <div ref="priceContainer">
   {% if has_volume_pricing %}
     {% comment %} Volume pricing display {% endcomment %}
@@ -130,3 +136,4 @@
     {{- 'content.volume_pricing_available' | t -}}
   </small>
 {%- endif -%}
+{% endif %}
