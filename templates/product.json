@@ -37,7 +37,11 @@
             "size_guide_row_LAVU3n": {
               "type": "size-guide-row",
               "settings": {
-                "size_label": "M"
+                "size_label": "S",
+                "chest": 25,
+                "waist": 24,
+                "hip": 21,
+                "length": 30
               },
               "blocks": {}
             },
