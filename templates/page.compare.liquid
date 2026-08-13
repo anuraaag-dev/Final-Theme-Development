@@ -1,0 +1,402 @@
+{%- comment -%}
+============================================================================
+  PAGE — PRODUCT COMPARE
+  Assign this template to a Page in Shopify Admin (Online Store > Pages)
+  and give that page the handle "compare" — the "Compare Now" button in
+  snippets/compare-widget.liquid links to {{ pages.compare.url }} by
+  default (falls back to /pages/compare). If you use a different handle,
+  update COMPARE_PAGE_URL in that snippet to match.
+
+  Reads the products the shopper checked (stored in localStorage by
+  snippets/compare-widget.liquid as [{id, handle, title}, ...]), fetches
+  each product's full JSON via the Storefront AJAX API
+  (/products/{handle}.js), and renders a side-by-side table: image,
+  title, vendor, price, description, and every variant option found
+  across the selected products.
+============================================================================
+{%- endcomment -%}
+
+<div class="pgc" id="ProductCompare">
+  <div class="pgc__inner">
+    <header class="pgc__header">
+      <h1 class="pgc__title">{{ page.title | default: 'Compare Products' }}</h1>
+      <button type="button" class="pgc__clear" data-pgc-clear hidden>Clear All</button>
+    </header>
+
+    <div class="pgc__empty" data-pgc-empty hidden>
+      <p>You haven't selected any products to compare yet. Pick two or three products using the "Compare" checkbox on a product card, then come back here.</p>
+      <a href="{{ routes.all_products_collection_url | default: '/collections/all' }}" class="pgc__browse-link">Browse products</a>
+    </div>
+
+    <div class="pgc__loading" data-pgc-loading>Loading comparison…</div>
+
+    <div class="pgc__table-wrap" data-pgc-table-wrap hidden>
+      <table class="pgc__table" data-pgc-table>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  #ProductCompare {
+    display: block;
+    padding-block: 40px 60px;
+  }
+  #ProductCompare * {
+    box-sizing: border-box;
+  }
+  #ProductCompare .pgc__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: 24px;
+  }
+  #ProductCompare .pgc__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  #ProductCompare .pgc__title {
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    font-weight: 700;
+    margin: 0;
+  }
+  #ProductCompare .pgc__clear {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  #ProductCompare .pgc__clear:hover {
+    background: #f5f5f5;
+  }
+  #ProductCompare .pgc__empty,
+  #ProductCompare .pgc__loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+  }
+  #ProductCompare .pgc__browse-link {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 10px 20px;
+    background: #12203f;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  #ProductCompare .pgc__table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #ProductCompare .pgc__table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+  }
+  #ProductCompare .pgc__table th,
+  #ProductCompare .pgc__table td {
+    border: 1px solid #ececec;
+    padding: 14px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 0.86rem;
+    min-width: 200px;
+  }
+  #ProductCompare .pgc__table td:first-child,
+  #ProductCompare .pgc__table th:first-child {
+    position: sticky;
+    left: 0;
+    background: #fafafa;
+    font-weight: 600;
+    min-width: 130px;
+    z-index: 1;
+  }
+  #ProductCompare .pgc__col-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #ProductCompare .pgc__col-image {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: contain;
+    background: #f4f4f5;
+    border-radius: 6px;
+  }
+  #ProductCompare .pgc__col-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: #111;
+  }
+  #ProductCompare .pgc__col-remove {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+  }
+  #ProductCompare .pgc__price {
+    font-weight: 700;
+  }
+  #ProductCompare .pgc__compare-price {
+    color: #d64545;
+    text-decoration: line-through;
+    margin-left: 6px;
+    font-weight: 400;
+  }
+  #ProductCompare .pgc__view-link {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 8px 14px;
+    background: #12203f;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  #ProductCompare .pgc__dash {
+    color: #bbb;
+  }
+  @media screen and (max-width: 749px) {
+    #ProductCompare .pgc__table th,
+    #ProductCompare .pgc__table td {
+      padding: 10px;
+      font-size: 0.8rem;
+      min-width: 160px;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'pgs_compare_list';
+    var root = document.getElementById('ProductCompare');
+    if (!root) return;
+
+    var emptyEl = root.querySelector('[data-pgc-empty]');
+    var loadingEl = root.querySelector('[data-pgc-loading]');
+    var tableWrap = root.querySelector('[data-pgc-table-wrap]');
+    var tableBody = root.querySelector('[data-pgc-table] tbody');
+    var clearBtn = root.querySelector('[data-pgc-clear]');
+
+    function getList() {
+      try {
+        var raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(raw) ? raw : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setList(list) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch (e) {
+        /* storage unavailable */
+      }
+    }
+
+    function stripHtml(html) {
+      var div = document.createElement('div');
+      div.innerHTML = html || '';
+      return div.textContent || div.innerText || '';
+    }
+
+    function truncate(str, len) {
+      if (str.length <= len) return str;
+      return str.slice(0, len).trim() + '…';
+    }
+
+    function formatMoney(cents) {
+      // Uses Shopify.formatMoney if the theme has it loaded; falls back to
+      // a plain decimal so the page still works stand-alone.
+      if (window.Shopify && typeof window.Shopify.formatMoney === 'function' && window.theme && window.theme.moneyFormat) {
+        return window.Shopify.formatMoney(cents, window.theme.moneyFormat);
+      }
+      return '$' + (cents / 100).toFixed(2);
+    }
+
+    function fetchProduct(handle) {
+      return fetch('/products/' + handle + '.js').then(function (res) {
+        if (!res.ok) throw new Error('Product not found: ' + handle);
+        return res.json();
+      });
+    }
+
+    function removeFromList(id) {
+      var list = getList().filter(function (i) {
+        return i.id !== id;
+      });
+      setList(list);
+      render();
+    }
+
+    function buildRow(label, cellsHtml) {
+      var tr = document.createElement('tr');
+      var th = document.createElement('td');
+      th.textContent = label;
+      tr.appendChild(th);
+      cellsHtml.forEach(function (html) {
+        var td = document.createElement('td');
+        td.innerHTML = html;
+        tr.appendChild(td);
+      });
+      return tr;
+    }
+
+    function render() {
+      var stored = getList();
+
+      if (!stored.length) {
+        loadingEl.hidden = true;
+        tableWrap.hidden = true;
+        clearBtn.hidden = true;
+        emptyEl.hidden = false;
+        return;
+      }
+
+      emptyEl.hidden = true;
+      loadingEl.hidden = false;
+      tableWrap.hidden = true;
+      clearBtn.hidden = false;
+
+      Promise.all(
+        stored.map(function (item) {
+          return fetchProduct(item.handle).catch(function () {
+            return null;
+          });
+        })
+      ).then(function (products) {
+        var valid = [];
+        products.forEach(function (p, idx) {
+          if (p) valid.push({ product: p, meta: stored[idx] });
+        });
+
+        if (!valid.length) {
+          loadingEl.hidden = true;
+          emptyEl.hidden = false;
+          return;
+        }
+
+        tableBody.innerHTML = '';
+
+        // Header row: image, title, remove button, view link
+        var headerCells = valid.map(function (entry) {
+          var p = entry.product;
+          var img = p.featured_image || (p.images && p.images[0]) || '';
+          return (
+            '<div class="pgc__col-header">' +
+            (img ? '<img class="pgc__col-image" src="' + img + '" alt="' + escapeHtml(p.title) + '">' : '') +
+            '<a class="pgc__col-title" href="/products/' + p.handle + '">' + escapeHtml(p.title) + '</a>' +
+            '<a class="pgc__view-link" href="/products/' + p.handle + '">View Product</a>' +
+            '<button type="button" class="pgc__col-remove" data-remove-id="' + entry.meta.id + '">Remove</button>' +
+            '</div>'
+          );
+        });
+        tableBody.appendChild(buildRow('Product', headerCells));
+
+        // Vendor
+        tableBody.appendChild(
+          buildRow(
+            'Vendor',
+            valid.map(function (entry) {
+              return entry.product.vendor ? escapeHtml(entry.product.vendor) : '<span class="pgc__dash">—</span>';
+            })
+          )
+        );
+
+        // Price
+        tableBody.appendChild(
+          buildRow(
+            'Price',
+            valid.map(function (entry) {
+              var p = entry.product;
+              var variant = (p.variants && p.variants[0]) || {};
+              var priceHtml = '<span class="pgc__price">' + formatMoney(variant.price || p.price) + '</span>';
+              if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+                priceHtml += '<span class="pgc__compare-price">' + formatMoney(variant.compare_at_price) + '</span>';
+              }
+              return priceHtml;
+            })
+          )
+        );
+
+        // Description
+        tableBody.appendChild(
+          buildRow(
+            'Description',
+            valid.map(function (entry) {
+              var text = stripHtml(entry.product.description);
+              return text ? escapeHtml(truncate(text, 220)) : '<span class="pgc__dash">—</span>';
+            })
+          )
+        );
+
+        // Variant options — union of option names across all selected products
+        var optionNames = [];
+        valid.forEach(function (entry) {
+          (entry.product.options || []).forEach(function (opt) {
+            var name = typeof opt === 'string' ? opt : opt.name;
+            if (name && optionNames.indexOf(name) === -1) optionNames.push(name);
+          });
+        });
+
+        optionNames.forEach(function (optionName) {
+          var cells = valid.map(function (entry) {
+            var p = entry.product;
+            var optIndex = -1;
+            (p.options || []).forEach(function (opt, i) {
+              var name = typeof opt === 'string' ? opt : opt.name;
+              if (name === optionName) optIndex = i;
+            });
+            if (optIndex === -1) return '<span class="pgc__dash">—</span>';
+
+            var key = 'option' + (optIndex + 1);
+            var values = [];
+            (p.variants || []).forEach(function (v) {
+              if (v[key] && values.indexOf(v[key]) === -1) values.push(v[key]);
+            });
+            return values.length ? escapeHtml(values.join(', ')) : '<span class="pgc__dash">—</span>';
+          });
+          tableBody.appendChild(buildRow(optionName, cells));
+        });
+
+        loadingEl.hidden = true;
+        tableWrap.hidden = false;
+      });
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str == null ? '' : String(str);
+      return div.innerHTML;
+    }
+
+    root.addEventListener('click', function (e) {
+      var removeBtn = e.target.closest('[data-remove-id]');
+      if (removeBtn) {
+        removeFromList(removeBtn.getAttribute('data-remove-id'));
+        return;
+      }
+      if (e.target.closest('[data-pgc-clear]')) {
+        setList([]);
+        render();
+      }
+    });
+
+    render();
+  })();
+</script>
