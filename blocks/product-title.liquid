@@ -1,5 +1,5 @@
 
-{% assign myProduct = closest.product %}
+{% assign proInfo = closest.product %}
 
 {% if closest.product == blank %}
   {% assign text = 'placeholders.product_title' | t %}
@@ -16,7 +16,7 @@
   </a>
 {% endif %}
 
-{% render 'wishlist-button', product: myProduct %}
+{% render 'wishlist-button', product: proInfo %}
 
 {% schema %}
 {
