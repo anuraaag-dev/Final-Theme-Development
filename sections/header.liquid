@@ -1122,7 +1122,7 @@
       <li>
         <a href="/pages/wishlist" class="header-wishlist-icon">
           {% render 'icon-wishlist' %}
-          <span data-wishlist-count hidden>0</span>
+          <span class="header-wishlist-icon__count" data-wishlist-count hidden>0</span>
         </a>
       </li>
 
@@ -1672,6 +1672,41 @@
     </div>
   </div>
 </aside>
+
+<style>
+.header-wishlist-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--color-foreground));
+}
+
+.header-wishlist-icon__count {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body--family);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: rgb(var(--color-background));
+  background: rgb(var(--color-foreground));
+  border: 2px solid rgb(var(--color-background));
+  border-radius: 999px;
+}
+
+.header-wishlist-icon__count[hidden] {
+  display: none;
+}
+
+</style>
 
 <script>
 (function () {
