@@ -12,57 +12,6 @@
     "main": {
       "type": "product-information",
       "blocks": {
-        "size_guide_KRf4Qy": {
-          "type": "size-guide",
-          "name": "Size guide",
-          "settings": {
-            "trigger_label": "Size guide",
-            "alignment": "left",
-            "heading": "Size guide",
-            "how_to_measure_label": "How to measure",
-            "how_to_measure": ""
-          },
-          "blocks": {
-            "size_guide_row_k4AAGY": {
-              "type": "size-guide-row",
-              "settings": {
-                "size_label": "M",
-                "chest": 30,
-                "waist": 20,
-                "hip": 25,
-                "length": 20
-              },
-              "blocks": {}
-            },
-            "size_guide_row_LAVU3n": {
-              "type": "size-guide-row",
-              "settings": {
-                "size_label": "S",
-                "chest": 25,
-                "waist": 24,
-                "hip": 21,
-                "length": 30
-              },
-              "blocks": {}
-            },
-            "size_guide_row_676dYg": {
-              "type": "size-guide-row",
-              "settings": {
-                "size_label": "XL",
-                "chest": 35,
-                "waist": 34,
-                "hip": 37,
-                "length": 40
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "size_guide_row_k4AAGY",
-            "size_guide_row_LAVU3n",
-            "size_guide_row_676dYg"
-          ]
-        },
         "disclosures_g9mWze": {
           "type": "disclosures",
           "name": "t:names.disclosures",
@@ -267,6 +216,57 @@
               },
               "blocks": {}
             },
+            "size_guide_EJFGV7": {
+              "type": "size-guide",
+              "name": "Size guide",
+              "settings": {
+                "trigger_label": "Size guide",
+                "alignment": "left",
+                "heading": "Size guide",
+                "how_to_measure_label": "How to measure",
+                "how_to_measure": ""
+              },
+              "blocks": {
+                "size_guide_row_k4AAGY": {
+                  "type": "size-guide-row",
+                  "settings": {
+                    "size_label": "M",
+                    "chest": 30,
+                    "waist": 20,
+                    "hip": 25,
+                    "length": 20
+                  },
+                  "blocks": {}
+                },
+                "size_guide_row_LAVU3n": {
+                  "type": "size-guide-row",
+                  "settings": {
+                    "size_label": "S",
+                    "chest": 25,
+                    "waist": 24,
+                    "hip": 21,
+                    "length": 30
+                  },
+                  "blocks": {}
+                },
+                "size_guide_row_676dYg": {
+                  "type": "size-guide-row",
+                  "settings": {
+                    "size_label": "XL",
+                    "chest": 35,
+                    "waist": 34,
+                    "hip": 37,
+                    "length": 40
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "size_guide_row_k4AAGY",
+                "size_guide_row_LAVU3n",
+                "size_guide_row_676dYg"
+              ]
+            },
             "buy_buttons_eYQEYi": {
               "type": "buy-buttons",
               "settings": {
@@ -358,13 +358,13 @@
             "group_icgrde",
             "divider_VJhene",
             "variant_picker_R3rGDr",
+            "size_guide_EJFGV7",
             "buy_buttons_eYQEYi",
             "text_aEtTtq"
           ]
         }
       },
       "block_order": [
-        "size_guide_KRf4Qy",
         "disclosures_g9mWze"
       ],
       "settings": {
