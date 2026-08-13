@@ -1,1 +1,899 @@
-{"sections":{"slideshow_three_slide_design_fMyUrc":{"type":"slideshow-three-slide-design","blocks":{"three_fold_PdtbJr":{"type":"three_fold","settings":{"image_1":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_22_2026_12_17_16_PM.png","image_1_mobile":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_22_2026_12_17_16_PM.png","image_1_link":"","image_2":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_22_2026_12_19_36_PM.png","image_2_mobile":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_22_2026_12_19_36_PM.png","image_2_link":"","subheading":"","heading":"Everyday Wear. Elevated.","heading_tag":"h1","heading_size":60,"text":"<p>From crisp shirts to perfectly tailored pants, every piece is made with premium fabrics and thoughtful details.<\/p>","text_alignment":"center","btn_label_1":"Explore","btn_link_1":"","btn_style_1":"primary","btn_new_tab_1":false,"btn_label_2":"","btn_link_2":"","btn_style_2":"secondary","btn_new_tab_2":false,"content_bg_color":"#950000","color_text":"{{ settings.color_palette.background }}","color_btn_primary":"rgba(0,0,0,0)","color_btn_primary_text":"#ffffff","color_btn_secondary":"rgba(0,0,0,0)"}},"slide_nTA46q":{"type":"slide","settings":{"image":"shopify:\/\/shop_images\/desk-bn.png","image_mobile":"shopify:\/\/shop_images\/mob-bn.png","image_link":"","overlay_opacity":40,"video_autoplay":true,"show_sound_control":false,"video_url":"","video_alt":"","subheading":"","heading":"Find the fit that makes you feel unstoppable.","heading_tag":"h1","heading_size":70,"text":"<p>From boardroom meetings to weekend workouts. We’ve curated the exact pieces your wardrobe is missing.<\/p>","content_position":"middle-center","btn_label_1":"SHOP NEW ARRIVALS","btn_link_1":"#","btn_style_1":"primary","btn_new_tab_1":false,"btn_label_2":"","btn_link_2":"","btn_style_2":"secondary","btn_new_tab_2":false,"color_text":"#ffffff","color_btn_primary":"rgba(0,0,0,0)","color_btn_primary_text":"#ffffff","color_btn_secondary":"rgba(0,0,0,0)","content_bg_color":"rgba(0,0,0,0)"}},"media_with_text_tGxJYc":{"type":"media_with_text","settings":{"image":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_22_2026_11_56_51_AM.png","image_link":"","subheading":"","heading":"Dress Better.   Live Better.","heading_tag":"h1","heading_size":60,"text":"<p>Build a wardrobe that works from morning meetings to weekend plans without compromising comfort.<\/p>","text_alignment":"left","media_position":"left","btn_label_1":"FIND YOUR STYLE","btn_link_1":"","btn_style_1":"primary","btn_new_tab_1":false,"btn_label_2":"","btn_link_2":"","btn_style_2":"secondary","btn_new_tab_2":false,"content_bg_color":"#950000","color_text":"{{ settings.color_palette.background }}","color_btn_primary":"{{ settings.color_palette.background }}","color_btn_primary_text":"{{ settings.color_palette.foreground }}","color_btn_secondary":"rgba(0,0,0,0)"}}},"block_order":["three_fold_PdtbJr","slide_nTA46q","media_with_text_tGxJYc"],"name":"Custom Slideshow","settings":{"auto_play":true,"change_slides_speed":5,"pause_hover":true,"transition_style":"slide","pagination_style":"bars","show_arrows":true,"full_width":true,"rounded_corner_desktop":false,"desktop_height":"650","padding_top":0,"padding_bottom":28,"full_width_mobile":true,"rounded_corner_mobile":false,"mobile_height":"450","padding_top_mobile":0,"padding_bottom_mobile":20}},"product_showcase_8XxdxF":{"type":"product-showcase","blocks":{"product_UU34Jh":{"type":"product","settings":{"product":"","custom_label":""}},"product_ALQnTw":{"type":"product","settings":{"product":"denim-jacket","custom_label":""}},"product_4pMtEw":{"type":"product","settings":{"product":"fleece-hoodie","custom_label":""}},"product_ck4VCq":{"type":"product","settings":{"product":"elegant-maxi-dress","custom_label":""}},"product_JntAbe":{"type":"product","settings":{"product":"classic-cotton-t-shirt","custom_label":""}}},"block_order":["product_UU34Jh","product_ALQnTw","product_4pMtEw","product_ck4VCq","product_JntAbe"],"name":"Product Showcase","settings":{"heading":"Popular Products","subheading":"Discover our most-loved styles","description":"","product_source":"manual","collection":"womens-clothing","product_count":8,"show_all_products":true,"layout_type":"grid","columns_desktop":4,"columns_tablet":3,"columns_mobile":2,"card_spacing":20,"card_border_radius":8,"card_shadow":true,"image_aspect_ratio":"1\/1","equal_card_height":true,"enable_autoplay":false,"autoplay_speed":4,"enable_loop":true,"show_arrows":true,"show_dots":true,"show_vendor":true,"show_rating":false,"show_compare_price":true,"show_sale_badge":true,"badge_style":"amount_saved","show_labels":true,"show_wishlist":true,"show_quick_add":true,"show_quick_view":true,"show_swatches":true,"swatch_size":22,"swatch_border_radius":50,"swatch_border_color":"#dddddd","swatch_active_color":"#111111","background_color":"{{ settings.color_palette.background }}","heading_color":"#111111","subheading_color":"#666666","card_bg_color":"#ffffff","card_border_color":"#ececec","price_color":"#111111","compare_price_color":"#d64545","badge_sale_color":"#d92b2b","badge_new_color":"#1a56db","button_bg_color":"#12203f","button_icon_color":"#ffffff","accent_color":"#12203f","section_padding_top":50,"section_padding_bottom":50}},"collection_list_glass_effect_LdjmQb":{"type":"collection-list-glass-effect","blocks":{"collection_BTmknH":{"type":"collection","settings":{"collection":"mens-clothing","description":""}},"collection_6NtfER":{"type":"collection","settings":{"collection":"activewear","description":""}},"collection_wUbgMN":{"type":"collection","settings":{"collection":"new-arrivals","description":""}},"collection_YPqd8L":{"type":"collection","settings":{"collection":"womens-clothing","description":""}}},"block_order":["collection_BTmknH","collection_6NtfER","collection_wUbgMN","collection_YPqd8L"],"name":"Collection Glass Grid","settings":{"heading":"Explore our collections","subheading":"Find the perfect style for every moment","per_row":4,"gap":25,"show_description":true,"button_label":"Discover"}},"video_with_image_WmgWi8":{"type":"video-with-image","name":"Video + Image Split","settings":{"section_label":"","section_label_align":"left","section_label_color":"#111111","label_gap":20,"layout":"video_left","full_width":false,"mobile_stack_order":"video_first","hide_video_mobile":false,"min_height_desktop":560,"min_height_mobile":360,"show_shadow":true,"border_radius":0,"show_divider":false,"divider_width":2,"divider_color":"#ffffff","video_hosted":"shopify:\/\/files\/videos\/8531894-hd_1920_1080_25fps.mp4","video_url":"","show_video_scrim":false,"video_scrim_opacity":20,"show_play_icon":true,"image":"shopify:\/\/shop_images\/pexels-koolshooters-7689243.jpg","image_overlay_color":"#000000","image_overlay_opacity":30,"image_zoom_on_hover":true,"eyebrow":"","heading":"Experience the difference","heading_tag":"h2","heading_weight":"700","subheading":"<p>Crafted for those who demand the very best.<\/p>","text_vertical":"bottom","text_horizontal":"left","content_padding":48,"btn_label":"Explore now","btn_url":"","btn_style":"primary","btn_show_arrow":true,"btn_new_tab":false,"btn_radius":2,"section_bg":"#ffffff","heading_color":"#ffffff","subheading_color":"#f0f0f0","btn_bg":"#ffffff","btn_text_color":"#111111","btn_border_color":"#ffffff","padding_top":40,"padding_bottom":40}},"product_showcase_fEFY9n":{"type":"product-showcase","name":"Product Showcase","settings":{"heading":"Trending Deals Of The Week","subheading":"Handpicked Bestsellers With Lightning-Fast Delivery.","description":"","product_source":"collection","collection":"mens-clothing","product_count":8,"show_all_products":true,"layout_type":"carousel","columns_desktop":5,"columns_tablet":3,"columns_mobile":2,"card_spacing":20,"card_border_radius":8,"card_shadow":true,"image_aspect_ratio":"1\/1","equal_card_height":true,"enable_autoplay":false,"autoplay_speed":4,"enable_loop":true,"show_arrows":true,"show_dots":true,"show_vendor":true,"show_rating":false,"show_compare_price":true,"show_sale_badge":true,"badge_style":"amount_saved","show_labels":true,"show_wishlist":true,"show_quick_add":true,"show_quick_view":true,"show_swatches":true,"swatch_size":22,"swatch_border_radius":50,"swatch_border_color":"#dddddd","swatch_active_color":"#111111","background_color":"{{ settings.color_palette.background }}","heading_color":"#111111","subheading_color":"#666666","card_bg_color":"#ffffff","card_border_color":"#ececec","price_color":"#111111","compare_price_color":"#d64545","badge_sale_color":"#d92b2b","badge_new_color":"#1a56db","button_bg_color":"#12203f","button_icon_color":"#ffffff","accent_color":"#12203f","section_padding_top":50,"section_padding_bottom":50}},"project_showcase_JUFbLM":{"type":"project-showcase","blocks":{"project_deHN86":{"type":"project","settings":{"title":"Modern Men's Collection","description":"Discover contemporary essentials designed for confidence and comfort. From everyday casual wear to refined statement pieces, our men's collection blends timeless style with modern versatility.","full_width":false,"image_1":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_30_2026_02_41_44_PM.png","image_1_alt":"","image_2":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_30_2026_02_45_10_PM.png","image_2_alt":"","image_3":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_30_2026_02_43_44_PM.png","image_3_alt":"","button_label":"View Products","button_link":"shopify:\/\/collections\/mens-clothing"}},"project_CwV9FH":{"type":"project","settings":{"title":"Elegant Women's Collection","description":"Celebrate effortless elegance with thoughtfully designed pieces that transition seamlessly from day to night. Fashion that complements your individuality and everyday lifestyle.","full_width":false,"image_1":"shopify:\/\/shop_images\/walter-o-rqLWwP9c-sI-unsplash_f59e8199-5eb1-4211-854b-a5d9c606b466.jpg","image_1_alt":"","image_2":"shopify:\/\/shop_images\/gaspar-zaldo-KByo-C0urNg-unsplash.jpg","image_2_alt":"","image_3":"shopify:\/\/shop_images\/shiv-narayan-das-vOS3X0l4hVQ-unsplash.jpg","image_3_alt":"","button_label":"View Products","button_link":"shopify:\/\/collections\/womens-clothing"}}},"block_order":["project_deHN86","project_CwV9FH"],"name":"Project Showcase","settings":{"heading":"Explore Men's & Women's Fashion","subheading":"Discover thoughtfully curated collections for men and women.","heading_color":"","subheading_color":"{{ settings.color_palette.foreground }}","text_color":"","corner_radius":18,"card_bg_color_1":"#f2ede6","card_bg_color_2":"#e7ddd0","shadow_color":"#00000026","button_radius":8,"button_bg_color":"#1a1a1a","button_text_color":"#ffffff","button_border_color":"#1a1a1a","button_bg_hover_color":"#333333","button_text_hover_color":"#ffffff"}},"main_product_xeMimG":{"type":"main-product","blocks":{"vendor_wf7ta3":{"type":"vendor","settings":{}},"title_NVRcPM":{"type":"title","settings":{}},"price_LrkqBa":{"type":"price","settings":{"divider_after_price":true}},"variant_picker_8Cn6NP":{"type":"variant_picker","settings":{}},"inventory_status_HfncVL":{"type":"inventory_status","settings":{}},"quantity_selector_3nBWrR":{"type":"quantity_selector","settings":{}},"buy_buttons_UUkiUA":{"type":"buy_buttons","settings":{"show_details_link":true,"details_link_text":"View full product details"}},"description_RxmqgN":{"type":"description","settings":{}},"trust_badge_3RaTRV":{"type":"trust_badge","settings":{"icon":"truck","text":"Fast, Reliable. Trackable."}},"trust_badge_UFTpbT":{"type":"trust_badge","settings":{"icon":"refresh","text":"No Hassle Replacements."}},"trust_badge_cEx9jz":{"type":"trust_badge","settings":{"icon":"leaf","text":"Green Safe Packaging."}}},"block_order":["vendor_wf7ta3","title_NVRcPM","price_LrkqBa","variant_picker_8Cn6NP","inventory_status_HfncVL","quantity_selector_3nBWrR","buy_buttons_UUkiUA","description_RxmqgN","trust_badge_3RaTRV","trust_badge_UFTpbT","trust_badge_cEx9jz"],"name":"Product Detail","settings":{"featured_product":"cable-knit-sweater","column_gap":56,"sticky_info":true,"image_aspect_ratio":"1\/1","image_border_radius":8,"enable_image_zoom":true,"show_sale_badge":false,"show_label_badge":true,"swatch_option_names":"Color, Colour","swatch_size":30,"swatch_border_radius":50,"swatch_border_color":"#dddddd","swatch_active_color":"#111111","divider_after_options":true,"truncate_description":true,"description_length":30,"show_inventory_status":true,"low_stock_threshold":5,"stock_in_color":"#2f9e44","stock_low_color":"{{ settings.color_palette.foreground }}","stock_out_color":"#e03131","show_buy_now":true,"background_color":"#ffffff","text_color":"#444444","heading_color":"#111111","title_font_size":30,"border_color":"#e8e8e8","accent_color":"#111111","price_color":"#111111","compare_price_color":"#d64545","sale_badge_color":"#d92b2b","label_badge_color":"#1a56db","pill_bg_color":"#ffffff","pill_text_color":"#111111","pill_active_bg":"#111111","pill_active_text_color":"#ffffff","add_to_cart_bg":"{{ settings.color_palette.foreground }}","add_to_cart_text_color":"#ffffff","buy_now_bg":"{{ settings.color_palette.foreground }}","buy_now_text_color":"{{ settings.color_palette.background }}","padding_top":40,"padding_bottom":60}},"collection_featured_list_APQbLR":{"type":"collection-featured-list","blocks":{"item_kDjGPb":{"type":"item","settings":{"collection":"activewear","custom_label":"","custom_url":""}},"item_yqB3Ch":{"type":"item","settings":{"collection":"mens-clothing","custom_label":"","custom_url":""}},"item_fcw7Cb":{"type":"item","settings":{"collection":"womens-clothing","custom_label":"","custom_url":""}},"item_8EFAzb":{"type":"item","settings":{"collection":"new-arrivals","custom_label":"","custom_url":""}}},"block_order":["item_kDjGPb","item_yqB3Ch","item_fcw7Cb","item_8EFAzb"],"name":"Collection Feature List","settings":{"eyebrow":"Popular Collections","eyebrow_gap":12,"font_size_desktop":50,"font_size_mobile":30,"line_height":1,"font_weight":"600","font_style":"inherit","letter_spacing":0,"slide_distance":20,"transition_duration":350,"show_underline":false,"underline_thickness":2,"img_placeholder_bg":"#e8e4df","show_numbers":false,"show_arrow":true,"show_dividers":true,"animate_divider":true,"align":"center","full_width":false,"max_width":900,"item_padding":12,"section_bg":"#faf9f7","text_color":"#1a1a1a","text_hover_color":"#1a1a1a","eyebrow_color":"#1a1a1a","divider_color":"#d8d3cc","padding_top":80,"padding_bottom":80}},"collection_grid_jdipwP":{"type":"collection-grid","blocks":{"large_tile_rJBcAW":{"type":"large_tile","settings":{"media_type":"video","video":"shopify:\/\/files\/videos\/7872848-uhd_4096_2160_25fps.mp4","video_autoplay":true,"video_loop":true,"video_muted":true,"show_controls":false,"title":"Women's Clothing","show_badge_dot":true,"link":"shopify:\/\/collections\/womens-clothing"}},"tile_ydE3Ud":{"type":"tile","settings":{"image":"shopify:\/\/shop_images\/pexels-ai25studioai-7081100.jpg","title":"Active Wear","show_badge_dot":false,"link":"shopify:\/\/collections\/activewear"}},"tile_RCncVQ":{"type":"tile","settings":{"image":"shopify:\/\/shop_images\/pexels-mart-production-9558897.jpg","title":"Men's Clothing","show_badge_dot":false,"link":"shopify:\/\/collections\/mens-clothing"}},"tile_8abP8n":{"type":"tile","settings":{"image":"shopify:\/\/shop_images\/pexels-ai25studioai-5264900.jpg","title":"New Arrivals","show_badge_dot":false,"link":"shopify:\/\/collections\/new-arrivals"}}},"block_order":["large_tile_rJBcAW","tile_ydE3Ud","tile_RCncVQ","tile_8abP8n"],"name":"Collection Bento Showcase","settings":{"heading":"","full_width":true,"grid_gap":12,"tile_border_radius":12,"grid_height_desktop":500,"mobile_tile_aspect_ratio":"4\/3","enable_hover_zoom":true,"overlay_color":"#000000","overlay_opacity":70,"title_color":"#ffffff","title_font_size":19,"title_font_weight":"700","badge_dot_color":"#3ecf4a","badge_dot_size":8,"background_color":"#f5f5f5","heading_color":"#111111","padding_top":50,"padding_bottom":50}},"countdown_product_showcase_TFEJn8":{"type":"countdown-product-showcase","custom_css":[".cps__card {border: 1px solid #e8e8e8;}"],"name":"Countdown Showcase","settings":{"subtitle":"Grab Them Before They're Gone!","heading":"Top Fashion Deals","description":"","button_text":"","button_link":"","enable_countdown":true,"countdown_end_date":"2026-12-31","countdown_end_time":"23:59","timezone_offset":"","expiry_message":"Offer Ended","show_days":true,"show_hours":true,"show_minutes":true,"show_seconds":true,"leading_zeros":true,"products":["cable-knit-sweater","classic-cotton-t-shirt","active-leggings","cargo-pants"],"mobile_products_per_view":2,"enable_badge":true,"enable_quick_add":true,"enable_wishlist":true,"enable_rating":false,"background_color":"{{ settings.color_palette.background }}","enable_overlay":true,"overlay_color":"#000000","overlay_opacity":30,"heading_color":"#111111","text_color":"#555555","accent_color":"#111111","timer_bg_color":"#1a1a1a","timer_text_color":"#ffffff","timer_label_color":"#cccccc","timer_border_radius":6,"card_bg_color":"#ffffff","card_text_color":"#111111","card_border_radius":10,"padding_top":60,"padding_bottom":60,"padding_top_mobile":30,"padding_bottom_mobile":30}},"custom_review_section_jEnYjt":{"type":"custom-review-section","blocks":{"testimonial_VnjG8G":{"type":"testimonial","settings":{"testimonial":"\"They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.\"","author_name":"John Doe","author_title":"CEO","company":"Tech Innovations","rating":5,"avatar":"shopify:\/\/shop_images\/a-product-has-the-title-classic-cotton-t-shirt-and-description-p-refresh-your-everyday-wardrobe-with-the-strong-classic-cotton-t-shirt-strong-a-timeless-essential-designed-to-deliver.png"}},"testimonial_naWHTr":{"type":"testimonial","settings":{"testimonial":"They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.","author_name":"John Doe","author_title":"CEO","company":"Tech Innovations","rating":5,"avatar":"shopify:\/\/shop_images\/a-product-has-the-title-premium-v-neck-tee-and-description-p-refresh-your-everyday-essentials-with-the-strong-premium-v-neck-tee-strong-designed-to-offer-the-perfect-combination-of-co_d2de4b6c-63e6-420e-a70f-a0ba6efcb43c.png"}},"testimonial_QJ89Ug":{"type":"testimonial","settings":{"testimonial":"They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.","author_name":"John Doe","author_title":"CEO","company":"Tech Innovations","rating":5,"avatar":"shopify:\/\/shop_images\/mohamad-khosravi-yMpZJvTEspk-unsplash_1.png"}}},"block_order":["testimonial_VnjG8G","testimonial_naWHTr","testimonial_QJ89Ug"],"name":"Testimonials Carousel","settings":{"background_image":"shopify:\/\/shop_images\/ChatGPT_Image_Jul_30_2026_11_48_30_AM.png","heading":"What Our Clients Say","subheading":"Real stories from real people","autoplay":true,"speed":4,"testimonial_text_size":22,"testimonial_text_color":"{{ settings.color_palette.foreground }}"}},"brand_story_slider_Knke4L":{"type":"brand-story-slider","blocks":{"slide_gjhxQT":{"type":"slide","settings":{"eyebrow":"About Us","heading":"Crafting Style for Every Story","body":"<p>We believe fashion is more than clothing—it's a reflection of confidence, personality, and individuality. Our collections are thoughtfully curated to combine timeless elegance with modern trends, ensuring every piece delivers exceptional comfort, quality, and style. Whether you're dressing for everyday moments or special occasions, we're here to help you look and feel your best.<\/p>","button_text":"","button_link":""}},"slide_JCJn6Y":{"type":"slide","settings":{"eyebrow":"What we do","heading":"Fashion Designed Around You","body":"<p>We create and curate premium apparel that blends contemporary design with lasting quality. From everyday essentials to statement pieces, our collections are crafted with attention to detail, superior fabrics, and modern silhouettes, making it easy to build a wardrobe you'll love.<\/p>","button_text":"","button_link":""}}},"block_order":["slide_gjhxQT","slide_JCJn6Y"],"name":"Brand Story Slider","settings":{"full_width":true,"column_gap":60,"collage_height_desktop":480,"collage_height_mobile":360,"image_back":"shopify:\/\/shop_images\/pexels-ahmadarikurniawan-14330642.jpg","image_front":"shopify:\/\/shop_images\/pexels-ivan-s-7213614.jpg","back_card_tilt":-4,"front_card_tilt":5,"card_border_color":"#ffffff","card_border_width":4,"card_border_radius":4,"background_color":"#f0f0f0","eyebrow_color":"#2f5fd6","heading_color":"#111111","body_color":"#444444","accent_color":"#2f5fd6","button_bg_color":"#111111","button_text_color":"#ffffff","nav_bg_color":"#ffffff","nav_icon_color":"#111111","padding_top":70,"padding_bottom":70}}},"order":["slideshow_three_slide_design_fMyUrc","product_showcase_8XxdxF","collection_list_glass_effect_LdjmQb","video_with_image_WmgWi8","product_showcase_fEFY9n","project_showcase_JUFbLM","main_product_xeMimG","collection_featured_list_APQbLR","collection_grid_jdipwP","countdown_product_showcase_TFEJn8","custom_review_section_jEnYjt","brand_story_slider_Knke4L"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "slideshow_three_slide_design_fMyUrc": {
+      "type": "slideshow-three-slide-design",
+      "blocks": {
+        "three_fold_PdtbJr": {
+          "type": "three_fold",
+          "settings": {
+            "image_1": "shopify://shop_images/ChatGPT_Image_Jul_22_2026_12_17_16_PM.png",
+            "image_1_mobile": "shopify://shop_images/ChatGPT_Image_Jul_22_2026_12_17_16_PM.png",
+            "image_1_link": "",
+            "image_2": "shopify://shop_images/ChatGPT_Image_Jul_22_2026_12_19_36_PM.png",
+            "image_2_mobile": "shopify://shop_images/ChatGPT_Image_Jul_22_2026_12_19_36_PM.png",
+            "image_2_link": "",
+            "subheading": "",
+            "heading": "Everyday Wear. Elevated.",
+            "heading_tag": "h1",
+            "heading_size": 60,
+            "text": "<p>From crisp shirts to perfectly tailored pants, every piece is made with premium fabrics and thoughtful details.</p>",
+            "text_alignment": "center",
+            "btn_label_1": "Explore",
+            "btn_link_1": "",
+            "btn_style_1": "primary",
+            "btn_new_tab_1": false,
+            "btn_label_2": "",
+            "btn_link_2": "",
+            "btn_style_2": "secondary",
+            "btn_new_tab_2": false,
+            "content_bg_color": "#950000",
+            "color_text": "{{ settings.color_palette.background }}",
+            "color_btn_primary": "rgba(0,0,0,0)",
+            "color_btn_primary_text": "#ffffff",
+            "color_btn_secondary": "rgba(0,0,0,0)"
+          }
+        },
+        "slide_nTA46q": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/desk-bn.png",
+            "image_mobile": "shopify://shop_images/mob-bn.png",
+            "image_link": "",
+            "overlay_opacity": 40,
+            "video_autoplay": true,
+            "show_sound_control": false,
+            "video_url": "",
+            "video_alt": "",
+            "subheading": "",
+            "heading": "Find the fit that makes you feel unstoppable.",
+            "heading_tag": "h1",
+            "heading_size": 70,
+            "text": "<p>From boardroom meetings to weekend workouts. We’ve curated the exact pieces your wardrobe is missing.</p>",
+            "content_position": "middle-center",
+            "btn_label_1": "SHOP NEW ARRIVALS",
+            "btn_link_1": "#",
+            "btn_style_1": "primary",
+            "btn_new_tab_1": false,
+            "btn_label_2": "",
+            "btn_link_2": "",
+            "btn_style_2": "secondary",
+            "btn_new_tab_2": false,
+            "color_text": "#ffffff",
+            "color_btn_primary": "rgba(0,0,0,0)",
+            "color_btn_primary_text": "#ffffff",
+            "color_btn_secondary": "rgba(0,0,0,0)",
+            "content_bg_color": "rgba(0,0,0,0)"
+          }
+        },
+        "media_with_text_tGxJYc": {
+          "type": "media_with_text",
+          "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_Jul_22_2026_11_56_51_AM.png",
+            "image_link": "",
+            "subheading": "",
+            "heading": "Dress Better.   Live Better.",
+            "heading_tag": "h1",
+            "heading_size": 60,
+            "text": "<p>Build a wardrobe that works from morning meetings to weekend plans without compromising comfort.</p>",
+            "text_alignment": "left",
+            "media_position": "left",
+            "btn_label_1": "FIND YOUR STYLE",
+            "btn_link_1": "",
+            "btn_style_1": "primary",
+            "btn_new_tab_1": false,
+            "btn_label_2": "",
+            "btn_link_2": "",
+            "btn_style_2": "secondary",
+            "btn_new_tab_2": false,
+            "content_bg_color": "#950000",
+            "color_text": "{{ settings.color_palette.background }}",
+            "color_btn_primary": "{{ settings.color_palette.background }}",
+            "color_btn_primary_text": "{{ settings.color_palette.foreground }}",
+            "color_btn_secondary": "rgba(0,0,0,0)"
+          }
+        }
+      },
+      "block_order": [
+        "three_fold_PdtbJr",
+        "slide_nTA46q",
+        "media_with_text_tGxJYc"
+      ],
+      "name": "Custom Slideshow",
+      "settings": {
+        "enable_lcp_optimization": true,
+        "auto_play": true,
+        "change_slides_speed": 5,
+        "pause_hover": true,
+        "transition_style": "slide",
+        "pagination_style": "bars",
+        "show_arrows": true,
+        "full_width": true,
+        "rounded_corner_desktop": false,
+        "desktop_height": "650",
+        "padding_top": 0,
+        "padding_bottom": 28,
+        "full_width_mobile": true,
+        "rounded_corner_mobile": false,
+        "mobile_height": "450",
+        "padding_top_mobile": 0,
+        "padding_bottom_mobile": 20
+      }
+    },
+    "product_showcase_8XxdxF": {
+      "type": "product-showcase",
+      "blocks": {
+        "product_UU34Jh": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "custom_label": ""
+          }
+        },
+        "product_ALQnTw": {
+          "type": "product",
+          "settings": {
+            "product": "denim-jacket",
+            "custom_label": ""
+          }
+        },
+        "product_4pMtEw": {
+          "type": "product",
+          "settings": {
+            "product": "fleece-hoodie",
+            "custom_label": ""
+          }
+        },
+        "product_ck4VCq": {
+          "type": "product",
+          "settings": {
+            "product": "elegant-maxi-dress",
+            "custom_label": ""
+          }
+        },
+        "product_JntAbe": {
+          "type": "product",
+          "settings": {
+            "product": "classic-cotton-t-shirt",
+            "custom_label": ""
+          }
+        }
+      },
+      "block_order": [
+        "product_UU34Jh",
+        "product_ALQnTw",
+        "product_4pMtEw",
+        "product_ck4VCq",
+        "product_JntAbe"
+      ],
+      "name": "Product Showcase",
+      "settings": {
+        "heading": "Popular Products",
+        "subheading": "Discover our most-loved styles",
+        "description": "",
+        "product_source": "manual",
+        "collection": "womens-clothing",
+        "product_count": 8,
+        "show_all_products": true,
+        "layout_type": "grid",
+        "columns_desktop": 4,
+        "columns_tablet": 3,
+        "columns_mobile": 2,
+        "card_spacing": 20,
+        "card_border_radius": 8,
+        "card_shadow": true,
+        "image_aspect_ratio": "1/1",
+        "equal_card_height": true,
+        "enable_autoplay": false,
+        "autoplay_speed": 4,
+        "enable_loop": true,
+        "show_arrows": true,
+        "show_dots": true,
+        "show_vendor": true,
+        "show_rating": false,
+        "show_compare_price": true,
+        "show_sale_badge": true,
+        "badge_style": "amount_saved",
+        "show_labels": true,
+        "show_wishlist": true,
+        "show_quick_add": true,
+        "show_quick_view": true,
+        "show_swatches": true,
+        "swatch_size": 22,
+        "swatch_border_radius": 50,
+        "swatch_border_color": "#dddddd",
+        "swatch_active_color": "#111111",
+        "background_color": "{{ settings.color_palette.background }}",
+        "heading_color": "#111111",
+        "subheading_color": "#666666",
+        "card_bg_color": "#ffffff",
+        "card_border_color": "#ececec",
+        "price_color": "#111111",
+        "compare_price_color": "#d64545",
+        "badge_sale_color": "#d92b2b",
+        "badge_new_color": "#1a56db",
+        "button_bg_color": "#12203f",
+        "button_icon_color": "#ffffff",
+        "accent_color": "#12203f",
+        "section_padding_top": 50,
+        "section_padding_bottom": 50
+      }
+    },
+    "collection_list_glass_effect_LdjmQb": {
+      "type": "collection-list-glass-effect",
+      "blocks": {
+        "collection_BTmknH": {
+          "type": "collection",
+          "settings": {
+            "collection": "mens-clothing",
+            "description": ""
+          }
+        },
+        "collection_6NtfER": {
+          "type": "collection",
+          "settings": {
+            "collection": "activewear",
+            "description": ""
+          }
+        },
+        "collection_wUbgMN": {
+          "type": "collection",
+          "settings": {
+            "collection": "new-arrivals",
+            "description": ""
+          }
+        },
+        "collection_YPqd8L": {
+          "type": "collection",
+          "settings": {
+            "collection": "womens-clothing",
+            "description": ""
+          }
+        }
+      },
+      "block_order": [
+        "collection_BTmknH",
+        "collection_6NtfER",
+        "collection_wUbgMN",
+        "collection_YPqd8L"
+      ],
+      "name": "Collection Glass Grid",
+      "settings": {
+        "heading": "Explore our collections",
+        "subheading": "Find the perfect style for every moment",
+        "per_row": 4,
+        "gap": 25,
+        "show_description": true,
+        "button_label": "Discover"
+      }
+    },
+    "video_with_image_WmgWi8": {
+      "type": "video-with-image",
+      "name": "Video + Image Split",
+      "settings": {
+        "enable_lcp_optimization": true,
+        "section_label": "",
+        "section_label_align": "left",
+        "section_label_color": "#111111",
+        "label_gap": 20,
+        "layout": "video_left",
+        "full_width": false,
+        "mobile_stack_order": "video_first",
+        "hide_video_mobile": false,
+        "min_height_desktop": 560,
+        "min_height_mobile": 360,
+        "show_shadow": true,
+        "border_radius": 0,
+        "show_divider": false,
+        "divider_width": 2,
+        "divider_color": "#ffffff",
+        "video_hosted": "shopify://files/videos/8531894-hd_1920_1080_25fps.mp4",
+        "video_url": "",
+        "show_video_scrim": false,
+        "video_scrim_opacity": 20,
+        "show_play_icon": true,
+        "image": "shopify://shop_images/pexels-koolshooters-7689243.jpg",
+        "image_overlay_color": "#000000",
+        "image_overlay_opacity": 30,
+        "image_zoom_on_hover": true,
+        "eyebrow": "",
+        "heading": "Experience the difference",
+        "heading_tag": "h2",
+        "heading_weight": "700",
+        "subheading": "<p>Crafted for those who demand the very best.</p>",
+        "text_vertical": "bottom",
+        "text_horizontal": "left",
+        "content_padding": 48,
+        "btn_label": "Explore now",
+        "btn_url": "",
+        "btn_style": "primary",
+        "btn_show_arrow": true,
+        "btn_new_tab": false,
+        "btn_radius": 2,
+        "section_bg": "#ffffff",
+        "heading_color": "#ffffff",
+        "subheading_color": "#f0f0f0",
+        "btn_bg": "#ffffff",
+        "btn_text_color": "#111111",
+        "btn_border_color": "#ffffff",
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    },
+    "product_showcase_fEFY9n": {
+      "type": "product-showcase",
+      "name": "Product Showcase",
+      "settings": {
+        "heading": "Trending Deals Of The Week",
+        "subheading": "Handpicked Bestsellers With Lightning-Fast Delivery.",
+        "description": "",
+        "product_source": "collection",
+        "collection": "mens-clothing",
+        "product_count": 8,
+        "show_all_products": true,
+        "layout_type": "carousel",
+        "columns_desktop": 5,
+        "columns_tablet": 3,
+        "columns_mobile": 2,
+        "card_spacing": 20,
+        "card_border_radius": 8,
+        "card_shadow": true,
+        "image_aspect_ratio": "1/1",
+        "equal_card_height": true,
+        "enable_autoplay": false,
+        "autoplay_speed": 4,
+        "enable_loop": true,
+        "show_arrows": true,
+        "show_dots": true,
+        "show_vendor": true,
+        "show_rating": false,
+        "show_compare_price": true,
+        "show_sale_badge": true,
+        "badge_style": "amount_saved",
+        "show_labels": true,
+        "show_wishlist": true,
+        "show_quick_add": true,
+        "show_quick_view": true,
+        "show_swatches": true,
+        "swatch_size": 22,
+        "swatch_border_radius": 50,
+        "swatch_border_color": "#dddddd",
+        "swatch_active_color": "#111111",
+        "background_color": "{{ settings.color_palette.background }}",
+        "heading_color": "#111111",
+        "subheading_color": "#666666",
+        "card_bg_color": "#ffffff",
+        "card_border_color": "#ececec",
+        "price_color": "#111111",
+        "compare_price_color": "#d64545",
+        "badge_sale_color": "#d92b2b",
+        "badge_new_color": "#1a56db",
+        "button_bg_color": "#12203f",
+        "button_icon_color": "#ffffff",
+        "accent_color": "#12203f",
+        "section_padding_top": 50,
+        "section_padding_bottom": 50
+      }
+    },
+    "project_showcase_JUFbLM": {
+      "type": "project-showcase",
+      "blocks": {
+        "project_deHN86": {
+          "type": "project",
+          "settings": {
+            "title": "Modern Men's Collection",
+            "description": "Discover contemporary essentials designed for confidence and comfort. From everyday casual wear to refined statement pieces, our men's collection blends timeless style with modern versatility.",
+            "full_width": false,
+            "image_1": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_02_41_44_PM.png",
+            "image_1_alt": "",
+            "image_2": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_02_45_10_PM.png",
+            "image_2_alt": "",
+            "image_3": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_02_43_44_PM.png",
+            "image_3_alt": "",
+            "button_label": "View Products",
+            "button_link": "shopify://collections/mens-clothing"
+          }
+        },
+        "project_CwV9FH": {
+          "type": "project",
+          "settings": {
+            "title": "Elegant Women's Collection",
+            "description": "Celebrate effortless elegance with thoughtfully designed pieces that transition seamlessly from day to night. Fashion that complements your individuality and everyday lifestyle.",
+            "full_width": false,
+            "image_1": "shopify://shop_images/walter-o-rqLWwP9c-sI-unsplash_f59e8199-5eb1-4211-854b-a5d9c606b466.jpg",
+            "image_1_alt": "",
+            "image_2": "shopify://shop_images/gaspar-zaldo-KByo-C0urNg-unsplash.jpg",
+            "image_2_alt": "",
+            "image_3": "shopify://shop_images/shiv-narayan-das-vOS3X0l4hVQ-unsplash.jpg",
+            "image_3_alt": "",
+            "button_label": "View Products",
+            "button_link": "shopify://collections/womens-clothing"
+          }
+        }
+      },
+      "block_order": [
+        "project_deHN86",
+        "project_CwV9FH"
+      ],
+      "name": "Project Showcase",
+      "settings": {
+        "heading": "Explore Men's & Women's Fashion",
+        "subheading": "Discover thoughtfully curated collections for men and women.",
+        "heading_color": "",
+        "subheading_color": "{{ settings.color_palette.foreground }}",
+        "text_color": "",
+        "corner_radius": 18,
+        "card_bg_color_1": "#f2ede6",
+        "card_bg_color_2": "#e7ddd0",
+        "shadow_color": "#00000026",
+        "button_radius": 8,
+        "button_bg_color": "#1a1a1a",
+        "button_text_color": "#ffffff",
+        "button_border_color": "#1a1a1a",
+        "button_bg_hover_color": "#333333",
+        "button_text_hover_color": "#ffffff"
+      }
+    },
+    "main_product_xeMimG": {
+      "type": "main-product",
+      "blocks": {
+        "vendor_wf7ta3": {
+          "type": "vendor",
+          "settings": {}
+        },
+        "title_NVRcPM": {
+          "type": "title",
+          "settings": {}
+        },
+        "price_LrkqBa": {
+          "type": "price",
+          "settings": {
+            "divider_after_price": true
+          }
+        },
+        "variant_picker_8Cn6NP": {
+          "type": "variant_picker",
+          "settings": {}
+        },
+        "inventory_status_HfncVL": {
+          "type": "inventory_status",
+          "settings": {}
+        },
+        "quantity_selector_3nBWrR": {
+          "type": "quantity_selector",
+          "settings": {}
+        },
+        "buy_buttons_UUkiUA": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_details_link": true,
+            "details_link_text": "View full product details"
+          }
+        },
+        "description_RxmqgN": {
+          "type": "description",
+          "settings": {}
+        },
+        "trust_badge_3RaTRV": {
+          "type": "trust_badge",
+          "settings": {
+            "icon": "truck",
+            "text": "Fast, Reliable. Trackable."
+          }
+        },
+        "trust_badge_UFTpbT": {
+          "type": "trust_badge",
+          "settings": {
+            "icon": "refresh",
+            "text": "No Hassle Replacements."
+          }
+        },
+        "trust_badge_cEx9jz": {
+          "type": "trust_badge",
+          "settings": {
+            "icon": "leaf",
+            "text": "Green Safe Packaging."
+          }
+        }
+      },
+      "block_order": [
+        "vendor_wf7ta3",
+        "title_NVRcPM",
+        "price_LrkqBa",
+        "variant_picker_8Cn6NP",
+        "inventory_status_HfncVL",
+        "quantity_selector_3nBWrR",
+        "buy_buttons_UUkiUA",
+        "description_RxmqgN",
+        "trust_badge_3RaTRV",
+        "trust_badge_UFTpbT",
+        "trust_badge_cEx9jz"
+      ],
+      "name": "Product Detail",
+      "settings": {
+        "featured_product": "cable-knit-sweater",
+        "column_gap": 56,
+        "sticky_info": true,
+        "image_aspect_ratio": "1/1",
+        "image_border_radius": 8,
+        "enable_image_zoom": true,
+        "show_sale_badge": false,
+        "show_label_badge": true,
+        "swatch_option_names": "Color, Colour",
+        "swatch_size": 30,
+        "swatch_border_radius": 50,
+        "swatch_border_color": "#dddddd",
+        "swatch_active_color": "#111111",
+        "divider_after_options": true,
+        "truncate_description": true,
+        "description_length": 30,
+        "show_inventory_status": true,
+        "low_stock_threshold": 5,
+        "stock_in_color": "#2f9e44",
+        "stock_low_color": "{{ settings.color_palette.foreground }}",
+        "stock_out_color": "#e03131",
+        "show_buy_now": true,
+        "background_color": "#ffffff",
+        "text_color": "#444444",
+        "heading_color": "#111111",
+        "title_font_size": 30,
+        "border_color": "#e8e8e8",
+        "accent_color": "#111111",
+        "price_color": "#111111",
+        "compare_price_color": "#d64545",
+        "sale_badge_color": "#d92b2b",
+        "label_badge_color": "#1a56db",
+        "pill_bg_color": "#ffffff",
+        "pill_text_color": "#111111",
+        "pill_active_bg": "#111111",
+        "pill_active_text_color": "#ffffff",
+        "add_to_cart_bg": "{{ settings.color_palette.foreground }}",
+        "add_to_cart_text_color": "#ffffff",
+        "buy_now_bg": "{{ settings.color_palette.foreground }}",
+        "buy_now_text_color": "{{ settings.color_palette.background }}",
+        "padding_top": 40,
+        "padding_bottom": 60
+      }
+    },
+    "collection_featured_list_APQbLR": {
+      "type": "collection-featured-list",
+      "blocks": {
+        "item_kDjGPb": {
+          "type": "item",
+          "settings": {
+            "collection": "activewear",
+            "custom_label": "",
+            "custom_url": ""
+          }
+        },
+        "item_yqB3Ch": {
+          "type": "item",
+          "settings": {
+            "collection": "mens-clothing",
+            "custom_label": "",
+            "custom_url": ""
+          }
+        },
+        "item_fcw7Cb": {
+          "type": "item",
+          "settings": {
+            "collection": "womens-clothing",
+            "custom_label": "",
+            "custom_url": ""
+          }
+        },
+        "item_8EFAzb": {
+          "type": "item",
+          "settings": {
+            "collection": "new-arrivals",
+            "custom_label": "",
+            "custom_url": ""
+          }
+        }
+      },
+      "block_order": [
+        "item_kDjGPb",
+        "item_yqB3Ch",
+        "item_fcw7Cb",
+        "item_8EFAzb"
+      ],
+      "name": "Collection Feature List",
+      "settings": {
+        "eyebrow": "Popular Collections",
+        "eyebrow_gap": 12,
+        "font_size_desktop": 50,
+        "font_size_mobile": 30,
+        "line_height": 1,
+        "font_weight": "600",
+        "font_style": "inherit",
+        "letter_spacing": 0,
+        "slide_distance": 20,
+        "transition_duration": 350,
+        "show_underline": false,
+        "underline_thickness": 2,
+        "img_placeholder_bg": "#e8e4df",
+        "show_numbers": false,
+        "show_arrow": true,
+        "show_dividers": true,
+        "animate_divider": true,
+        "align": "center",
+        "full_width": false,
+        "max_width": 900,
+        "item_padding": 12,
+        "section_bg": "#faf9f7",
+        "text_color": "#1a1a1a",
+        "text_hover_color": "#1a1a1a",
+        "eyebrow_color": "#1a1a1a",
+        "divider_color": "#d8d3cc",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "collection_grid_jdipwP": {
+      "type": "collection-grid",
+      "blocks": {
+        "large_tile_rJBcAW": {
+          "type": "large_tile",
+          "settings": {
+            "media_type": "video",
+            "video": "shopify://files/videos/7872848-uhd_4096_2160_25fps.mp4",
+            "video_autoplay": true,
+            "video_loop": true,
+            "video_muted": true,
+            "show_controls": false,
+            "title": "Women's Clothing",
+            "show_badge_dot": true,
+            "link": "shopify://collections/womens-clothing"
+          }
+        },
+        "tile_ydE3Ud": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify://shop_images/pexels-ai25studioai-7081100.jpg",
+            "title": "Active Wear",
+            "show_badge_dot": false,
+            "link": "shopify://collections/activewear"
+          }
+        },
+        "tile_RCncVQ": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify://shop_images/pexels-mart-production-9558897.jpg",
+            "title": "Men's Clothing",
+            "show_badge_dot": false,
+            "link": "shopify://collections/mens-clothing"
+          }
+        },
+        "tile_8abP8n": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify://shop_images/pexels-ai25studioai-5264900.jpg",
+            "title": "New Arrivals",
+            "show_badge_dot": false,
+            "link": "shopify://collections/new-arrivals"
+          }
+        }
+      },
+      "block_order": [
+        "large_tile_rJBcAW",
+        "tile_ydE3Ud",
+        "tile_RCncVQ",
+        "tile_8abP8n"
+      ],
+      "name": "Collection Bento Showcase",
+      "settings": {
+        "heading": "",
+        "full_width": true,
+        "grid_gap": 12,
+        "tile_border_radius": 12,
+        "grid_height_desktop": 500,
+        "mobile_tile_aspect_ratio": "4/3",
+        "enable_hover_zoom": true,
+        "overlay_color": "#000000",
+        "overlay_opacity": 70,
+        "title_color": "#ffffff",
+        "title_font_size": 19,
+        "title_font_weight": "700",
+        "badge_dot_color": "#3ecf4a",
+        "badge_dot_size": 8,
+        "background_color": "#f5f5f5",
+        "heading_color": "#111111",
+        "padding_top": 50,
+        "padding_bottom": 50
+      }
+    },
+    "countdown_product_showcase_TFEJn8": {
+      "type": "countdown-product-showcase",
+      "custom_css": [
+        ".cps__card {border: 1px solid #e8e8e8;}"
+      ],
+      "name": "Countdown Showcase",
+      "settings": {
+        "subtitle": "Grab Them Before They're Gone!",
+        "heading": "Top Fashion Deals",
+        "description": "",
+        "button_text": "",
+        "button_link": "",
+        "enable_countdown": true,
+        "countdown_end_date": "2026-12-31",
+        "countdown_end_time": "23:59",
+        "timezone_offset": "",
+        "expiry_message": "Offer Ended",
+        "show_days": true,
+        "show_hours": true,
+        "show_minutes": true,
+        "show_seconds": true,
+        "leading_zeros": true,
+        "products": [
+          "cable-knit-sweater",
+          "classic-cotton-t-shirt",
+          "active-leggings",
+          "cargo-pants"
+        ],
+        "mobile_products_per_view": 2,
+        "enable_badge": true,
+        "enable_quick_add": true,
+        "enable_wishlist": true,
+        "enable_rating": false,
+        "background_color": "{{ settings.color_palette.background }}",
+        "enable_overlay": true,
+        "overlay_color": "#000000",
+        "overlay_opacity": 30,
+        "heading_color": "#111111",
+        "text_color": "#555555",
+        "accent_color": "#111111",
+        "timer_bg_color": "#1a1a1a",
+        "timer_text_color": "#ffffff",
+        "timer_label_color": "#cccccc",
+        "timer_border_radius": 6,
+        "card_bg_color": "#ffffff",
+        "card_text_color": "#111111",
+        "card_border_radius": 10,
+        "padding_top": 60,
+        "padding_bottom": 60,
+        "padding_top_mobile": 30,
+        "padding_bottom_mobile": 30
+      }
+    },
+    "custom_review_section_jEnYjt": {
+      "type": "custom-review-section",
+      "blocks": {
+        "testimonial_VnjG8G": {
+          "type": "testimonial",
+          "settings": {
+            "testimonial": "\"They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.\"",
+            "author_name": "John Doe",
+            "author_title": "CEO",
+            "company": "Tech Innovations",
+            "rating": 5,
+            "avatar": "shopify://shop_images/a-product-has-the-title-classic-cotton-t-shirt-and-description-p-refresh-your-everyday-wardrobe-with-the-strong-classic-cotton-t-shirt-strong-a-timeless-essential-designed-to-deliver.png"
+          }
+        },
+        "testimonial_naWHTr": {
+          "type": "testimonial",
+          "settings": {
+            "testimonial": "They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.",
+            "author_name": "John Doe",
+            "author_title": "CEO",
+            "company": "Tech Innovations",
+            "rating": 5,
+            "avatar": "shopify://shop_images/a-product-has-the-title-premium-v-neck-tee-and-description-p-refresh-your-everyday-essentials-with-the-strong-premium-v-neck-tee-strong-designed-to-offer-the-perfect-combination-of-co_d2de4b6c-63e6-420e-a70f-a0ba6efcb43c.png"
+          }
+        },
+        "testimonial_QJ89Ug": {
+          "type": "testimonial",
+          "settings": {
+            "testimonial": "They brought clarity to complex problems, breaking down barriers and delivering innovative solutions.",
+            "author_name": "John Doe",
+            "author_title": "CEO",
+            "company": "Tech Innovations",
+            "rating": 5,
+            "avatar": "shopify://shop_images/mohamad-khosravi-yMpZJvTEspk-unsplash_1.png"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_VnjG8G",
+        "testimonial_naWHTr",
+        "testimonial_QJ89Ug"
+      ],
+      "name": "Testimonials Carousel",
+      "settings": {
+        "background_image": "shopify://shop_images/ChatGPT_Image_Jul_30_2026_11_48_30_AM.png",
+        "heading": "What Our Clients Say",
+        "subheading": "Real stories from real people",
+        "autoplay": true,
+        "speed": 4,
+        "testimonial_text_size": 22,
+        "testimonial_text_color": "{{ settings.color_palette.foreground }}"
+      }
+    },
+    "brand_story_slider_Knke4L": {
+      "type": "brand-story-slider",
+      "blocks": {
+        "slide_gjhxQT": {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "About Us",
+            "heading": "Crafting Style for Every Story",
+            "body": "<p>We believe fashion is more than clothing—it's a reflection of confidence, personality, and individuality. Our collections are thoughtfully curated to combine timeless elegance with modern trends, ensuring every piece delivers exceptional comfort, quality, and style. Whether you're dressing for everyday moments or special occasions, we're here to help you look and feel your best.</p>",
+            "button_text": "",
+            "button_link": ""
+          }
+        },
+        "slide_JCJn6Y": {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "What we do",
+            "heading": "Fashion Designed Around You",
+            "body": "<p>We create and curate premium apparel that blends contemporary design with lasting quality. From everyday essentials to statement pieces, our collections are crafted with attention to detail, superior fabrics, and modern silhouettes, making it easy to build a wardrobe you'll love.</p>",
+            "button_text": "",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_gjhxQT",
+        "slide_JCJn6Y"
+      ],
+      "name": "Brand Story Slider",
+      "settings": {
+        "full_width": true,
+        "column_gap": 60,
+        "collage_height_desktop": 480,
+        "collage_height_mobile": 360,
+        "image_back": "shopify://shop_images/pexels-ahmadarikurniawan-14330642.jpg",
+        "image_front": "shopify://shop_images/pexels-ivan-s-7213614.jpg",
+        "back_card_tilt": -4,
+        "front_card_tilt": 5,
+        "card_border_color": "#ffffff",
+        "card_border_width": 4,
+        "card_border_radius": 4,
+        "background_color": "#f0f0f0",
+        "eyebrow_color": "#2f5fd6",
+        "heading_color": "#111111",
+        "body_color": "#444444",
+        "accent_color": "#2f5fd6",
+        "button_bg_color": "#111111",
+        "button_text_color": "#ffffff",
+        "nav_bg_color": "#ffffff",
+        "nav_icon_color": "#111111",
+        "padding_top": 70,
+        "padding_bottom": 70
+      }
+    },
+    "recently_viewed_products_PtYDXn": {
+      "type": "recently-viewed-products",
+      "name": "Recently Viewed Products",
+      "settings": {
+        "section_width": "page-width",
+        "heading": "Recently Viewed",
+        "max_products": 4,
+        "empty_text": "You haven't viewed any products yet."
+      }
+    }
+  },
+  "order": [
+    "slideshow_three_slide_design_fMyUrc",
+    "product_showcase_8XxdxF",
+    "collection_list_glass_effect_LdjmQb",
+    "video_with_image_WmgWi8",
+    "product_showcase_fEFY9n",
+    "project_showcase_JUFbLM",
+    "main_product_xeMimG",
+    "collection_featured_list_APQbLR",
+    "collection_grid_jdipwP",
+    "countdown_product_showcase_TFEJn8",
+    "custom_review_section_jEnYjt",
+    "brand_story_slider_Knke4L",
+    "recently_viewed_products_PtYDXn"
+  ]
+}
