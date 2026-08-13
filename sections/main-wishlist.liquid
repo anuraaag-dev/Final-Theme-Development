@@ -44,7 +44,7 @@
     const updateCount = () => {
       const total = grid.children.length;
       countLabel.hidden = total === 0;
-      countLabel.textContent = total === 1 ? '1 item saved' : `${total} items saved`;
+      countLabel.textContent = total;
     };
 
     const finishLoading = (hasSavedHandles) => {
