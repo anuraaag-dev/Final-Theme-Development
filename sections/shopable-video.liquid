@@ -1,0 +1,804 @@
+{% comment %}
+  ============================================================
+  Shoppable Video Reels — Infinite Loop
+  Clone-buffer technique:
+    [clone of last N] [real slides] [clone of first N]
+  When the track reaches a clone it silently jumps to the
+  real counterpart (no transition), giving a seamless loop.
+  ============================================================
+{% endcomment %}
+
+<style>
+  /* ─── Section ─────────────────────────────────────────── */
+  #vr-{{ section.id }} {
+    background: {{ section.settings.background_color }};
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    overflow: hidden;
+  }
+
+  #vr-{{ section.id }} .vr-heading {
+    text-align: center;
+    font-size: clamp(18px, 2.5vw, 28px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: {{ section.settings.heading_color }};
+    margin: 0 0 32px;
+    padding: 0 20px;
+  }
+
+  /* ─── Track wrapper ───────────────────────────────────── */
+  #vr-{{ section.id }} .vr-track-wrap {
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+  }
+  #vr-{{ section.id }} .vr-track-wrap:active { cursor: grabbing; }
+
+  /* ─── Track ───────────────────────────────────────────── */
+  #vr-{{ section.id }} .vr-track {
+    display: flex;
+    align-items: center;
+    will-change: transform;
+    padding: 20px 0 28px;
+    /* transition applied by JS so clones can jump without animation */
+  }
+
+  /* ─── Slide ───────────────────────────────────────────── */
+  #vr-{{ section.id }} .vr-slide {
+    flex-shrink: 0;
+    width: {{ section.settings.slide_width }}px;
+    margin: 0 {{ section.settings.slide_gap }}px;
+    transition: transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94),
+                opacity   0.45s ease;
+    transform: scale(0.88);
+    opacity: 0.55;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #vr-{{ section.id }} .vr-slide.is-active {
+    transform: scale(1);
+    opacity: 1;
+    z-index: 2;
+  }
+
+  /* ─── Video wrap ──────────────────────────────────────── */
+  #vr-{{ section.id }} .vr-video-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: {{ section.settings.border_radius }}px;
+    overflow: hidden;
+    background: #111;
+    aspect-ratio: 9 / 16;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    transition: box-shadow 0.45s ease;
+  }
+  #vr-{{ section.id }} .vr-slide.is-active .vr-video-wrap {
+    box-shadow: 0 20px 60px rgba(0,0,0,0.32);
+  }
+
+  #vr-{{ section.id }} .vr-video-wrap video,
+  #vr-{{ section.id }} .vr-video-wrap svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ─── Play overlay (inactive) ─────────────────────────── */
+  #vr-{{ section.id }} .vr-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.08);
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  #vr-{{ section.id }} .vr-slide.is-active .vr-play-overlay { opacity: 0; }
+  #vr-{{ section.id }} .vr-play-overlay svg {
+    position: static;
+    width: 40px;
+    height: 40px;
+    fill: rgba(255,255,255,0.7);
+    stroke: none;
+  }
+
+  /* ─── Sound toggle ────────────────────────────────────── */
+  #vr-{{ section.id }} .vr-sound-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.45);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #vr-{{ section.id }} .vr-slide.is-active .vr-sound-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #vr-{{ section.id }} .vr-sound-btn:hover { background: rgba(0,0,0,0.7); }
+  #vr-{{ section.id }} .vr-sound-btn svg {
+    position: static;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .vr-icon-muted { display: none; }
+  .is-muted .vr-icon-muted { display: block; }
+  .is-muted .vr-icon-sound { display: none; }
+
+  /* ─── Product card ────────────────────────────────────── */
+  #vr-{{ section.id }} .vr-product-card {
+    width: 100%;
+    margin-top: 14px;
+    background: {{ section.settings.card_bg }};
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.35s ease 0.1s, transform 0.35s ease 0.1s;
+    pointer-events: none;
+    min-height: 60px;
+  }
+  #vr-{{ section.id }} .vr-slide.is-active .vr-product-card {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  #vr-{{ section.id }} .vr-product-card__img {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #eee;
+  }
+  #vr-{{ section.id }} .vr-product-card__info {
+    flex: 1;
+    min-width: 0;
+  }
+  #vr-{{ section.id }} .vr-product-card__vendor {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: {{ section.settings.card_text_muted }};
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #vr-{{ section.id }} .vr-product-card__title {
+    font-size: 13px;
+    font-weight: 500;
+    color: {{ section.settings.card_text_color }};
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #vr-{{ section.id }} .vr-product-card__price {
+    font-size: 12px;
+    color: {{ section.settings.card_text_muted }};
+    margin: 0;
+  }
+  #vr-{{ section.id }} .vr-product-card__btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: {{ section.settings.card_btn_bg }};
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+  }
+  #vr-{{ section.id }} .vr-product-card__btn:hover {
+    background: {{ section.settings.card_btn_hover }};
+    transform: scale(1.08);
+  }
+  #vr-{{ section.id }} .vr-product-card__btn svg {
+    position: static;
+    width: 15px;
+    height: 15px;
+    stroke: {{ section.settings.card_btn_icon }};
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ─── Nav ─────────────────────────────────────────────── */
+  #vr-{{ section.id }} .vr-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  #vr-{{ section.id }} .vr-nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid {{ section.settings.nav_border }};
+    background: {{ section.settings.nav_bg }};
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  #vr-{{ section.id }} .vr-nav-btn:hover {
+    background: {{ section.settings.nav_hover_bg }};
+    border-color: {{ section.settings.nav_hover_border }};
+  }
+  #vr-{{ section.id }} .vr-nav-btn svg {
+    position: static;
+    width: 16px;
+    height: 16px;
+    stroke: {{ section.settings.nav_icon_color }};
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ─── Dots ────────────────────────────────────────────── */
+  #vr-{{ section.id }} .vr-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  #vr-{{ section.id }} .vr-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: {{ section.settings.nav_border }};
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  #vr-{{ section.id }} .vr-dot.is-active {
+    background: {{ section.settings.nav_icon_color }};
+    transform: scale(1.4);
+  }
+
+  /* ─── Mobile ──────────────────────────────────────────── */
+  @media (max-width: 749px) {
+    #vr-{{ section.id }} .vr-slide {
+      width: {{ section.settings.slide_width | times: 0.72 | round }}px;
+    }
+  }
+</style>
+
+<section id="vr-{{ section.id }}" data-section-id="{{ section.id }}">
+
+  {%- if section.settings.heading != blank -%}
+    <h2 class="vr-heading">{{ section.settings.heading }}</h2>
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+
+    <div class="vr-track-wrap">
+      {%- comment -%}
+        JS will inject clone slides here via the DOM.
+        We render real slides only — clones are built in JS
+        so we don't duplicate Liquid/product data.
+      {%- endcomment -%}
+      <div class="vr-track" id="vr-track-{{ section.id }}">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'reel' -%}
+            {%- assign product = block.settings.featured_product -%}
+            <div class="vr-slide" data-real-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+
+              <div class="vr-video-wrap">
+                {%- if block.settings.video != blank -%}
+                  {{ block.settings.video | video_tag: autoplay: false, loop: true, muted: true, controls: false, playsinline: true, preload: 'none', image_size: '600x' }}
+                {%- else -%}
+                  {{ 'product-apparel-3' | placeholder_svg_tag }}
+                {%- endif -%}
+
+                <div class="vr-play-overlay" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+                </div>
+
+                <button class="vr-sound-btn is-muted" aria-label="Toggle sound" data-sound-toggle>
+                  <svg class="vr-icon-sound" viewBox="0 0 24 24">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  </svg>
+                  <svg class="vr-icon-muted" viewBox="0 0 24 24">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                    <line x1="23" y1="9" x2="17" y2="15"/>
+                    <line x1="17" y1="9" x2="23" y2="15"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="vr-product-card">
+                {%- if product != blank -%}
+                  {%- if product.featured_image != blank -%}
+                    {{ product.featured_image | image_url: width: 100 | image_tag: class: 'vr-product-card__img', alt: product.title, loading: 'lazy' }}
+                  {%- else -%}
+                    <div class="vr-product-card__img"></div>
+                  {%- endif -%}
+                  <div class="vr-product-card__info">
+                    {%- if product.vendor != blank -%}<p class="vr-product-card__vendor">{{ product.vendor }}</p>{%- endif -%}
+                    <p class="vr-product-card__title">{{ product.title }}</p>
+                    <p class="vr-product-card__price">{{ product.price | money }}</p>
+                  </div>
+                  <a href="{{ product.url }}" class="vr-product-card__btn" aria-label="View {{ product.title }}">
+                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                  </a>
+                {%- else -%}
+                  <div class="vr-product-card__info">
+                    <p class="vr-product-card__title">Assign a product</p>
+                    <p class="vr-product-card__price">—</p>
+                  </div>
+                {%- endif -%}
+              </div>
+
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <div class="vr-nav">
+      <button class="vr-nav-btn" id="vr-prev-{{ section.id }}" aria-label="Previous">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="vr-nav-btn" id="vr-next-{{ section.id }}" aria-label="Next">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <div class="vr-dots" id="vr-dots-{{ section.id }}">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'reel' -%}
+          <button class="vr-dot" data-dot="{{ forloop.index0 }}" aria-label="Slide {{ forloop.index }}"></button>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+  {%- else -%}
+    {%- if request.design_mode -%}
+      <p style="text-align:center;padding:40px;color:#aaa;font-size:14px;">Add reel blocks to populate this section.</p>
+    {%- endif -%}
+  {%- endif -%}
+
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var SECTION_ID = {{ section.id | json }};
+  var GAP        = {{ section.settings.slide_gap }};
+
+  var section  = document.getElementById('vr-' + SECTION_ID);
+  if (!section) return;
+
+  var track    = document.getElementById('vr-track-' + SECTION_ID);
+  var dotsWrap = document.getElementById('vr-dots-' + SECTION_ID);
+  var prevBtn  = document.getElementById('vr-prev-' + SECTION_ID);
+  var nextBtn  = document.getElementById('vr-next-' + SECTION_ID);
+
+  /* ── 1. Collect real slides ──────────────────────────── */
+  var realSlides = Array.from(track.querySelectorAll('.vr-slide[data-real-index]'));
+  var total      = realSlides.length;
+  if (total === 0) return;
+
+  /* How many clones to buffer on each side.
+     Use enough so the carousel always looks full. */
+  var CLONE_COUNT = Math.min(total, 4);
+
+  /* ── 2. Build clone nodes ────────────────────────────── */
+  function makeClones(sourceSlides, count, atEnd) {
+    /* sourceSlides: array to pick from
+       count: how many clones
+       atEnd: if true append, else prepend */
+    var clones = [];
+    for (var i = 0; i < count; i++) {
+      var src   = atEnd
+        ? sourceSlides[i % total]               /* first slides → append */
+        : sourceSlides[total - 1 - (i % total)]; /* last slides → prepend (reversed) */
+      var clone = src.cloneNode(true);
+      clone.removeAttribute('data-real-index');
+      clone.classList.remove('is-active');
+      clone.setAttribute('data-clone', atEnd ? 'end' : 'start');
+      /* strip shopify-attributes to avoid conflicts */
+      clone.removeAttribute('data-shopify-editor-block');
+      clones.push(clone);
+    }
+    return atEnd ? clones : clones.reverse();
+  }
+
+  var prependClones = makeClones(realSlides, CLONE_COUNT, false); /* clones of last N real slides */
+  var appendClones  = makeClones(realSlides, CLONE_COUNT, true);  /* clones of first N real slides */
+
+  prependClones.forEach(function (c) { track.insertBefore(c, track.firstChild); });
+  appendClones.forEach(function (c)  { track.appendChild(c); });
+
+  /* ── 3. All slides (clones + real + clones) ──────────── */
+  var allSlides = Array.from(track.querySelectorAll('.vr-slide'));
+  /* The real slide at index 0 now sits at position CLONE_COUNT */
+  var currentPos = CLONE_COUNT; /* visual position in allSlides array */
+
+  /* ── 4. Geometry helpers ─────────────────────────────── */
+  function slideWidth() {
+    return allSlides[0].offsetWidth + GAP * 2;
+  }
+
+  function wrapWidth() {
+    return section.querySelector('.vr-track-wrap').offsetWidth;
+  }
+
+  function offsetForPos(pos) {
+    var sw = slideWidth();
+    var ww = wrapWidth();
+    return (ww / 2) - (pos * sw) - (sw / 2);
+  }
+
+  /* ── 5. Apply position & active state ───────────────── */
+  function applyPos(animate) {
+    track.style.transition = animate
+      ? 'transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94)'
+      : 'none';
+    track.style.transform = 'translateX(' + offsetForPos(currentPos) + 'px)';
+
+    /* active class on all slides */
+    allSlides.forEach(function (s, i) {
+      s.classList.toggle('is-active', i === currentPos);
+    });
+
+    /* dots — map currentPos to real index */
+    var realIndex = currentPos - CLONE_COUNT;
+    /* wrap real index for dot highlight */
+    var dotIndex  = ((realIndex % total) + total) % total;
+    var dots = Array.from(dotsWrap.querySelectorAll('.vr-dot'));
+    dots.forEach(function (d, i) {
+      d.classList.toggle('is-active', i === dotIndex);
+    });
+
+    /* video play/pause across ALL slides (real + clones) */
+    allSlides.forEach(function (s, i) {
+      var video = s.querySelector('video');
+      if (!video) return;
+      if (i === currentPos) {
+        video.muted = true; /* always start muted for autoplay policy */
+        video.play().catch(function () {});
+      } else {
+        video.pause();
+        video.currentTime = 0;
+        /* reset sound icon on inactive slides */
+        var btn = s.querySelector('.vr-sound-btn');
+        if (btn) {
+          btn.classList.add('is-muted');
+          video.muted = true;
+        }
+      }
+    });
+  }
+
+  /* ── 6. Infinite jump (after transition ends) ────────── */
+  track.addEventListener('transitionend', function () {
+    var minPos = CLONE_COUNT;
+    var maxPos = CLONE_COUNT + total - 1;
+
+    if (currentPos < minPos) {
+      /* jumped into prepend-clone territory → snap to real counterpart at the end */
+      currentPos = currentPos + total;
+      applyPos(false);
+    } else if (currentPos > maxPos) {
+      /* jumped into append-clone territory → snap to real counterpart at the start */
+      currentPos = currentPos - total;
+      applyPos(false);
+    }
+  });
+
+  /* ── 7. Navigate ─────────────────────────────────────── */
+  function goTo(pos, animate) {
+    currentPos = pos;
+    applyPos(animate !== false);
+  }
+
+  prevBtn && prevBtn.addEventListener('click', function () { goTo(currentPos - 1, true); });
+  nextBtn && nextBtn.addEventListener('click', function () { goTo(currentPos + 1, true); });
+
+  /* dots navigate to real slide */
+  dotsWrap.addEventListener('click', function (e) {
+    var dot = e.target.closest('.vr-dot');
+    if (!dot) return;
+    var realIdx = parseInt(dot.dataset.dot, 10);
+    goTo(CLONE_COUNT + realIdx, true);
+  });
+
+  /* click non-active slide */
+  track.addEventListener('click', function (e) {
+    var slide = e.target.closest('.vr-slide');
+    if (!slide) return;
+    var idx = allSlides.indexOf(slide);
+    if (idx !== -1 && idx !== currentPos) goTo(idx, true);
+  });
+
+  /* ── 8. Sound toggle ─────────────────────────────────── */
+  section.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-sound-toggle]');
+    if (!btn) return;
+    var slide = btn.closest('.vr-slide');
+    var video = slide && slide.querySelector('video');
+    if (!video) return;
+    video.muted = !video.muted;
+    btn.classList.toggle('is-muted', video.muted);
+  });
+
+  /* ── 9. Drag / swipe ─────────────────────────────────── */
+  var wrap       = section.querySelector('.vr-track-wrap');
+  var dragging   = false;
+  var dragStartX = 0;
+  var dragDelta  = 0;
+
+  function onDragStart(x) {
+    dragging   = true;
+    dragStartX = x;
+    dragDelta  = 0;
+    track.style.transition = 'none';
+  }
+  function onDragMove(x) {
+    if (!dragging) return;
+    dragDelta = x - dragStartX;
+    track.style.transform = 'translateX(' + (offsetForPos(currentPos) + dragDelta) + 'px)';
+  }
+  function onDragEnd() {
+    if (!dragging) return;
+    dragging = false;
+    var threshold = slideWidth() * 0.22;
+    if      (dragDelta < -threshold) goTo(currentPos + 1, true);
+    else if (dragDelta >  threshold) goTo(currentPos - 1, true);
+    else                              goTo(currentPos,     true);
+  }
+
+  wrap.addEventListener('mousedown',   function (e) { onDragStart(e.clientX); });
+  window.addEventListener('mousemove', function (e) { onDragMove(e.clientX); });
+  window.addEventListener('mouseup',   onDragEnd);
+  wrap.addEventListener('touchstart',  function (e) { onDragStart(e.touches[0].clientX); }, { passive: true });
+  wrap.addEventListener('touchmove',   function (e) { onDragMove(e.touches[0].clientX);  }, { passive: true });
+  wrap.addEventListener('touchend',    onDragEnd);
+
+  /* ── 10. Keyboard ────────────────────────────────────── */
+  section.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft')  goTo(currentPos - 1, true);
+    if (e.key === 'ArrowRight') goTo(currentPos + 1, true);
+  });
+
+  /* ── 11. Resize ──────────────────────────────────────── */
+  window.addEventListener('resize', function () { applyPos(false); });
+
+  /* ── 12. Init ────────────────────────────────────────── */
+  applyPos(false);
+
+}());
+</script>
+
+{% schema %}
+{
+  "name": "True Infinte Video Reels",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Best Sellers in Motion"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading colour",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Slides"
+    },
+    {
+      "type": "range",
+      "id": "slide_width",
+      "label": "Slide width (px)",
+      "min": 160,
+      "max": 380,
+      "step": 10,
+      "default": 240
+    },
+    {
+      "type": "range",
+      "id": "slide_gap",
+      "label": "Gap between slides (px)",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Video corner radius (px)",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Product card"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card background",
+      "default": "#f7f7f7"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card text",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "card_text_muted",
+      "label": "Card muted text",
+      "default": "#888888"
+    },
+    {
+      "type": "color",
+      "id": "card_btn_bg",
+      "label": "Card button background",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "card_btn_hover",
+      "label": "Card button hover",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "card_btn_icon",
+      "label": "Card button icon",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "color",
+      "id": "nav_bg",
+      "label": "Button background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "nav_border",
+      "label": "Button border / dot colour",
+      "default": "#dddddd"
+    },
+    {
+      "type": "color",
+      "id": "nav_hover_bg",
+      "label": "Button hover background",
+      "default": "#f2f2f2"
+    },
+    {
+      "type": "color",
+      "id": "nav_hover_border",
+      "label": "Button hover border",
+      "default": "#aaaaaa"
+    },
+    {
+      "type": "color",
+      "id": "nav_icon_color",
+      "label": "Button icon / active dot",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top (px)",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 52
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom (px)",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 52
+    }
+  ],
+  "blocks": [
+    {
+      "type": "reel",
+      "name": "Reel",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video"
+        },
+        {
+          "type": "product",
+          "id": "featured_product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video Reels",
+      "blocks": [
+        { "type": "reel" },
+        { "type": "reel" },
+        { "type": "reel" },
+        { "type": "reel" },
+        { "type": "reel" },
+        { "type": "reel" }
+      ]
+    }
+  ],
+  "max_blocks": 12
+}
+{% endschema %}
