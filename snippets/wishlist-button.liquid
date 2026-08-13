@@ -9,7 +9,7 @@
   data-wishlist-button
   data-product-handle="{{ product.handle }}"
   aria-pressed="false"
-  aria-label="{{ 'products.product.add_to_wishlist' | t | default: 'Add to wishlist' }}"
+  aria-label="{{ 'products.product.add_to_wishlist' | default: 'Add to wishlist' }}"
 >
   {% render 'icon-wishlist' %}
 </button>

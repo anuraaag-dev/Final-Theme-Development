@@ -1,0 +1,76 @@
+<div class="wishlist-page-wrapper" data-wishlist-page style="--wishlist-columns: {{ section.settings.columns }}">
+  <h1 class="wishlist-page-title">{{ section.settings.heading }}</h1>
+  <div class="wishlist-grid" data-wishlist-grid></div>
+  <p class="wishlist-empty-message" data-wishlist-empty hidden>{{ section.settings.empty_message }}</p>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const grid = document.querySelector('[data-wishlist-grid]');
+    const emptyMsg = document.querySelector('[data-wishlist-empty]');
+    const handles = window.Wishlist.getWishlist();
+
+    if (!handles.length) {
+      emptyMsg.hidden = false;
+      return;
+    }
+
+    for (const handle of handles) {
+      try {
+        const res = await fetch(`/products/${handle}?view=card`);
+        if (!res.ok) continue;
+        const html = await res.text();
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        grid.appendChild(wrapper.firstElementChild);
+      } catch (e) {
+        console.error('Wishlist fetch failed for', handle, e);
+      }
+    }
+  });
+</script>
+
+<style>
+  .wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--wishlist-columns, 4), 1fr);
+    gap: var(--grid-desktop-horizontal-spacing, 24px);
+  }
+
+  @media screen and (max-width: 749px) {
+    .wishlist-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Wishlist",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "My Wishlist"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Empty state message",
+      "default": "You haven't added anything yet."
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Products per row (desktop)",
+      "min": 2,
+      "max": 5,
+      "default": 4
+    }
+  ],
+  "presets": [
+    { "name": "Wishlist" }
+  ]
+}
+{% endschema %}
