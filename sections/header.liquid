@@ -1119,6 +1119,13 @@
         </li>
       {%- endif -%}
 
+      <li>
+        <a href="/pages/wishlist" class="header-wishlist-icon">
+          {% render 'icon-wishlist' %}
+          <span data-wishlist-count hidden>0</span>
+        </a>
+      </li>
+
       <li class="wt-header__panel__item">
         <a href="{{ routes.cart_url }}" class="wt-header__panel__link wt-icon" id="cart-icon-bubble">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
