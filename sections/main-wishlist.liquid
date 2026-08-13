@@ -47,10 +47,15 @@
       countLabel.textContent = total === 1 ? '1 item saved' : `${total} items saved`;
     };
 
-    const finishLoading = () => {
+    const finishLoading = (hasSavedHandles) => {
       skeleton.hidden = true;
+      const message = emptyState.querySelector('.wishlist-empty__message');
       if (grid.children.length) {
         grid.hidden = false;
+        emptyState.hidden = true;
+      } else if (hasSavedHandles) {
+        message.textContent = "We couldn't load your saved items. Try refreshing the page.";
+        emptyState.hidden = false;
       } else {
         emptyState.hidden = false;
       }
@@ -58,7 +63,7 @@
     };
 
     if (!handles.length) {
-      finishLoading();
+      finishLoading(false);
       return;
     }
 
@@ -93,7 +98,7 @@
       }
     }
 
-    finishLoading();
+    finishLoading(true);
 
     document.addEventListener('wishlist:updated', (e) => {
       const current = e.detail.handles;
@@ -207,10 +212,10 @@
 
   .wishlist-card__remove {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 28px;
-    height: 28px;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
