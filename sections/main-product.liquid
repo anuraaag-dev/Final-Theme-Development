@@ -165,10 +165,7 @@
                 {%- endif -%}
 
               {%- when 'title' -%}
-                <div>
                   <h1 class="mpd__title" {{ block.shopify_attributes }}>{{ product.title }}</h1>
-                  {% render 'wishlist-button', product: product %}
-                </div>  
               {%- when 'price' -%}
                 <div class="mpd__price-row" data-mpd-price-row {{ block.shopify_attributes }}>
                   <span class="mpd__price" data-mpd-price>{{ current_variant.price | money }}</span>
