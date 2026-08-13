@@ -1,9 +1,4 @@
-{% doc %}
-  A single row of the size guide table (e.g. "S", "M", "L"). Enter
-  measurements in inches — centimeters are calculated automatically and
-  shown when the shopper toggles to CM. Add one of these per size, inside
-  a "Size guide" block.
-{% enddoc %}
+
 
 {% liquid
   assign chest_cm = block.settings.chest | times: 2.54 | round: 1
