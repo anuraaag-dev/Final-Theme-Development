@@ -1,0 +1,40 @@
+{%- doc -%}
+  Renders a wishlist toggle button for a product.
+  Accepts: product (object, required)
+{%- enddoc -%}
+
+<button
+  type="button"
+  class="wishlist-button"
+  data-wishlist-button
+  data-product-handle="{{ product.handle }}"
+  aria-pressed="false"
+  aria-label="{{ 'products.product.add_to_wishlist' | t | default: 'Add to wishlist' }}"
+>
+  {% render 'icon-wishlist' %}
+</button>
+
+<style>
+  .wishlist-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: rgb(var(--color-foreground));
+  }
+
+  .wishlist-button .icon-wishlist-fill {
+    transition: fill-opacity 0.15s ease;
+  }
+
+  .wishlist-button.is-active .icon-wishlist-fill {
+    fill-opacity: 1;
+  }
+
+  .wishlist-button.is-active .icon-wishlist-outline {
+    opacity: 0;
+  }
+</style>

@@ -78,6 +78,7 @@
     view-event-payload="{{ product | standard_event_data: 'view', context: product_view_context | escape }}"
   {%- endunless -%}
 >
+  {% render 'wishlist-button', product: product %}
   <a
     id="{{ product_card_id | md5 }}"
     {% unless onboarding %}
@@ -87,7 +88,8 @@
     class="product-card__link"
     ref="productCardLink"
     aria-label="{{ product.title | escape }}"
-  ></a>
+  >
+  </a>
   <div
     class="
       product-card__content
