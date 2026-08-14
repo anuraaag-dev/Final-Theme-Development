@@ -1,10 +1,3 @@
-{% doc %}
-  Editorial "Size guide" trigger + popup. The measurements table is built
-  from "Size row" child blocks — add one per size (S, M, L...) in the
-  theme editor. Enter each measurement in inches on the row block;
-  centimeters are calculated automatically and shown via the IN / CM
-  toggle. An image can be used instead of, or alongside, the table.
-{% enddoc %}
 
 <size-guide-block class="size-guide-block{% if block.settings.alignment == 'center' %} size-guide-block--center{% elsif block.settings.alignment == 'right' %} size-guide-block--right{% endif %}">
   <button type="button" class="size-guide-block__trigger" data-size-guide-open>
@@ -45,20 +38,29 @@
       {% endif %}
 
       {% if block.blocks.size > 0 %}
-        <table class="size-guide-block__table">
-          <thead>
-            <tr>
-              <th scope="col">Size</th>
-              <th scope="col">Chest</th>
-              <th scope="col">Waist</th>
-              <th scope="col">Hip</th>
-              <th scope="col">Length</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% content_for 'blocks' %}
-          </tbody>
-        </table>
+        <div class="size-guide-block__table-wrap">
+          <table class="size-guide-block__table" data-size-guide-table data-unit="in">
+            <colgroup>
+              <col class="size-guide-block__col--size">
+              <col>
+              <col>
+              <col>
+              <col>
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">Size</th>
+                <th scope="col">Chest</th>
+                <th scope="col">Waist</th>
+                <th scope="col">Hip</th>
+                <th scope="col">Length</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% content_for 'blocks' %}
+            </tbody>
+          </table>
+        </div>
       {% endif %}
 
       {% if block.settings.how_to_measure != blank %}
@@ -196,30 +198,94 @@
     margin-bottom: var(--margin-md, 16px);
   }
 
-  /* Thin-line table: no cell borders except a hairline under each row,
-     no header fill — matches an editorial, low-chrome aesthetic */
+  /* Thin-line table: sticky header, zebra rows, right-aligned figures
+     with tabular numerals so columns line up cleanly when toggling units */
+  .size-guide-block__col--size {
+    width: 72px;
+  }
+
+  .size-guide-block__table-wrap {
+    margin-top: var(--margin-2xs, 4px);
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+    border-radius: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .size-guide-block__table {
     width: 100%;
+    min-width: 420px;
     border-collapse: collapse;
   }
 
   .size-guide-block__table th,
   .size-guide-block__table td {
-    text-align: left;
-    padding: var(--padding-2xs, 10px) var(--padding-3xs, 6px);
-    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+    padding: var(--padding-2xs, 12px) var(--padding-sm, 14px);
     font-size: var(--font-paragraph-small--size);
+    white-space: nowrap;
+  }
+
+  .size-guide-block__table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
 
   .size-guide-block__table thead th {
+    text-align: right;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-weight: var(--font-weight-normal, 400);
-    color: rgb(var(--color-foreground-rgb) / 0.6);
+    font-size: var(--font-paragraph-2xsmall--size, 0.75rem);
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    background: var(--color-background);
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    padding-top: var(--padding-sm, 14px);
+    padding-bottom: var(--padding-sm, 14px);
+  }
+
+  .size-guide-block__table thead th:first-child {
+    text-align: left;
+  }
+
+  .size-guide-block__table tbody tr {
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    transition: background-color 0.15s ease;
+  }
+
+  .size-guide-block__table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .size-guide-block__table tbody tr:nth-child(even) {
+    background: rgb(var(--color-foreground-rgb) / 0.025);
+  }
+
+  .size-guide-block__table tbody tr:hover {
+    background: rgb(var(--color-foreground-rgb) / 0.05);
   }
 
   .size-guide-block__table tbody th {
+    text-align: left;
     font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+  }
+
+  .size-guide-block__table tbody td {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--color-foreground-rgb) / 0.85);
+  }
+
+  .size-guide-block__table tbody td::after {
+    content: '"';
+    margin-left: 1px;
+    color: rgb(var(--color-foreground-rgb) / 0.4);
+  }
+
+  .size-guide-block__table[data-unit='cm'] tbody td::after {
+    content: ' cm';
   }
 
   .size-guide-block__how-to {
