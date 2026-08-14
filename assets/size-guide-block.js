@@ -5,6 +5,7 @@ class SizeGuideBlock extends HTMLElement {
     this.closeButton = this.querySelector('[data-size-guide-close]');
     this.unitButtons = this.querySelectorAll('[data-size-guide-unit]');
     this.valueCells = this.querySelectorAll('[data-size-guide-value]');
+    this.table = this.querySelector('[data-size-guide-table]');
 
     this.openButton?.addEventListener('click', () => this.open());
     this.closeButton?.addEventListener('click', () => this.close());
@@ -46,6 +47,8 @@ class SizeGuideBlock extends HTMLElement {
       const value = unit === 'cm' ? cell.dataset.cm : cell.dataset.in;
       cell.textContent = value || '—';
     });
+
+    if (this.table) this.table.dataset.unit = unit;
   }
 }
 
