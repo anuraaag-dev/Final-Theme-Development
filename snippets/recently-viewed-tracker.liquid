@@ -1,0 +1,29 @@
+{% comment %}
+  Snippet: Recently Viewed Tracker
+  Include this on the product template (e.g. templates/product.liquid or
+  sections/main-product.liquid) so a view gets recorded even if the
+  "Recently Viewed Products" section isn't present on the page.
+
+  Usage: {% render 'recently-viewed-tracker' %}
+{% endcomment %}
+
+{% if product %}
+<script>
+(function () {
+  var STORAGE_KEY = 'shopify_recently_viewed';
+  var MAX_STORED = 20;
+  var handle = {{ product.handle | json }};
+
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    var viewed = raw ? JSON.parse(raw) : [];
+    viewed = viewed.filter(function (h) { return h !== handle; });
+    viewed.unshift(handle);
+    if (viewed.length > MAX_STORED) viewed = viewed.slice(0, MAX_STORED);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(viewed));
+  } catch (e) {
+    // localStorage unavailable (private browsing, etc.) - fail silently
+  }
+})();
+</script>
+{% endif %}
