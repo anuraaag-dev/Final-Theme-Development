@@ -1,0 +1,377 @@
+{%- comment -%} Multi-Tier Rewards Progress Bar {%- endcomment -%}
+{%- liquid
+  assign fsb_tiers = ''
+  for i in (1..4)
+    assign fsb_enable_key = 'fsb_tier' | append: i | append: '_enable'
+    if settings[fsb_enable_key]
+      assign fsb_tiers = fsb_tiers | append: i | append: ','
+    endif
+  endfor
+  assign fsb_tier_indexes = fsb_tiers | split: ','
+
+  assign fsb_qualifying_cents = 0
+  for item in cart.items
+    assign fsb_is_gift = false
+    if item.properties['_fsb_tier'] != blank
+      assign fsb_is_gift = true
+    endif
+    unless fsb_is_gift
+      assign fsb_qualifying_cents = fsb_qualifying_cents | plus: item.line_price
+    endunless
+  endfor
+-%}
+
+{%- if fsb_tier_indexes.size > 0 -%}
+  {%- liquid
+    assign fsb_last_index = fsb_tier_indexes | last
+    assign fsb_max_key = 'fsb_tier' | append: fsb_last_index | append: '_threshold'
+    assign fsb_max_cents = settings[fsb_max_key] | times: 100
+
+    assign fsb_tier_count = fsb_tier_indexes.size
+    assign fsb_prev_threshold_cents = 0
+    assign fsb_prev_marker_pct = 0
+    assign fsb_fill_pct = 0
+    assign fsb_fill_found = false
+
+    for i in fsb_tier_indexes
+      assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold'
+      assign fsb_tier_cents = settings[fsb_threshold_key] | times: 100
+      assign fsb_marker_pct = forloop.index | times: 100.0 | divided_by: fsb_tier_count
+
+      if fsb_qualifying_cents < fsb_tier_cents and fsb_fill_found == false
+        assign fsb_segment_range_cents = fsb_tier_cents | minus: fsb_prev_threshold_cents
+        assign fsb_segment_progress_cents = fsb_qualifying_cents | minus: fsb_prev_threshold_cents
+        if fsb_segment_range_cents > 0
+          assign fsb_segment_pct = fsb_segment_progress_cents | times: 1.0 | divided_by: fsb_segment_range_cents
+        else
+          assign fsb_segment_pct = 1
+        endif
+       assign fsb_segment_span = fsb_marker_pct | minus: fsb_prev_marker_pct
+       assign fsb_segment_contribution = fsb_segment_span | times: fsb_segment_pct
+       assign fsb_fill_pct = fsb_prev_marker_pct | plus: fsb_segment_contribution
+       assign fsb_fill_found = true
+      endif
+
+      assign fsb_prev_threshold_cents = fsb_tier_cents
+      assign fsb_prev_marker_pct = fsb_marker_pct
+    endfor
+
+    if fsb_fill_found == false
+      assign fsb_fill_pct = 100
+    endif
+
+    if fsb_fill_pct > 100
+      assign fsb_fill_pct = 100
+    endif
+    if fsb_fill_pct < 0
+      assign fsb_fill_pct = 0
+    endif
+
+    assign fsb_next_index = nil
+    for i in fsb_tier_indexes
+      assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold'
+      assign fsb_tier_cents = settings[fsb_threshold_key] | times: 100
+      if fsb_qualifying_cents < fsb_tier_cents and fsb_next_index == nil
+        assign fsb_next_index = i
+      endif
+    endfor
+
+    assign fsb_unlocked_str = ''
+    for i in fsb_tier_indexes
+      assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold'
+      assign fsb_type_key = 'fsb_tier' | append: i | append: '_type'
+      assign fsb_label_key = 'fsb_tier' | append: i | append: '_label'
+      assign fsb_discount_key = 'fsb_tier' | append: i | append: '_discount_percent'
+      assign fsb_tier_cents = settings[fsb_threshold_key] | times: 100
+      if fsb_qualifying_cents >= fsb_tier_cents
+        if settings[fsb_type_key] == 'discount'
+          assign fsb_token = settings[fsb_discount_key] | append: '% off'
+        else
+          assign fsb_token = settings[fsb_label_key]
+        endif
+        assign fsb_unlocked_str = fsb_unlocked_str | append: fsb_token | append: '||'
+      endif
+    endfor
+    assign fsb_unlocked_tokens = fsb_unlocked_str | split: '||'
+
+    assign fsb_combined_message = ''
+    for token in fsb_unlocked_tokens
+      if forloop.first
+        assign fsb_combined_message = token
+      elsif forloop.last
+        assign fsb_combined_message = fsb_combined_message | append: ' and ' | append: token
+      else
+        assign fsb_combined_message = fsb_combined_message | append: ', ' | append: token
+      endif
+    endfor
+  -%}
+
+  <div
+    class="rewards-bar"
+    data-free-shipping-bar
+    data-max-cents="{{ fsb_max_cents }}"
+    style="
+      --fsb-dot-size: {{ settings.fsb_dot_size | default: 24 }}px;
+      --fsb-dot-icon-size: {{ settings.fsb_dot_icon_size | default: 55 }}%;
+      --fsb-dot-border-width: {{ settings.fsb_dot_border_width | default: 2 }}px;
+      --fsb-dot-border-color: {{ settings.fsb_dot_border_color | default: '#E5E5E5' }};
+      --fsb-dot-bg-color: {{ settings.fsb_dot_bg_color | default: '#FFFFFF' }};
+      --fsb-dot-active-border-color: {{ settings.fsb_dot_active_border_color | default: '#1F8A4C' }};
+      --fsb-dot-active-bg-color: {{ settings.fsb_dot_active_bg_color | default: '#FFFFFF' }};
+      --fsb-dot-hover-scale: {{ settings.fsb_dot_hover_scale | default: 110 | divided_by: 100.0 }};
+      --fsb-dot-transition-speed: {{ settings.fsb_dot_transition_speed | default: 250 }}ms;
+      --fsb-dot-spacing: {{ settings.fsb_dot_spacing | default: 0 }}px;
+      --fsb-width: {{ settings.fsb_bar_width | default: 90 }}%;
+      --fsb-height: {{ settings.fsb_bar_height | default: 6 }}px;
+      --fsb-track-color: {{ settings.fsb_track_color | default: '#E5E5E5' }};
+      --fsb-fill-color: {{ settings.fsb_fill_color | default: '#1F8A4C' }};
+      --fsb-text-color: {{ settings.fsb_text_color | default: '#000000' }};
+      --fsb-marker-font-size: {{ settings.fsb_marker_font_size | default: 11 }}px;
+      --fsb-message-font-size: {{ settings.fsb_message_font_size | default: 16 }}px;
+    "
+  >
+    <p class="rewards-bar__message" data-fsb-message>
+      {%- if fsb_next_index -%}
+        {%- assign fsb_next_threshold_key = 'fsb_tier' | append: fsb_next_index | append: '_threshold' -%}
+        {%- assign fsb_next_icon_key = 'fsb_tier' | append: fsb_next_index | append: '_icon' -%}
+        {%- assign fsb_next_label_key = 'fsb_tier' | append: fsb_next_index | append: '_label' -%}
+        {%- assign fsb_remaining = settings[fsb_next_threshold_key] | times: 100 | minus: fsb_qualifying_cents -%}
+        Add <strong>{{ fsb_remaining | money }}</strong> more to unlock
+        <strong>{{ settings[fsb_next_icon_key] }} {{ settings[fsb_next_label_key] }}</strong>
+      {%- elsif fsb_combined_message != blank -%}
+        <strong>🎉 {{ fsb_combined_message }} unlocked!</strong>
+      {%- else -%}
+        <strong>🎉 All rewards unlocked!</strong>
+      {%- endif -%}
+    </p>
+
+    {%- assign fsb_has_top_label = false -%}
+    {%- for i in fsb_tier_indexes -%}
+      {%- assign fsb_position_key = 'fsb_tier' | append: i | append: '_label_position' -%}
+      {%- if settings[fsb_position_key] == 'top' -%}
+        {%- assign fsb_has_top_label = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <div class="rewards-bar__track{% if fsb_has_top_label %} has-top-label{% endif %}" data-fsb-track>
+      <div class="rewards-bar__fill" data-fsb-fill style="width: {{ fsb_fill_pct }}%;"></div>
+
+      {%- if fsb_tier_indexes.size > 1 -%}
+        {%- assign fsb_tier_count = fsb_tier_indexes.size -%}
+        {%- assign fsb_label_max_width = 100.0 | divided_by: fsb_tier_count -%}
+        {%- for i in fsb_tier_indexes -%}
+          {%- liquid
+            assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold'
+            assign fsb_icon_key = 'fsb_tier' | append: i | append: '_icon'
+            assign fsb_label_key = 'fsb_tier' | append: i | append: '_label'
+            assign fsb_position_key = 'fsb_tier' | append: i | append: '_label_position'
+            assign fsb_tier_cents = settings[fsb_threshold_key] | times: 100
+            assign fsb_marker_pct = forloop.index | times: 100.0 | divided_by: fsb_tier_count
+            assign fsb_unlocked = false
+            if fsb_qualifying_cents >= fsb_tier_cents
+              assign fsb_unlocked = true
+            endif
+            assign fsb_edge_class = 'is-mid'
+            if forloop.first
+              assign fsb_edge_class = 'is-first'
+            elsif forloop.last
+              assign fsb_edge_class = 'is-last'
+            endif
+            assign fsb_pos_class = 'pos-' | append: settings[fsb_position_key] | default: 'pos-bottom'
+          -%}
+          <div
+            class="rewards-bar__marker{% if fsb_unlocked %} is-unlocked{% endif %}"
+            style="--fsb-marker-left: {{ fsb_marker_pct }}%;"
+            >
+            <div class="rewards-bar__marker-dot">
+                <span class="rewards-bar__marker-icon">{{ settings[fsb_icon_key] }}</span>
+            </div>
+            <span
+                class="rewards-bar__marker-label {{ fsb_edge_class }} {{ fsb_pos_class }}"
+                style="max-width: {{ fsb_label_max_width }}vw;"
+                title="{{ settings[fsb_label_key] }}"
+            >
+                {{ settings[fsb_label_key] }}
+            </span>
+            </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- for i in fsb_tier_indexes -%}
+      {%- liquid
+        assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold'
+        assign fsb_type_key = 'fsb_tier' | append: i | append: '_type'
+        assign fsb_icon_key = 'fsb_tier' | append: i | append: '_icon'
+        assign fsb_message_key = 'fsb_tier' | append: i | append: '_unlocked_message'
+        assign fsb_tier_cents = settings[fsb_threshold_key] | times: 100
+      -%}
+      {%- if fsb_qualifying_cents >= fsb_tier_cents and settings[fsb_type_key] == 'free_gift' -%}
+        <div class="rewards-bar__gift">
+          <span>{{ settings[fsb_icon_key] }} {{ settings[fsb_message_key] }}</span>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <style>
+    .rewards-bar { padding: 28px 0 36px; margin-bottom: 12px; color: var(--fsb-text-color); }
+    .rewards-bar__message {
+      font-size: var(--fsb-message-font-size, 16px);
+      margin: 0 0 24px;
+      text-align: center;
+    }
+    .rewards-bar__message strong { font-weight: 600; }
+    .rewards-bar__track {
+      position: relative;
+      width: var(--fsb-width);
+      height: var(--fsb-height);
+      background: var(--fsb-track-color);
+      border-radius: 999px;
+      overflow: visible;
+      margin-inline: auto;
+    }
+    .rewards-bar__fill {
+      height: 100%;
+      width: 0%;
+      background: var(--fsb-fill-color);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      overflow: hidden;
+    }
+    .rewards-bar__marker {
+    position: absolute;
+    top: 50%;
+    left: var(--fsb-marker-left, 50%);
+    transform: translate(-50%, -50%) scale(1);
+    width: calc(var(--fsb-dot-size) + var(--fsb-dot-spacing));
+    height: calc(var(--fsb-dot-size) + var(--fsb-dot-spacing));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    }
+
+    .rewards-bar__marker-dot {
+    position: relative;
+    width: var(--fsb-dot-size);
+    height: var(--fsb-dot-size);
+    border-radius: 50%;
+    background: var(--fsb-dot-bg-color);
+    border: var(--fsb-dot-border-width) solid var(--fsb-dot-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        border-color var(--fsb-dot-transition-speed) ease,
+        background-color var(--fsb-dot-transition-speed) ease,
+        transform var(--fsb-dot-transition-speed) ease;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    }
+
+    .rewards-bar__marker.is-unlocked .rewards-bar__marker-dot {
+    border-color: var(--fsb-dot-active-border-color);
+    background: var(--fsb-dot-active-bg-color);
+    }
+
+    .rewards-bar__marker:hover .rewards-bar__marker-dot {
+    transform: scale(var(--fsb-dot-hover-scale));
+    }
+
+    .rewards-bar__marker-icon {
+    font-size: var(--fsb-dot-icon-size);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    transform: scale(1);
+    transform-origin: center;
+    /* em-based sizing means the icon always scales proportionally
+        with --fsb-dot-icon-size regardless of the dot's own diameter,
+        preventing clipping or blur at any combination of settings. */
+    }
+    .rewards-bar__marker-label {
+      position: absolute;
+      font-size: var(--fsb-marker-font-size, 11px);
+      font-weight: 500;
+      color: var(--fsb-text-color);
+      opacity: 0.85;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+      z-index: 2;
+    }
+    .rewards-bar__is-gift-row [class*="quantity"],
+    .rewards-bar__is-gift-row quantity-selector {
+      display: none !important;
+    }
+    .rewards-bar__track.has-top-label {
+      margin-top: 34px;
+    }
+    .rewards-bar__marker-label.pos-top { bottom: calc(100% + 5px); }
+    .rewards-bar__marker-label.pos-bottom { top: calc(100% + 5px); }
+    .rewards-bar__marker-label.is-mid { left: 50%; transform: translateX(-50%); }
+    .rewards-bar__marker-label.is-first { left: 0; transform: none; text-align: left; }
+    .rewards-bar__marker-label.is-last { right: 0; left: auto; transform: none; text-align: right; }
+    @media screen and (max-width: 480px) {
+      .rewards-bar__marker-label { font-size: calc(var(--fsb-marker-font-size, 11px) - 2px); }
+    }
+    .rewards-bar__gift {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+      font-size: 1.2rem;
+    }
+  </style>
+  <script type="application/json" id="fsb-config-{{ section_id }}" data-fsb-config>
+    {
+    "giftTiers": [
+        {%- for i in fsb_tier_indexes -%}
+        {%- assign fsb_type_key = 'fsb_tier' | append: i | append: '_type' -%}
+        {%- if settings[fsb_type_key] == 'free_gift' -%}
+            {%- assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold' -%}
+            {%- assign fsb_gift_key = 'fsb_tier' | append: i | append: '_gift_product' -%}
+            {%- assign fsb_variant_id = settings[fsb_gift_key].selected_or_first_available_variant.id -%}
+            {%- if fsb_variant_id -%}
+            { "tier": {{ i }}, "thresholdCents": {{ settings[fsb_threshold_key] | times: 100 }}, "variantId": {{ fsb_variant_id | json }} },
+            {%- endif -%}
+        {%- endif -%}
+        {%- endfor -%}
+        null
+    ],
+    "giftTitles": [
+        {%- for i in fsb_tier_indexes -%}
+        {%- assign fsb_type_key = 'fsb_tier' | append: i | append: '_type' -%}
+        {%- if settings[fsb_type_key] == 'free_gift' -%}
+            {%- assign fsb_gift_key = 'fsb_tier' | append: i | append: '_gift_product' -%}
+            {%- if settings[fsb_gift_key] -%}
+            {{ settings[fsb_gift_key].title | json }},
+            {%- endif -%}
+        {%- endif -%}
+        {%- endfor -%}
+        null
+    ],
+    "discountTiers": [
+        {%- for i in fsb_tier_indexes -%}
+        {%- assign fsb_type_key = 'fsb_tier' | append: i | append: '_type' -%}
+        {%- assign fsb_code_key = 'fsb_tier' | append: i | append: '_discount_code' -%}
+        {%- if settings[fsb_type_key] == 'discount' and settings[fsb_code_key] != blank -%}
+            {%- assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold' -%}
+            { "tier": {{ i }}, "thresholdCents": {{ settings[fsb_threshold_key] | times: 100 }}, "code": {{ settings[fsb_code_key] | json }} },
+        {%- endif -%}
+        {%- endfor -%}
+        null
+    ],
+    "sectionId": {{ section_id | json }}
+    }
+   </script>
+ 
+{%- endif -%}
