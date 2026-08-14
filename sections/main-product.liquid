@@ -30,7 +30,7 @@
 ============================================================================
 {%- endcomment -%}
 
-{% comment %} Hello {% endcomment %}
+
 
 {%- liquid
   assign s = section.settings
@@ -39,6 +39,8 @@
   assign current_variant = product.selected_or_first_available_variant
   assign swatch_option_names = s.swatch_option_names | downcase | split: ','
 -%}
+
+
 
 <section
   id="MainProduct-{{ sec_id }}"
@@ -58,10 +60,10 @@
       <div class="mpd__gallery" data-mpd-gallery>
 
         <div class="mpd__main-image-wrap" data-mpd-main-wrap>
-          {% comment %} <button type="button" class="mpd__share-btn" data-mpd-share aria-label="Share this product">
+          <button type="button" class="mpd__share-btn" data-mpd-share aria-label="Share this product">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
             <span class="mpd__share-tooltip" data-mpd-share-tooltip>Link copied!</span>
-          </button> {% endcomment %}
+          </button>
 
           {%- assign mpd_label = blank -%}
           {%- if product.tags contains 'new' -%}

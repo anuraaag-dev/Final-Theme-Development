@@ -1,0 +1,401 @@
+
+<size-guide-block class="size-guide-block{% if block.settings.alignment == 'center' %} size-guide-block--center{% elsif block.settings.alignment == 'right' %} size-guide-block--right{% endif %}">
+  <button type="button" class="size-guide-block__trigger" data-size-guide-open>
+    {{ block.settings.trigger_label | default: 'Size guide' }}
+  </button>
+
+  <dialog class="size-guide-block__dialog" data-size-guide-dialog>
+    <div class="size-guide-block__header">
+      <p class="size-guide-block__title">{{ block.settings.heading | default: 'Size guide' }}</p>
+      <button
+        type="button"
+        class="size-guide-block__close"
+        data-size-guide-close
+        aria-label="{{ 'accessibility.close' | t | default: 'Close' }}"
+      >
+        <span class="svg-wrapper">{{ 'icon-close.svg' | inline_asset_content }}</span>
+      </button>
+    </div>
+
+    {% if block.blocks.size > 0 %}
+      <div class="size-guide-block__units" role="tablist" aria-label="Measurement unit">
+        <button type="button" class="size-guide-block__unit is-active" data-size-guide-unit="in" role="tab" aria-selected="true">
+          IN
+        </button>
+        <button type="button" class="size-guide-block__unit" data-size-guide-unit="cm" role="tab" aria-selected="false">
+          CM
+        </button>
+      </div>
+    {% endif %}
+
+    <div class="size-guide-block__content">
+      {% if block.settings.image != blank %}
+        {{
+          block.settings.image
+          | image_url: width: 1500
+          | image_tag: loading: 'lazy', alt: block.settings.image.alt, sizes: '(min-width: 750px) 700px, 100vw'
+        }}
+      {% endif %}
+
+      {% if block.blocks.size > 0 %}
+        <div class="size-guide-block__table-wrap">
+          <table class="size-guide-block__table" data-size-guide-table data-unit="in">
+            <colgroup>
+              <col class="size-guide-block__col--size">
+              <col>
+              <col>
+              <col>
+              <col>
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">Size</th>
+                <th scope="col">Chest</th>
+                <th scope="col">Waist</th>
+                <th scope="col">Hip</th>
+                <th scope="col">Length</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% content_for 'blocks' %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+      {% if block.settings.how_to_measure != blank %}
+        <details class="size-guide-block__how-to">
+          <summary>{{ block.settings.how_to_measure_label | default: 'How to measure' }}</summary>
+          <div class="rte">{{ block.settings.how_to_measure }}</div>
+        </details>
+      {% endif %}
+
+      {% if block.settings.image == blank and block.blocks.size == 0 %}
+        <p class="size-guide-block__placeholder">
+          Add "Size row" child blocks (one per size) or a size-chart image in the block settings to fill this popup.
+        </p>
+      {% endif %}
+    </div>
+  </dialog>
+</size-guide-block>
+
+<script src="{{ 'size-guide-block.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  /* ---- Trigger: quiet underlined text, not a boxed button ---- */
+  .size-guide-block {
+    display: flex;
+  }
+
+  .size-guide-block--center {
+    justify-content: center;
+  }
+
+  .size-guide-block--right {
+    justify-content: flex-end;
+  }
+
+  .size-guide-block__trigger {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: var(--font-paragraph-small--size);
+    letter-spacing: 0.02em;
+    text-underline-offset: 3px;
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--color-foreground-rgb) / 0.35);
+    color: rgb(var(--color-foreground-rgb));
+    transition: text-decoration-color 0.15s ease;
+  }
+
+  .size-guide-block__trigger:hover {
+    text-decoration-color: rgb(var(--color-foreground-rgb));
+  }
+
+  /* ---- Dialog: flat, hairline-bordered, no heavy shadow/radius ---- */
+  .size-guide-block__dialog {
+    margin: auto;
+    max-width: 480px;
+    width: calc(100% - var(--margin-lg, 32px) * 2);
+    max-height: calc(100dvh - var(--margin-lg, 32px) * 2);
+    border: none;
+    padding: 0;
+    border-radius: 2px;
+    background: var(--color-background);
+    box-shadow: 0 0 0 1px rgb(var(--color-foreground-rgb) / 0.08), var(--shadow-popover);
+    overflow: hidden;
+  }
+
+  .size-guide-block__dialog::backdrop {
+    background: rgb(0 0 0 / 40%);
+  }
+
+  .size-guide-block__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-md, 16px);
+    padding: var(--padding-md, 20px) var(--padding-lg, 24px);
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+  }
+
+  .size-guide-block__title {
+    margin: 0;
+    font-size: var(--font-paragraph-medium--size);
+    font-weight: var(--font-weight-normal, 400);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .size-guide-block__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--padding-2xs, 4px);
+    line-height: 0;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .size-guide-block__close:hover {
+    opacity: 1;
+  }
+
+  /* ---- Unit toggle: two quiet tabs, underline marks the active one ---- */
+  .size-guide-block__units {
+    display: flex;
+    gap: var(--gap-md, 20px);
+    padding: var(--padding-sm, 16px) var(--padding-lg, 24px) 0;
+  }
+
+  .size-guide-block__unit {
+    background: none;
+    border: none;
+    padding: 0 0 var(--padding-3xs, 6px);
+    font-size: var(--font-paragraph-small--size);
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    color: rgb(var(--color-foreground-rgb) / 0.45);
+    border-bottom: 1px solid transparent;
+  }
+
+  .size-guide-block__unit.is-active {
+    color: rgb(var(--color-foreground-rgb));
+    border-bottom-color: rgb(var(--color-foreground-rgb));
+  }
+
+  /* ---- Content ---- */
+  .size-guide-block__content {
+    padding: var(--padding-lg, 24px);
+    overflow-y: auto;
+    max-height: calc(100dvh - 200px);
+  }
+
+  .size-guide-block__content img {
+    width: 100%;
+    height: auto;
+    margin-bottom: var(--margin-md, 16px);
+  }
+
+  /* Thin-line table: sticky header, zebra rows, right-aligned figures
+     with tabular numerals so columns line up cleanly when toggling units */
+  .size-guide-block__col--size {
+    width: 72px;
+  }
+
+  .size-guide-block__table-wrap {
+    margin-top: var(--margin-2xs, 4px);
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+    border-radius: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .size-guide-block__table {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+  }
+
+  .size-guide-block__table th,
+  .size-guide-block__table td {
+    padding: var(--padding-2xs, 12px) var(--padding-sm, 14px);
+    font-size: var(--font-paragraph-small--size);
+    white-space: nowrap;
+  }
+
+  .size-guide-block__table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .size-guide-block__table thead th {
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: var(--font-weight-normal, 400);
+    font-size: var(--font-paragraph-2xsmall--size, 0.75rem);
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    background: var(--color-background);
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    padding-top: var(--padding-sm, 14px);
+    padding-bottom: var(--padding-sm, 14px);
+  }
+
+  .size-guide-block__table thead th:first-child {
+    text-align: left;
+  }
+
+  .size-guide-block__table tbody tr {
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    transition: background-color 0.15s ease;
+  }
+
+  .size-guide-block__table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .size-guide-block__table tbody tr:nth-child(even) {
+    background: rgb(var(--color-foreground-rgb) / 0.025);
+  }
+
+  .size-guide-block__table tbody tr:hover {
+    background: rgb(var(--color-foreground-rgb) / 0.05);
+  }
+
+  .size-guide-block__table tbody th {
+    text-align: left;
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+  }
+
+  .size-guide-block__table tbody td {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--color-foreground-rgb) / 0.85);
+  }
+
+  .size-guide-block__table tbody td::after {
+    content: '"';
+    margin-left: 1px;
+    color: rgb(var(--color-foreground-rgb) / 0.4);
+  }
+
+  .size-guide-block__table[data-unit='cm'] tbody td::after {
+    content: ' cm';
+  }
+
+  .size-guide-block__how-to {
+    margin-top: var(--margin-md, 20px);
+    padding-top: var(--padding-md, 16px);
+    border-top: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+  }
+
+  .size-guide-block__how-to summary {
+    cursor: pointer;
+    font-size: var(--font-paragraph-small--size);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .size-guide-block__how-to .rte {
+    margin-top: var(--margin-sm, 10px);
+    font-size: var(--font-paragraph-small--size);
+    color: rgb(var(--color-foreground-rgb) / 0.75);
+  }
+
+  .size-guide-block__placeholder {
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text, 0.6));
+  }
+
+  @media screen and (max-width: 749px) {
+    .size-guide-block__dialog {
+      width: 100%;
+      max-width: none;
+      max-height: 85dvh;
+      margin: auto auto 0;
+      border-radius: 2px 2px 0 0;
+      align-self: flex-end;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Size guide",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "size-guide-row"
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "trigger_label",
+      "label": "Trigger label",
+      "default": "Size guide"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Trigger alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Popup content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Popup heading",
+      "default": "Size guide"
+    },
+    {
+      "type": "paragraph",
+      "content": "Add \"Size row\" blocks below (one per size) to build the measurements table. Enter inches only — cm is calculated automatically."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Size chart image (optional)",
+      "info": "Shown above the table. Useful for a diagram of where to measure."
+    },
+    {
+      "type": "header",
+      "content": "How to measure"
+    },
+    {
+      "type": "text",
+      "id": "how_to_measure_label",
+      "label": "Section label",
+      "default": "How to measure"
+    },
+    {
+      "type": "richtext",
+      "id": "how_to_measure",
+      "label": "Instructions",
+      "info": "Optional. Shown as a collapsible section below the table."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Size guide",
+      "blocks": [
+        { "type": "size-guide-row" },
+        { "type": "size-guide-row" },
+        { "type": "size-guide-row" }
+      ]
+    }
+  ]
+}
+{% endschema %}

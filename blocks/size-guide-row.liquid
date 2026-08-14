@@ -1,0 +1,62 @@
+
+{% liquid
+  assign chest_cm = block.settings.chest | times: 2.54 | round: 1
+  assign waist_cm = block.settings.waist | times: 2.54 | round: 1
+  assign hip_cm = block.settings.hip | times: 2.54 | round: 1
+  assign length_cm = block.settings.length | times: 2.54 | round: 1
+%}
+<tr class="size-guide-block__row">
+  <th scope="row">{{ block.settings.size_label }}</th>
+  <td data-size-guide-value data-in="{{ block.settings.chest }}" data-cm="{{ chest_cm }}">
+    {{ block.settings.chest }}
+  </td>
+  <td data-size-guide-value data-in="{{ block.settings.waist }}" data-cm="{{ waist_cm }}">
+    {{ block.settings.waist }}
+  </td>
+  <td data-size-guide-value data-in="{{ block.settings.hip }}" data-cm="{{ hip_cm }}">
+    {{ block.settings.hip }}
+  </td>
+  <td data-size-guide-value data-in="{{ block.settings.length }}" data-cm="{{ length_cm }}">
+    {{ block.settings.length }}
+  </td>
+</tr>
+
+{% schema %}
+{
+  "name": "Size row",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "size_label",
+      "label": "Size",
+      "default": "M"
+    },
+    {
+      "type": "number",
+      "id": "chest",
+      "label": "Chest (in)"
+    },
+    {
+      "type": "number",
+      "id": "waist",
+      "label": "Waist (in)"
+    },
+    {
+      "type": "number",
+      "id": "hip",
+      "label": "Hip (in)"
+    },
+    {
+      "type": "number",
+      "id": "length",
+      "label": "Length (in)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Size row"
+    }
+  ]
+}
+{% endschema %}
