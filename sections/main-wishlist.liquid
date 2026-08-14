@@ -1,0 +1,370 @@
+<div class="wishlist-page" data-wishlist-page style="--wishlist-columns: {{ section.settings.columns }}; --wishlist-gap: {{ section.settings.gap }}px;">
+  <div class="wishlist-page__header">
+    <h1 class="wishlist-page__title">{{ section.settings.heading }}</h1>
+    <p class="wishlist-page__count" data-wishlist-count hidden></p>
+  </div>
+
+  <div class="wishlist-grid" data-wishlist-grid hidden></div>
+
+  <div class="wishlist-skeleton" data-wishlist-skeleton>
+    {% for i in (1..section.settings.columns) %}
+      <div class="wishlist-skeleton__card">
+        <div class="wishlist-skeleton__image"></div>
+        <div class="wishlist-skeleton__line" style="width: 70%;"></div>
+        <div class="wishlist-skeleton__line" style="width: 40%;"></div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="wishlist-empty" data-wishlist-empty hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" width="48" height="48" aria-hidden="true">
+      <path d="M12 21s-7.5-4.6-10-9.1C.4 8.5 2 4.5 6 4c2-.2 3.7.9 5 2.7C12.3 4.9 14 3.8 16 4c4 .5 5.6 4.5 4 7.9-2.5 4.5-10 9.1-10 9.1z"/>
+    </svg>
+    <p class="wishlist-empty__message">{{ section.settings.empty_message }}</p>
+    <a href="{{ section.settings.empty_link }}" class="wishlist-empty__cta">{{ section.settings.empty_cta_text }}</a>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const page = document.querySelector('[data-wishlist-page]');
+    const grid = document.querySelector('[data-wishlist-grid]');
+    const skeleton = document.querySelector('[data-wishlist-skeleton]');
+    const emptyState = document.querySelector('[data-wishlist-empty]');
+    const countLabel = document.querySelector('[data-wishlist-count]');
+    const handles = window.Wishlist.getWishlist();
+
+    const formatMoney = (cents) => {
+      const amount = (cents / 100).toFixed(2);
+      return window.Shopify?.currency?.active
+        ? `${amount} ${window.Shopify.currency.active}`
+        : `$${amount}`;
+    };
+
+    const updateCount = () => {
+      const total = grid.children.length;
+      countLabel.hidden = total === 0;
+      countLabel.textContent = total;
+    };
+
+    const finishLoading = (hasSavedHandles) => {
+      skeleton.hidden = true;
+      const message = emptyState.querySelector('.wishlist-empty__message');
+      if (grid.children.length) {
+        grid.hidden = false;
+        emptyState.hidden = true;
+      } else if (hasSavedHandles) {
+        message.textContent = "We couldn't load your saved items. Try refreshing the page.";
+        emptyState.hidden = false;
+      } else {
+        emptyState.hidden = false;
+      }
+      updateCount();
+    };
+
+    if (!handles.length) {
+      finishLoading(false);
+      return;
+    }
+
+    let index = 0;
+    for (const handle of handles) {
+      try {
+        const res = await fetch(`/products/${handle}.js`);
+        if (!res.ok) continue;
+        const product = await res.json();
+
+        const card = document.createElement('div');
+        card.className = 'wishlist-card';
+        card.style.setProperty('--i', index++);
+        card.setAttribute('data-wishlist-card', handle);
+        card.innerHTML = `
+          <a href="${product.url}" class="wishlist-card__link">
+            <span class="wishlist-card__image-wrap">
+              <img src="${product.featured_image}" alt="${product.title}" width="400" height="400" loading="lazy">
+            </span>
+            <span class="wishlist-card__title">${product.title}</span>
+            <span class="wishlist-card__price">${formatMoney(product.price)}</span>
+          </a>
+          <button type="button" data-wishlist-button data-product-handle="${handle}" class="wishlist-card__remove is-active" aria-pressed="true" aria-label="Remove from wishlist">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="40" height="40" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        `;
+        grid.appendChild(card);
+      } catch (e) {
+        console.error('Wishlist fetch failed for', handle, e);
+      }
+    }
+
+    finishLoading(true);
+
+    document.addEventListener('wishlist:updated', (e) => {
+      const current = e.detail.handles;
+      grid.querySelectorAll('[data-wishlist-card]').forEach((card) => {
+        const handle = card.getAttribute('data-wishlist-card');
+        if (!current.includes(handle)) {
+          card.classList.add('is-removing');
+          card.addEventListener('animationend', () => {
+            card.remove();
+            updateCount();
+            if (!grid.children.length) {
+              grid.hidden = true;
+              emptyState.hidden = false;
+            }
+          }, { once: true });
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .wishlist-page {
+    max-width: var(--page-width, 1200px);
+    margin: 0 auto;
+    padding: var(--spacing-2xl, 64px) var(--container-gutter, 24px);
+  }
+
+  .wishlist-page__header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl, 40px);
+  }
+
+  .wishlist-page__title {
+    font-family: var(--font-heading--family);
+    color: rgb(var(--color-foreground));
+    margin: 0;
+  }
+
+  .wishlist-page__count {
+    font-family: var(--font-body--family);
+    color: rgba(var(--color-foreground), 0.6);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+
+  .wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--wishlist-columns, 4), 1fr);
+    gap: var(--wishlist-gap, 24px);
+  }
+
+  @media screen and (max-width: 989px) {
+    .wishlist-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media screen and (max-width: 749px) {
+    .wishlist-grid, .wishlist-skeleton { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .wishlist-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    animation: wishlistCardIn 0.5s ease both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+
+  .wishlist-card.is-removing {
+    animation: wishlistCardOut 0.3s ease forwards;
+  }
+
+  .wishlist-card__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .wishlist-card__image-wrap {
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius, 8px);
+    border: 1px solid rgba(var(--color-foreground), 0.08);
+  }
+
+  .wishlist-card__image-wrap img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .wishlist-card:hover .wishlist-card__image-wrap img {
+    transform: scale(1.04);
+  }
+
+  .wishlist-card__title {
+    font-family: var(--font-body--family);
+    color: rgb(var(--color-foreground));
+    font-size: 0.95rem;
+  }
+
+  .wishlist-card__price {
+    font-family: var(--font-body--family);
+    color: rgba(var(--color-foreground), 0.7);
+    font-size: 0.875rem;
+  }
+
+  .wishlist-card__remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(var(--color-background));
+    border: 1px solid rgba(var(--color-foreground), 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    color: rgb(var(--color-foreground));
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .wishlist-card:hover .wishlist-card__remove,
+  .wishlist-card__remove:focus-visible {
+    opacity: 1;
+  }
+
+  .wishlist-card__remove:hover {
+    transform: scale(1.08);
+  }
+
+  .wishlist-skeleton {
+    display: grid;
+    grid-template-columns: repeat(var(--wishlist-columns, 4), 1fr);
+    gap: var(--wishlist-gap, 24px);
+  }
+
+  .wishlist-skeleton__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .wishlist-skeleton__image {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius, 8px);
+    background: rgba(var(--color-foreground), 0.06);
+    animation: wishlistPulse 1.4s ease-in-out infinite;
+  }
+
+  .wishlist-skeleton__line {
+    height: 12px;
+    border-radius: 4px;
+    background: rgba(var(--color-foreground), 0.06);
+    animation: wishlistPulse 1.4s ease-in-out infinite;
+  }
+
+  .wishlist-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding: var(--spacing-2xl, 64px) 0;
+    color: rgb(var(--color-foreground));
+  }
+
+  .wishlist-empty__message {
+    font-family: var(--font-body--family);
+    color: rgba(var(--color-foreground), 0.7);
+    margin: 0;
+  }
+
+  .wishlist-empty__cta {
+    font-family: var(--font-body--family);
+    color: rgb(var(--color-foreground));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @keyframes wishlistCardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes wishlistCardOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.92); }
+  }
+
+  @keyframes wishlistPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .wishlist-grid[hidden],
+    .wishlist-empty[hidden],
+    .wishlist-skeleton[hidden] {
+      display: none;
+    }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wishlist-card,
+    .wishlist-card.is-removing,
+    .wishlist-skeleton__image,
+    .wishlist-skeleton__line {
+      animation: none !important;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Wishlist",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "My wishlist"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Empty state message",
+      "default": "You haven't saved anything yet."
+    },
+    {
+      "type": "text",
+      "id": "empty_cta_text",
+      "label": "Empty state button label",
+      "default": "Continue shopping"
+    },
+    {
+      "type": "url",
+      "id": "empty_link",
+      "label": "Empty state button link"
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Products per row (desktop)",
+      "min": 2,
+      "max": 5,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between products",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    { "name": "Wishlist" }
+  ]
+}
+{% endschema %}

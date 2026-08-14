@@ -1119,6 +1119,13 @@
         </li>
       {%- endif -%}
 
+      <li class="wt-header__panel__item" >
+        <a href="/pages/wishlist" class="header-wishlist-icon wt-header__panel__link wt-icon">
+          {% render 'icon-wishlist' %}
+          <span class="header-wishlist-icon__count" data-wishlist-count hidden>0</span>
+        </a>
+      </li>
+
       <li class="wt-header__panel__item">
         <!-- CHANGED: added data-cart-type attribute so the script below can
              tell whether this theme uses a cart drawer or the full cart page.
@@ -1673,6 +1680,39 @@
     </div>
   </div>
 </aside>
+
+<style>
+.header-wishlist-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--color-foreground));
+}
+
+.header-wishlist-icon__count {
+  position: absolute;
+    top: 7px;
+    right: 4px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 500;
+    line-height: 1;
+    color: white;
+    background: black;
+    border: 2px solid rgb(var(--color-background));
+    border-radius: 20px;
+    aspect-ratio: 1 / 1;
+}
+
+.header-wishlist-icon__count[hidden] {
+  display: none;
+}
+
+</style>
 
 <script>
 (function () {
