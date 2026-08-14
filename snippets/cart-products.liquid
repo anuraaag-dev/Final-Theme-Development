@@ -330,6 +330,8 @@
                   role="cell"
                   headers="quantity"
                 >
+
+
                   {% # Here I want to pass some arguments to the quantity block so it knows which value should the input be set to. Though quantity block could be a snippet instead %}
                   {% assign can_update_quantity = item.instructions.can_update_quantity
                     | default: true, allow_false: true

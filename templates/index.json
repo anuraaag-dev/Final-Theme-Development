@@ -878,6 +878,75 @@
         "heading": "Recently Viewed",
         "max_products": 4,
         "empty_text": "You haven't viewed any products yet."
+    "shopable_video_X6CF9T": {
+      "type": "shopable-video",
+      "blocks": {
+        "reel_bLMNTi": {
+          "type": "reel",
+          "settings": {
+            "featured_product": ""
+          }
+        },
+        "reel_FgRFXx": {
+          "type": "reel",
+          "settings": {
+            "featured_product": ""
+          }
+        },
+        "reel_b7fjHU": {
+          "type": "reel",
+          "settings": {
+            "featured_product": ""
+          }
+        },
+        "reel_kyDHHM": {
+          "type": "reel",
+          "settings": {
+            "featured_product": ""
+          }
+        },
+        "reel_jJaaLU": {
+          "type": "reel",
+          "settings": {
+            "featured_product": ""
+          }
+        },
+        "reel_jPc8PK": {
+          "type": "reel",
+          "settings": {
+            "featured_product": ""
+          }
+        }
+      },
+      "block_order": [
+        "reel_bLMNTi",
+        "reel_FgRFXx",
+        "reel_b7fjHU",
+        "reel_kyDHHM",
+        "reel_jJaaLU",
+        "reel_jPc8PK"
+      ],
+      "name": "Video Reels",
+      "settings": {
+        "heading": "Best Sellers in Motion",
+        "heading_color": "#111111",
+        "slide_width": 240,
+        "slide_gap": 10,
+        "border_radius": 16,
+        "card_bg": "#f7f7f7",
+        "card_text_color": "#111111",
+        "card_text_muted": "#888888",
+        "card_btn_bg": "#111111",
+        "card_btn_hover": "#333333",
+        "card_btn_icon": "#ffffff",
+        "nav_bg": "#ffffff",
+        "nav_border": "#dddddd",
+        "nav_hover_bg": "#f2f2f2",
+        "nav_hover_border": "#aaaaaa",
+        "nav_icon_color": "#111111",
+        "background_color": "#ffffff",
+        "padding_top": 52,
+        "padding_bottom": 52
       }
     }
   },
@@ -895,5 +964,6 @@
     "custom_review_section_jEnYjt",
     "brand_story_slider_Knke4L",
     "recently_viewed_products_PtYDXn"
+    "shopable_video_X6CF9T"
   ]
 }
