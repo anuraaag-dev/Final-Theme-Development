@@ -9,23 +9,25 @@
   data-wishlist-button
   data-product-handle="{{ product.handle }}"
   aria-pressed="false"
-  aria-label="{{ 'products.product.add_to_wishlist' | default: 'Add to wishlist' }}"
 >
   {% render 'icon-wishlist' %}
-  
+  <span class="wishlist-button__label wishlist-button__label--add">{{ 'products.product.add_to_wishlist' | default: 'Add to wishlist' }}</span>
+  <span class="wishlist-button__label wishlist-button__label--remove">{{ 'products.product.remove_from_wishlist' | default: 'Remove from wishlist' }}</span>
 </button>
 
 <style>
   .wishlist-button {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.5rem;
     background: none;
-    border: 2px solid black;
+    border: 1px solid rgba(var(--color-foreground), 0.2);
     border-radius: 14px;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     color: rgb(var(--color-foreground));
+    font-family: var(--font-body--family);
+    font-size: 0.875rem;
   }
 
   .wishlist-button .icon-wishlist-fill {
@@ -38,5 +40,17 @@
 
   .wishlist-button.is-active .icon-wishlist-outline {
     opacity: 0;
+  }
+
+  .wishlist-button__label--remove {
+    display: none;
+  }
+
+  .wishlist-button.is-active .wishlist-button__label--add {
+    display: none;
+  }
+
+  .wishlist-button.is-active .wishlist-button__label--remove {
+    display: inline;
   }
 </style>
