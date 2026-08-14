@@ -367,6 +367,10 @@
             add_to_cart_text: add_to_cart_text
           %}
 
+          <span class="buy-buttons-block__wishlist" style="flex-shrink: 0; display: flex; align-items: center;">
+            {% render 'wishlist-button', product: product %}
+          </span>
+
           {% content_for 'block',
             type: 'accelerated-checkout',
             id: 'accelerated-checkout',
