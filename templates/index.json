@@ -870,14 +870,6 @@
         "padding_bottom": 70
       }
     },
-    "recently_viewed_products_PtYDXn": {
-      "type": "recently-viewed-products",
-      "name": "Recently Viewed Products",
-      "settings": {
-        "section_width": "page-width",
-        "heading": "Recently Viewed",
-        "max_products": 4,
-        "empty_text": "You haven't viewed any products yet."
     "shopable_video_X6CF9T": {
       "type": "shopable-video",
       "blocks": {
@@ -948,6 +940,16 @@
         "padding_top": 52,
         "padding_bottom": 52
       }
+    },
+    "recently_viewed_products_mzP4rX": {
+      "type": "recently-viewed-products",
+      "name": "Recently Viewed Products",
+      "settings": {
+        "section_width": "page-width",
+        "heading": "Recently Viewed",
+        "max_products": 4,
+        "empty_text": "You haven't viewed any products yet."
+      }
     }
   },
   "order": [
@@ -963,7 +965,7 @@
     "countdown_product_showcase_TFEJn8",
     "custom_review_section_jEnYjt",
     "brand_story_slider_Knke4L",
-    "recently_viewed_products_PtYDXn"
-    "shopable_video_X6CF9T"
+    "shopable_video_X6CF9T",
+    "recently_viewed_products_mzP4rX"
   ]
 }
