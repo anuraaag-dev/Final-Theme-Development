@@ -1,0 +1,358 @@
+{%- comment -%}
+  Store Locator section
+  - Renders SSR store cards from the "store_location" metaobject (source of truth,
+    read once into JS via data-attributes — no duplicate JSON payload).
+  - Emits schema.org JSON-LD for SEO.
+  - All interaction (search, filters, map, geolocation) is handled by
+    assets/store-locator.js, loaded via the theme's deferred script tags.
+{%- endcomment -%}
+
+{%- liquid
+  assign store_types = section.settings.store_type_filters | split: ','
+  assign printed_count = 0
+  assign json_ld_items = ''
+-%}
+
+<section
+  class="store-locator"
+  id="StoreLocator-{{ section.id }}"
+  data-store-locator
+  data-default-lat="{{ section.settings.default_lat }}"
+  data-default-lng="{{ section.settings.default_lng }}"
+  data-default-zoom="{{ section.settings.default_zoom }}"
+  style="--slr-map-height: {{ section.settings.map_height }}px; --slr-accent: {{ section.settings.accent_color }}; --slr-card-bg: {{ section.settings.card_background }}; --slr-border: {{ section.settings.border_color }}; --slr-radius: {{ section.settings.corner_radius }}px; --slr-marker-color: {{ section.settings.marker_color }}; --slr-directions-bg: {{ section.settings.directions_bg_color }}; --slr-directions-text: {{ section.settings.directions_text_color }};"
+>
+  <div class="store-locator__inner">
+
+    <header class="store-locator__header">
+      <h1 class="store-locator__title">{{ section.settings.heading | default: 'Find a Store Near You' }}</h1>
+      {%- if section.settings.subheading != blank -%}
+        <p class="store-locator__subtitle">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="visually-hidden" aria-live="polite" data-status-announcer></div>
+
+    <div class="store-locator__controls">
+      <form class="store-locator__search" data-search-form role="search">
+        <label class="visually-hidden" for="StoreLocatorSearch-{{ section.id }}">Search by city, postcode or address</label>
+        <div class="store-locator__search-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="StoreLocatorSearch-{{ section.id }}"
+            data-search-input
+            placeholder="Enter city, postcode or location"
+            autocomplete="off"
+          >
+          {%- if section.settings.show_locate_button -%}
+            <button type="button" class="store-locator__locate-btn" data-locate-btn aria-label="{{ section.settings.locate_button_label | default: 'Use my current location' }}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line>
+                <line x1="19" y1="12" x2="22" y2="12"></line>
+              </svg>
+            </button>
+          {%- endif -%}
+        </div>
+        <button type="submit" class="store-locator__search-btn" data-search-submit>
+          {{- section.settings.search_button_label | default: 'Search' -}}
+        </button>
+      </form>
+    </div>
+
+    {%- if section.settings.show_filters -%}
+      <div class="store-locator__filters" data-type-filters role="group" aria-label="Filter by store type">
+        <button type="button" class="store-locator__filter-chip is-active" data-type-filter="all" aria-pressed="true">All Stores</button>
+        {%- for type in store_types -%}
+          {%- assign type_trimmed = type | strip -%}
+          {%- if type_trimmed != blank -%}
+            <button type="button" class="store-locator__filter-chip" data-type-filter="{{ type_trimmed | downcase }}" aria-pressed="false">{{ type_trimmed }}</button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <p class="store-locator__status" data-result-count aria-live="polite"></p>
+
+    <div class="store-locator__layout">
+      <div class="store-locator__results" data-results-panel>
+        <ul class="store-locator__list" data-store-list>
+          {%- for store in shop.metaobjects.store_location.values limit: section.settings.max_stores -%}
+            {%- if store.active.value -%}
+              {%- liquid
+                assign address_line = store.address_line_1.value
+                if store.address_line_2.value != blank
+                  assign address_line = address_line | append: ', ' | append: store.address_line_2.value
+                endif
+
+                assign city_state_postal = store.city.value
+                if store.state.value != blank
+                  assign city_state_postal = city_state_postal | append: ', ' | append: store.state.value
+                endif
+                if store.postal_code.value != blank
+                  assign city_state_postal = city_state_postal | append: ' ' | append: store.postal_code.value
+                endif
+
+                assign full_address = address_line | append: ', ' | append: city_state_postal
+
+                assign has_coords = false
+                if store.latitude.value and store.longitude.value
+                  assign has_coords = true
+                endif
+
+                if has_coords
+                  assign directions_url = 'https://www.google.com/maps/dir/?api=1&destination=' | append: store.latitude.value | append: ',' | append: store.longitude.value
+                elsif store.maps_url.value != blank
+                  assign directions_url = store.maps_url.value
+                else
+                  assign encoded_address = full_address | url_encode
+                  assign directions_url = 'https://www.google.com/maps/dir/?api=1&destination=' | append: encoded_address
+                endif
+
+                assign hours_json = store.hours.value | json
+              -%}
+
+              <li class="store-locator__item" data-store-item>
+                <div
+                  class="store-locator__card"
+                  data-store-card
+                  data-store-id="{{ store.id }}"
+                  data-marker-key="{{ forloop.index0 }}"
+                  data-name="{{ store.store_name.value | escape }}"
+                  data-lat="{{ store.latitude.value }}"
+                  data-lng="{{ store.longitude.value }}"
+                  data-type="{{ store.store_type.value | strip | downcase }}"
+                  data-timezone="{{ store.timezone.value }}"
+                  data-city="{{ store.city.value | escape }}"
+                  data-state="{{ store.state.value | escape }}"
+                  data-postal="{{ store.postal_code.value | escape }}"
+                  data-address="{{ full_address | escape }}"
+                  {%- if section.settings.show_phone and store.phone.value != blank %}
+                  data-phone="{{ store.phone.value | escape }}"
+                  {%- endif %}
+                >
+                  <button type="button" class="store-locator__card-trigger" data-card-trigger aria-pressed="false">
+                    {%- if section.settings.show_images and store.image.value != blank -%}
+                      <span class="store-locator__card-image">
+                        <img
+                          src="{{ store.image.value | image_url: width: 240 }}"
+                          width="120"
+                          height="120"
+                          loading="lazy"
+                          alt="{{ store.store_name.value | escape }}"
+                        >
+                      </span>
+                    {%- endif -%}
+                    <span class="store-locator__card-body">
+                      <span class="store-locator__card-name">{{ store.store_name.value }}</span>
+                      {%- if store.store_type.value != blank -%}
+                        <span class="store-locator__card-type">{{ store.store_type.value }}</span>
+                      {%- endif -%}
+                      <span class="store-locator__card-address">{{ address_line }}<br>{{ city_state_postal }}</span>
+                      <span class="store-locator__card-distance" data-card-distance hidden></span>
+                      <span class="store-locator__card-status" data-card-status data-hours="{{ hours_json | escape }}">
+                        <span class="store-locator__status-dot" aria-hidden="true"></span>
+                        <span data-status-text>Hours unavailable</span>
+                      </span>
+                      {%- if section.settings.show_phone and store.phone.value != blank -%}
+                        <span class="store-locator__card-phone">{{ store.phone.value }}</span>
+                      {%- endif -%}
+                    </span>
+                  </button>
+                  <div class="store-locator__card-footer">
+                    <button type="button" class="store-locator__directions-btn" data-show-route>
+                      <span>{{- section.settings.directions_button_label | default: 'Get Directions' -}}</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                    <a class="store-locator__directions-link" data-directions-link href="{{ directions_url }}" target="_blank" rel="noopener noreferrer">
+                      <span>{{- section.settings.open_maps_label | default: 'Open in Google Maps' -}}</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                  </div>
+                </div>
+              </li>
+
+              {%- capture store_json -%}
+                {
+                  "@type": "Store",
+                  "name": {{ store.store_name.value | json }},
+                  "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": {{ address_line | json }},
+                    "addressLocality": {{ store.city.value | json }},
+                    "addressRegion": {{ store.state.value | json }},
+                    "postalCode": {{ store.postal_code.value | json }},
+                    "addressCountry": {{ store.country.value | json }}
+                  }
+                  {%- if has_coords -%}
+                  ,"geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": {{ store.latitude.value }},
+                    "longitude": {{ store.longitude.value }}
+                  }
+                  {%- endif -%}
+                  {%- if store.phone.value != blank -%}
+                  ,"telephone": {{ store.phone.value | json }}
+                  {%- endif -%}
+                  {%- if store.website.value != blank -%}
+                  ,"url": {{ store.website.value | json }}
+                  {%- endif -%}
+                }
+              {%- endcapture -%}
+              {%- liquid
+                assign separator = ''
+                unless printed_count == 0
+                  assign separator = ','
+                endunless
+                assign json_ld_items = json_ld_items | append: separator | append: store_json
+                assign printed_count = printed_count | plus: 1
+              -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+
+        <div class="store-locator__empty" data-empty-state hidden>
+          <p data-empty-message>No stores found near this location.</p>
+          <button type="button" class="store-locator__reset-btn" data-clear-search>Clear Search</button>
+        </div>
+      </div>
+
+      <div class="store-locator__map-wrap" data-map-wrap>
+        <div class="store-locator__map" data-map role="application" aria-label="Store location map"></div>
+        <div class="store-locator__route-summary" data-route-summary hidden aria-live="polite">
+          <span class="store-locator__route-summary-text" data-route-summary-text></span>
+          <button type="button" class="store-locator__route-clear" data-route-clear aria-label="Clear directions">&times;</button>
+        </div>
+        <div class="store-locator__map-controls">
+          <button type="button" class="store-locator__map-control-btn" data-map-type-btn>Satellite</button>
+          <button type="button" class="store-locator__map-control-btn store-locator__map-control-btn--icon" data-fullscreen-btn aria-label="View fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+              <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+              <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+              <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="store-locator__map-fallback" data-map-fallback hidden>
+          <p>The map couldn't be loaded right now, but you can still browse stores in the list.</p>
+        </div>
+        <div class="store-locator__map-loading" data-map-loading>
+          <span class="store-locator__spinner" aria-hidden="true"></span>
+          <span>Loading map…</span>
+        </div>
+      </div>
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="store-locator__benefits">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'benefit' -%}
+              <div class="store-locator__benefit" {{ block.shopify_attributes }}>
+                <span class="store-locator__benefit-icon" aria-hidden="true">
+                  {%- case block.settings.icon -%}
+                    {%- when 'pin' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
+                    {%- when 'clock' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+                    {%- when 'shield' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+                    {%- else -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="14" height="10" rx="1.5"/><path d="M17 10h2.5L22 13v4h-5"/><circle cx="7.5" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/></svg>
+                  {%- endcase -%}
+                </span>
+                <h3 class="store-locator__benefit-heading">{{ block.settings.heading }}</h3>
+                <p class="store-locator__benefit-text">{{ block.settings.text }}</p>
+              </div>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+
+  {%- if json_ld_items != blank -%}
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[{{ json_ld_items }}]}
+    </script>
+  {%- endif -%}
+</section>
+
+{{ 'store-locator.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'store-locator.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Store locator",
+  "tag": "section",
+  "class": "shopify-section--store-locator",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Find a Store Near You" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Search by city, postcode, address or use your current location." },
+
+    { "type": "header", "content": "Map" },
+    { "type": "range", "id": "map_height", "label": "Map height", "min": 320, "max": 900, "step": 20, "unit": "px", "default": 560 },
+    { "type": "range", "id": "default_zoom", "label": "Default zoom", "min": 2, "max": 18, "step": 1, "default": 11 },
+    { "type": "text", "id": "default_lat", "label": "Default map center latitude", "info": "Used before any store or search location is known." },
+    { "type": "text", "id": "default_lng", "label": "Default map center longitude" },
+
+    { "type": "header", "content": "Store list" },
+    { "type": "range", "id": "max_stores", "label": "Maximum stores to display", "min": 10, "max": 500, "step": 10, "default": 200 },
+    { "type": "text", "id": "store_type_filters", "label": "Store type filters", "default": "Retail, Outlet, Dealer, Distributor", "info": "Comma-separated. Must match each store's Store Type field." },
+    { "type": "checkbox", "id": "show_images", "label": "Show store images", "default": true },
+    { "type": "checkbox", "id": "show_phone", "label": "Show phone number", "default": true },
+    { "type": "checkbox", "id": "show_filters", "label": "Show filters", "default": true },
+    { "type": "checkbox", "id": "show_locate_button", "label": "Show \"use my location\" button", "default": true },
+
+    { "type": "header", "content": "Labels" },
+    { "type": "text", "id": "search_button_label", "label": "Search button", "default": "Search" },
+    { "type": "text", "id": "locate_button_label", "label": "Locate button (aria-label)", "default": "Use my current location" },
+    { "type": "text", "id": "directions_button_label", "label": "Directions button", "default": "Get Directions" },
+    { "type": "text", "id": "open_maps_label", "label": "Open in Google Maps link", "default": "Open in Google Maps" },
+
+    { "type": "header", "content": "Style" },
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#1a1a1a" },
+    { "type": "color", "id": "card_background", "label": "Card background", "default": "#ffffff" },
+    { "type": "color", "id": "border_color", "label": "Border color", "default": "#e5e5e5" },
+    { "type": "range", "id": "corner_radius", "label": "Corner radius", "min": 0, "max": 24, "step": 2, "unit": "px", "default": 12 },
+    { "type": "color", "id": "marker_color", "label": "Map marker color", "default": "#1a1a1a" },
+    { "type": "color", "id": "directions_bg_color", "label": "Get Directions button background", "default": "#1a1a1a" },
+    { "type": "color", "id": "directions_text_color", "label": "Get Directions button text", "default": "#ffffff" }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "options": [
+          { "value": "pin", "label": "Pin" },
+          { "value": "clock", "label": "Clock" },
+          { "value": "shield", "label": "Shield" },
+          { "value": "truck", "label": "Truck" }
+        ], "default": "pin" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "In-store pickup" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Order online and collect from your nearest store." }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Store locator",
+      "blocks": [
+        { "type": "benefit" },
+        { "type": "benefit" },
+        { "type": "benefit" }
+      ]
+    }
+  ]
+}
+{% endschema %}
