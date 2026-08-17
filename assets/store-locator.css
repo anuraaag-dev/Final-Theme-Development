@@ -282,6 +282,7 @@
   border-radius: var(--slr-radius);
   overflow: hidden;
   border: 1px solid var(--slr-border);
+  z-index: 1;
 }
 
 .store-locator__map {
