@@ -1,0 +1,287 @@
+{%- comment -%}
+  COMPARE WIDGET
+  ------------------------------------------------------------------
+  Renders the floating "Compare" bar and the shared JS that powers every
+  compare checkbox added to snippets/product-card.liquid and
+  sections/product-grid-showcase.liquid.
+
+  IDEMPOTENT BY DESIGN: this snippet gets rendered once per product card
+  (both card files render it defensively), so both the DOM element and
+  the event-binding logic are guarded to only initialize once per page,
+  no matter how many times {% render 'compare-widget' %} runs.
+
+  For best performance, render this ONCE in theme.liquid right before
+  </body> instead of relying on the per-card renders — the per-card
+  renders exist only as a safety net so the feature still works even if
+  a merchant never touches theme.liquid.
+
+  Selected products are stored in localStorage (key below) as
+  [{ id, handle, title }, ...] and picked up by templates/page.compare.liquid.
+{%- endcomment -%}
+
+<div id="pgs-compare-bar" class="pgs-compare-bar" hidden>
+  <div class="pgs-compare-bar__inner">
+    <div class="pgs-compare-bar__items" data-pgs-compare-items></div>
+    <div class="pgs-compare-bar__actions">
+      <span><span data-pgs-compare-count>0</span> / 3 selected</span>
+      <button type="button" class="pgs-compare-bar__clear" data-pgs-compare-clear>Clear</button>
+      <button type="button" class="pgs-compare-bar__go" data-pgs-compare-go disabled>Compare Now</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .pgs-compare-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    background: #12203f;
+    color: #fff;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.18);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+  .pgs-compare-bar.is-visible {
+    transform: translateY(0);
+  }
+  .pgs-compare-bar__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .pgs-compare-bar__items {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .pgs-compare-bar__chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 4px 6px 4px 10px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+  }
+  .pgs-compare-bar__chip span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pgs-compare-bar__chip button {
+    background: none;
+    border: none;
+    color: #fff;
+    opacity: 0.7;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+    flex: 0 0 auto;
+  }
+  .pgs-compare-bar__chip button:hover {
+    opacity: 1;
+  }
+  .pgs-compare-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+    font-size: 0.82rem;
+  }
+  .pgs-compare-bar__clear {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    border-radius: 4px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .pgs-compare-bar__go {
+    background: #fff;
+    color: #12203f;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.82rem;
+  }
+  .pgs-compare-bar__go:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  @media (max-width: 600px) {
+    .pgs-compare-bar__inner {
+      padding: 10px 14px;
+    }
+    .pgs-compare-bar__items {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    if (window.__pgsCompareInit) return;
+    window.__pgsCompareInit = true;
+
+    var STORAGE_KEY = 'pgs_compare_list';
+    var MAX_ITEMS = 3;
+    var COMPARE_PAGE_URL = '{{ pages.compare.url | default: "/pages/compare" }}';
+
+    function getList() {
+      try {
+        var raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(raw) ? raw : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setList(list) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch (e) {
+        /* storage unavailable */
+      }
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    function syncCheckboxes() {
+      var ids = getList().map(function (i) {
+        return i.id;
+      });
+      document.querySelectorAll('[data-compare-checkbox]').forEach(function (box) {
+        var pid = box.getAttribute('data-product-id');
+        box.checked = ids.indexOf(pid) !== -1;
+        box.disabled = !box.checked && ids.length >= MAX_ITEMS;
+      });
+    }
+
+    function renderBar() {
+      var bar = document.getElementById('pgs-compare-bar');
+      if (!bar) return;
+
+      var list = getList();
+      var itemsWrap = bar.querySelector('[data-pgs-compare-items]');
+      var countEl = bar.querySelector('[data-pgs-compare-count]');
+      var goBtn = bar.querySelector('[data-pgs-compare-go]');
+
+      itemsWrap.innerHTML = '';
+      list.forEach(function (item) {
+        var chip = document.createElement('span');
+        chip.className = 'pgs-compare-bar__chip';
+
+        var label = document.createElement('span');
+        label.textContent = item.title || 'Product';
+        chip.appendChild(label);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', 'Remove ' + (item.title || 'product') + ' from compare');
+        removeBtn.textContent = '\u00D7';
+        removeBtn.addEventListener('click', function () {
+          removeItem(item.id);
+        });
+        chip.appendChild(removeBtn);
+
+        itemsWrap.appendChild(chip);
+      });
+
+      countEl.textContent = list.length;
+      goBtn.disabled = list.length < 2;
+      bar.hidden = false;
+      bar.classList.toggle('is-visible', list.length > 0);
+    }
+
+    function addItem(data) {
+      var list = getList();
+      if (list.some(function (i) { return i.id === data.id; })) return true;
+      if (list.length >= MAX_ITEMS) return false;
+      list.push(data);
+      setList(list);
+      return true;
+    }
+
+    function removeItem(id) {
+      var list = getList().filter(function (i) {
+        return i.id !== id;
+      });
+      setList(list);
+      syncCheckboxes();
+      renderBar();
+    }
+
+    function clearAll() {
+      setList([]);
+      syncCheckboxes();
+      renderBar();
+    }
+
+    document.addEventListener('change', function (e) {
+      var box = e.target.closest && e.target.closest('[data-compare-checkbox]');
+      if (!box) return;
+
+      var data = {
+        id: box.getAttribute('data-product-id'),
+        handle: box.getAttribute('data-product-handle'),
+        title: box.getAttribute('data-product-title')
+      };
+
+      if (box.checked) {
+        var added = addItem(data);
+        if (!added) {
+          box.checked = false;
+          alert('You can compare up to ' + MAX_ITEMS + ' products at a time. Remove one to add another.');
+          return;
+        }
+      } else {
+        removeItem(data.id);
+      }
+
+      syncCheckboxes();
+      renderBar();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-pgs-compare-clear]')) {
+        clearAll();
+      }
+      if (e.target.closest('[data-pgs-compare-go]')) {
+        if (getList().length >= 2) {
+          window.location.href = COMPARE_PAGE_URL;
+        }
+      }
+    });
+
+    function init() {
+      syncCheckboxes();
+      renderBar();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>

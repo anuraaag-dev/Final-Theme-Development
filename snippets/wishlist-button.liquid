@@ -1,0 +1,60 @@
+{%- doc -%}
+  Renders a wishlist toggle button for a product.
+  Accepts: product (object, required)
+{%- enddoc -%}
+
+<button
+  type="button"
+  class="wishlist-button"
+  data-wishlist-button
+  data-product-handle="{{ product.handle }}"
+  aria-pressed="false"
+>
+  {% render 'icon-wishlist' %}
+  <span class="wishlist-button__label wishlist-button__label--add">{{ 'Add to Wishlist' | default: 'Add to wishlist' }}</span>
+  <span class="wishlist-button__label wishlist-button__label--remove">{{ 'Remove from Wishlist' | default: 'Remove from wishlist' }}</span>
+</button>
+
+<style>
+  .wishlist-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: black;
+    border: 2px solid black;
+    border-radius: 14px;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body--family);
+    font-size: 0.875rem;
+    color: white
+  }
+
+  .wishlist-button .icon-wishlist-fill {
+    transition: fill-opacity 0.15s ease;
+  }
+
+  .wishlist-button.is-active .icon-wishlist-fill {
+    fill-opacity: 1;
+  }
+
+  .wishlist-button.is-active .icon-wishlist-outline {
+    opacity: 0;
+  }
+
+  .wishlist-button__label--remove {
+    display: none;
+  }
+
+  .wishlist-button.is-active .wishlist-button__label--add {
+    display: none;
+    background: transparent;
+    color: black;
+  }
+
+  .wishlist-button.is-active .wishlist-button__label--remove {
+    display: inline;
+  }
+</style>
