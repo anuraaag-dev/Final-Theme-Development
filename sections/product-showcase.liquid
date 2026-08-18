@@ -4191,10 +4191,10 @@
       });
   });
 
-  /* ------------------------------------------------------------------
+  /*------------------------------------------------------------------
      Quick View modal
      ------------------------------------------------------------------ */
-  {% comment %} var overlay = section.querySelector('[data-pgs-modal-overlay]');
+  var overlay = section.querySelector('[data-pgs-modal-overlay]');
   if (overlay) {
     var modalImage = overlay.querySelector('[data-pgs-modal-image]');
     var modalVendor = overlay.querySelector('[data-pgs-modal-vendor]');
@@ -4301,7 +4301,7 @@
         });
     });
   }
-})(); {% endcomment %}
+})(); 
 </script>
 
 {% schema %}
