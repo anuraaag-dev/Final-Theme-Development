@@ -327,7 +327,22 @@
   }
 </style> {% endcomment %}
 
-<style>     
+<style>
+  /* =========================================================
+     GLOBAL HORIZONTAL OVERFLOW FIX
+     ========================================================= */
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+
+  /* =========================================================
+     COLLECTION BENTO SECTION
+     ========================================================= */
+
   #CollectionBento-{{ sec_id }} {
     --cbs-bg: {{ s.background_color }};
     --cbs-heading-color: {{ s.heading_color }};
@@ -352,14 +367,16 @@
     max-width: 100%;
     min-width: 0;
 
-    background: var(--cbs-bg);
+    margin: 0;
 
     padding-top: var(--cbs-padding-top);
     padding-bottom: var(--cbs-padding-bottom);
 
+    background: var(--cbs-bg);
+
     box-sizing: border-box;
 
-    isolation: isolate;
+    overflow: visible;
   }
 
 
@@ -368,6 +385,7 @@
      ========================================================= */
 
   {% if s.full_width %}
+
     #CollectionBento-{{ sec_id }} {
       background: transparent;
     }
@@ -392,6 +410,7 @@
 
       pointer-events: none;
     }
+
   {% endif %}
 
 
@@ -411,6 +430,8 @@
      ========================================================= */
 
   #CollectionBento-{{ sec_id }} .cbs__inner {
+    display: block;
+
     width: 100%;
     max-width: 1400px;
     min-width: 0;
@@ -420,6 +441,8 @@
 
     padding-left: 24px;
     padding-right: 24px;
+
+    box-sizing: border-box;
   }
 
 
@@ -428,17 +451,19 @@
      ========================================================= */
 
   #CollectionBento-{{ sec_id }} .cbs__heading {
+    display: block;
+
     width: 100%;
     max-width: 100%;
     min-width: 0;
 
     margin: 0 0 20px;
 
+    color: var(--cbs-heading-color);
+
     font-size: clamp(1.4rem, 2.6vw, 1.9rem);
     font-weight: 700;
     line-height: 1.3;
-
-    color: var(--cbs-heading-color);
 
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -446,7 +471,7 @@
 
 
   /* =========================================================
-     DESKTOP GRID
+     GRID
      ========================================================= */
 
   #CollectionBento-{{ sec_id }} .cbs__grid {
@@ -455,6 +480,9 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
+
+    margin: 0;
+    padding: 0;
 
     grid-template-columns:
       minmax(0, 1.6fr)
@@ -472,6 +500,8 @@
     gap: var(--cbs-gap);
 
     height: var(--cbs-grid-height);
+
+    box-sizing: border-box;
   }
 
 
@@ -507,11 +537,16 @@
     max-width: 100%;
     min-width: 0;
 
+    margin: 0;
+    padding: 0;
+
     overflow: hidden;
 
     border-radius: var(--cbs-radius);
 
     background: #1a1a1a;
+
+    box-sizing: border-box;
   }
 
 
@@ -525,10 +560,16 @@
     display: block;
 
     width: 100%;
+    max-width: 100%;
     height: 100%;
     min-width: 0;
 
+    margin: 0;
+    padding: 0;
+
     text-decoration: none;
+
+    box-sizing: border-box;
   }
 
 
@@ -539,13 +580,19 @@
   #CollectionBento-{{ sec_id }} .cbs__media {
     position: absolute;
 
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 
     display: block;
 
     width: 100%;
-    height: 100%;
     max-width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
 
     object-fit: cover;
 
@@ -558,11 +605,17 @@
   #CollectionBento-{{ sec_id }} .cbs__placeholder-svg {
     position: absolute;
 
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 
     width: 100%;
-    height: 100%;
     max-width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
 
     object-fit: cover;
 
@@ -575,11 +628,13 @@
      ========================================================= */
 
   {% if s.enable_hover_zoom %}
+
     #CollectionBento-{{ sec_id }}
       .cbs__tile-link:hover
       .cbs__media {
       transform: scale(1.05);
     }
+
   {% endif %}
 
 
@@ -590,7 +645,10 @@
   #CollectionBento-{{ sec_id }} .cbs__overlay {
     position: absolute;
 
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 
     background:
       linear-gradient(
@@ -621,11 +679,11 @@
     display: flex;
     align-items: center;
 
-    gap: 8px;
-
     width: auto;
     max-width: calc(100% - 40px);
     min-width: 0;
+
+    gap: 8px;
   }
 
 
@@ -636,16 +694,19 @@
   #CollectionBento-{{ sec_id }} .cbs__title {
     display: block;
 
+    width: auto;
     max-width: 100%;
     min-width: 0;
 
-    font-size: var(--cbs-title-size);
-    font-weight: var(--cbs-title-weight);
-
-    line-height: 1.3;
-    letter-spacing: 0.01em;
+    margin: 0;
+    padding: 0;
 
     color: var(--cbs-title-color);
+
+    font-size: var(--cbs-title-size);
+    font-weight: var(--cbs-title-weight);
+    line-height: 1.3;
+    letter-spacing: 0.01em;
 
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -653,10 +714,12 @@
 
 
   /* =========================================================
-     BADGE
+     BADGE DOT
      ========================================================= */
 
   #CollectionBento-{{ sec_id }} .cbs__badge-dot {
+    display: block;
+
     flex: 0 0 auto;
 
     width: var(--cbs-badge-size);
@@ -676,6 +739,7 @@
      ========================================================= */
 
   @media screen and (max-width: 989px) {
+
     #CollectionBento-{{ sec_id }} .cbs__grid {
       grid-template-columns:
         minmax(0, 1fr)
@@ -694,14 +758,17 @@
       height: auto;
     }
 
+
     #CollectionBento-{{ sec_id }} .cbs__tile--large {
       aspect-ratio: 16 / 9;
     }
+
 
     #CollectionBento-{{ sec_id }} .cbs__tile--1,
     #CollectionBento-{{ sec_id }} .cbs__tile--2 {
       aspect-ratio: 1 / 1;
     }
+
 
     #CollectionBento-{{ sec_id }} .cbs__tile--3 {
       aspect-ratio: 21 / 9;
@@ -714,18 +781,14 @@
      ========================================================= */
 
   @media screen and (max-width: 749px) {
+
     #CollectionBento-{{ sec_id }} .cbs__inner {
       padding-left: 16px;
       padding-right: 16px;
     }
 
+
     #CollectionBento-{{ sec_id }} .cbs__grid {
-      display: grid;
-
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-
       grid-template-columns:
         minmax(0, 1fr);
 
@@ -740,6 +803,7 @@
       height: auto;
     }
 
+
     #CollectionBento-{{ sec_id }} .cbs__tile--large,
     #CollectionBento-{{ sec_id }} .cbs__tile--1,
     #CollectionBento-{{ sec_id }} .cbs__tile--2,
@@ -750,6 +814,7 @@
 
       aspect-ratio: {{ s.mobile_tile_aspect_ratio }};
     }
+
 
     #CollectionBento-{{ sec_id }} .cbs__content {
       left: 16px;
@@ -766,9 +831,11 @@
      ========================================================= */
 
   @media (prefers-reduced-motion: reduce) {
+
     #CollectionBento-{{ sec_id }} .cbs__media {
       transition: none !important;
     }
+
   }
 </style>
 
