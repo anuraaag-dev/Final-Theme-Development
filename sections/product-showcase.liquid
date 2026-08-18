@@ -2169,8 +2169,7 @@
 {% endschema %} {% endcomment %}
 
 
-
-  {%- liquid
+ {%- liquid
   assign s = section.settings
   assign sec_id = section.id
   assign layout = s.layout_type
@@ -4060,41 +4059,51 @@
     });
   }
 
-  // NEW — Horizon theme's own cart drawer only refreshes its markup when
-  // it receives Horizon's CartUpdateEvent class from "@theme/events", not
-  // a generic CustomEvent. This mirrors Shopify's officially documented
-  // fix for this exact "drawer doesn't update without a refresh" issue.
-  function refreshHorizonCartDrawer(cart) {
-    if (typeof window.customElements === 'undefined' || !window.customElements.get('cart-drawer-component')) {
-      return; // Not a Horizon-style drawer theme, or the drawer isn't on this page — nothing to do.
-    }
-    import('@theme/events')
-      .then(function (mod) {
-        var CartUpdateEvent = mod.CartUpdateEvent;
-        if (!CartUpdateEvent) return;
+  // NEW (v2) — dispatching Horizon's internal CartUpdateEvent class only
+  // *notifies* the drawer something changed; it does not guarantee the
+  // drawer's markup actually gets replaced with the new cart contents,
+  // and depends on undocumented internal plumbing. This replacement is
+  // deterministic instead: Shopify's public Ajax Cart API accepts a
+  // `sections` parameter on /cart/add.js, and returns that section
+  // freshly rendered server-side with the already-updated cart baked in.
+  // We just swap that HTML straight into the page — no guessing about
+  // event shapes, no race condition, works the same on any theme that
+  // exposes a `cart-drawer-section` section (Horizon does, see the
+  // "shopify-section-cart-drawer-section" wrapper id in cart-drawer.liquid).
+  var CART_DRAWER_SECTION_ID = 'cart-drawer-section';
 
-        var event = new CartUpdateEvent(cart, 'product-showcase', {
-          itemCount: cart.item_count,
-          source: 'product-showcase',
-          sections: {}
-        });
-        document.dispatchEvent(event);
+  function applyCartDrawerSectionHtml(sectionsHtml) {
+    if (!sectionsHtml || !sectionsHtml[CART_DRAWER_SECTION_ID]) return false;
 
-        // Respect the merchant's "Auto open cart drawer" setting, same as
-        // Horizon's own product-form component does — only force the
-        // drawer open if that setting is on (rendered as the `auto-open`
-        // attribute in cart-drawer.liquid).
-        var cartDrawer = document.querySelector('cart-drawer-component');
-        if (cartDrawer && typeof cartDrawer.open === 'function' && cartDrawer.hasAttribute('auto-open')) {
-          cartDrawer.open();
-        }
-      })
-      .catch(function (err) {
-        console.error('Could not refresh Horizon cart drawer', err);
-      });
+    var wrapper = document.getElementById('shopify-section-' + CART_DRAWER_SECTION_ID);
+    if (!wrapper) return false;
+
+    var parsed = new DOMParser().parseFromString(sectionsHtml[CART_DRAWER_SECTION_ID], 'text/html');
+    var freshWrapper = parsed.getElementById('shopify-section-' + CART_DRAWER_SECTION_ID);
+
+    // Replacing innerHTML (rather than the wrapper node itself) means any
+    // custom elements inside — <theme-drawer>, <cart-drawer-component> —
+    // are freshly connected to the DOM by this assignment, so the browser
+    // automatically re-runs their connectedCallback with the new cart data.
+    wrapper.innerHTML = freshWrapper ? freshWrapper.innerHTML : parsed.body.innerHTML;
+    return true;
   }
 
-  function notifyCartUpdated(itemInfo) {
+  function openCartDrawer() {
+    var cartDrawer = document.querySelector('cart-drawer-component');
+    if (cartDrawer && typeof cartDrawer.open === 'function') {
+      cartDrawer.open();
+      return;
+    }
+    // Fallback for any drawer implementation without a scripted .open():
+    // open the underlying <dialog> directly.
+    var dialog = document.querySelector('#cart-drawer dialog');
+    if (dialog && typeof dialog.showModal === 'function' && !dialog.open) {
+      dialog.showModal();
+    }
+  }
+
+  function notifyCartUpdated(itemInfo, sectionsHtml) {
     fetch('/cart.js', { headers: { Accept: 'application/json' } })
       .then(function (res) { return res.json(); })
       .then(function (cart) {
@@ -4106,7 +4115,15 @@
         document.dispatchEvent(new CustomEvent('cart:refresh', { detail: { cart: cart } }));
         bestEffortUpdateThemeCartCount(cart);
         showCartToast(itemInfo, cart);
-        refreshHorizonCartDrawer(cart); // NEW — makes Horizon's own drawer refresh
+
+        // NEW — swap in the drawer's freshly-rendered markup (with the
+        // just-added item already in it) and open it. No-ops safely on
+        // any theme/setup where the cart-drawer-section wrapper isn't on
+        // the page (e.g. cart_type isn't "drawer").
+        var applied = applyCartDrawerSectionHtml(sectionsHtml);
+        if (applied) {
+          openCartDrawer();
+        }
       })
       .catch(function (err) {
         console.error('Could not refresh cart after add', err);
@@ -4144,6 +4161,10 @@
     var itemInfo = getCardAddedItemInfo(card);
 
     var formData = new FormData(form);
+    // NEW — ask Shopify to include the drawer section, freshly rendered
+    // with the updated cart, directly in this same response.
+    formData.append('sections', CART_DRAWER_SECTION_ID);
+
     fetch('/cart/add.js', {
       method: 'POST',
       headers: { Accept: 'application/json' },
@@ -4157,8 +4178,8 @@
         }
         return res.json();
       })
-      .then(function () {
-        notifyCartUpdated(itemInfo);
+      .then(function (data) {
+        notifyCartUpdated(itemInfo, data.sections);
       })
       .catch(function (err) {
         console.error('Quick add failed', err);
@@ -4245,6 +4266,10 @@
       };
 
       var formData = new FormData(modalForm);
+      // NEW — ask Shopify to include the drawer section, freshly rendered
+      // with the updated cart, directly in this same response.
+      formData.append('sections', CART_DRAWER_SECTION_ID);
+
       modalAddBtn.disabled = true;
       var originalText = modalAddBtn.textContent;
       modalAddBtn.textContent = 'Adding...';
@@ -4261,9 +4286,9 @@
           }
           return res.json();
         })
-        .then(function () {
+        .then(function (data) {
           modalAddBtn.textContent = 'Added!';
-          notifyCartUpdated(itemInfo);
+          notifyCartUpdated(itemInfo, data.sections);
         })
         .catch(function () {
           modalAddBtn.textContent = 'Error';
@@ -4702,6 +4727,6 @@
         "layout_type": "carousel"
       }
     }
-  ]   
+  ]
 }
 {% endschema %}
