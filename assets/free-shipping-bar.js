@@ -102,29 +102,7 @@ setInterval(fsbInstallFetchPatch, 2000);
     return undefined;
   }
 
-  // function fsbApplyDiscountCodes(cart, qualifying, discountTiers) {
-  //   if (!discountTiers || !discountTiers.length) return Promise.resolve();
-  //   var desired = discountTiers
-  //     .filter(function(t) { return qualifying >= t.thresholdCents; })
-  //     .map(function(t) { return t.code; });
-  //   if (!desired.length) return Promise.resolve();
 
-  //   var current = (cart.discount_codes || []).map(function(d) { return d.code; });
-  //   var merged = current.slice();
-  //   var changed = false;
-  //   desired.forEach(function(code) {
-  //     if (merged.indexOf(code) === -1) { merged.push(code); changed = true; }
-  //   });
-  //   if (!changed) return Promise.resolve();
-
-  //   return fsbInternalFetch('/cart/update.js', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({ discount: merged.join(',') })
-  //   }).catch(function(err) {
-  //     console.error('[FSB] Discount application failed:', err);
-  //   });
-  // }
 
   function fsbComputeGiftActions(cart, giftTiers, giftTitles) {
     var qualifyingTotal = fsbQualifyingTotal(cart);
