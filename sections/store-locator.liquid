@@ -66,18 +66,35 @@
       </form>
     </div>
 
-    {%- if section.settings.show_filters -%}
-      <div class="store-locator__filters" data-type-filters role="group" aria-label="Filter by store type">
-        <button type="button" class="store-locator__filter-chip is-active" data-type-filter="all" aria-pressed="true">All Stores</button>
-        {%- for type in store_types -%}
-          {%- assign type_trimmed = type | strip -%}
-          {%- if type_trimmed != blank -%}
-            <button type="button" class="store-locator__filter-chip" data-type-filter="{{ type_trimmed | downcase }}" aria-pressed="false">{{ type_trimmed }}</button>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
+    <div class="store-locator__filters-row">
+      {%- if section.settings.show_filters -%}
+        <div class="store-locator__filters" data-type-filters role="group" aria-label="Filter by store type">
+          <button type="button" class="store-locator__filter-chip is-active" data-type-filter="all" aria-pressed="true">All Stores</button>
+          {%- for type in store_types -%}
+            {%- assign type_trimmed = type | strip -%}
+            {%- if type_trimmed != blank -%}
+              <button type="button" class="store-locator__filter-chip" data-type-filter="{{ type_trimmed | downcase }}" aria-pressed="false">{{ type_trimmed }}</button>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
 
+      {%- if section.settings.show_radius_filter -%}
+        {%- assign radius_options = section.settings.radius_filter_options | split: ',' -%}
+        <div class="store-locator__radius-filter">
+          <label class="visually-hidden" for="StoreLocatorRadius-{{ section.id }}">{{ section.settings.radius_filter_label | default: 'Distance' }}</label>
+          <select id="StoreLocatorRadius-{{ section.id }}" class="store-locator__radius-select" data-radius-filter>
+            <option value="">Any distance</option>
+            {%- for r in radius_options -%}
+              {%- assign r_trimmed = r | strip -%}
+              {%- if r_trimmed != blank -%}
+                <option value="{{ r_trimmed }}">Within {{ r_trimmed }} km</option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- endif -%}
+    </div>
     <p class="store-locator__status" data-result-count aria-live="polite"></p>
 
     <div class="store-locator__layout">
@@ -310,6 +327,9 @@
     { "type": "checkbox", "id": "show_images", "label": "Show store images", "default": true },
     { "type": "checkbox", "id": "show_phone", "label": "Show phone number", "default": true },
     { "type": "checkbox", "id": "show_filters", "label": "Show filters", "default": true },
+    { "type": "checkbox", "id": "show_radius_filter", "label": "Show distance filter", "default": true },
+    { "type": "text", "id": "radius_filter_options", "label": "Distance filter options (km)", "default": "5, 10, 15, 25, 50", "info": "Comma-separated distances in km. A \"Within X km\" option is shown for each." },
+    { "type": "text", "id": "radius_filter_label", "label": "Distance filter label", "default": "Distance" },
     { "type": "checkbox", "id": "show_locate_button", "label": "Show \"use my location\" button", "default": true },
 
     { "type": "header", "content": "Labels" },
