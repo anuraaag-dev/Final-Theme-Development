@@ -4233,12 +4233,12 @@
       document.body.style.overflow = 'hidden';
     }
 
-    function closeModal() {
+    {% comment %} function closeModal() {
       overlay.classList.remove('is-open');
       document.body.style.overflow = '';
       setTimeout(function () {
         overlay.hidden = true;
-      }, 250);
+      }, 250); {% endcomment %}
     }
 
     section.querySelectorAll('[data-pgs-quickview]').forEach(function (btn) {
