@@ -60,6 +60,7 @@ html[scroll-lock] .page-wrapper {
   .page-wrapper {
     height: 100dvh;
     overflow-y: auto;
+    overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--color-foreground-rgb) / var(--opacity-40)) var(--color-background);
