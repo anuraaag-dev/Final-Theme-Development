@@ -359,17 +359,7 @@
         {%- endfor -%}
         null
     ],
-    "discountTiers": [
-        {%- for i in fsb_tier_indexes -%}
-        {%- assign fsb_type_key = 'fsb_tier' | append: i | append: '_type' -%}
-        {%- assign fsb_code_key = 'fsb_tier' | append: i | append: '_discount_code' -%}
-        {%- if settings[fsb_type_key] == 'discount' and settings[fsb_code_key] != blank -%}
-            {%- assign fsb_threshold_key = 'fsb_tier' | append: i | append: '_threshold' -%}
-            { "tier": {{ i }}, "thresholdCents": {{ settings[fsb_threshold_key] | times: 100 }}, "code": {{ settings[fsb_code_key] | json }} },
-        {%- endif -%}
-        {%- endfor -%}
-        null
-    ],
+    "discountTiers": [],
     "sectionId": {{ section_id | json }}
     }
    </script>
