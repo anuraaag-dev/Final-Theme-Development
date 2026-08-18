@@ -2170,7 +2170,7 @@
 
 
 
- {%- liquid
+  {%- liquid
   assign s = section.settings
   assign sec_id = section.id
   assign layout = s.layout_type
@@ -2647,7 +2647,7 @@
   <div class="pgs__modal-overlay" data-pgs-modal-overlay hidden>
     <div class="pgs__modal" role="dialog" aria-modal="true" aria-label="Quick view">
       <button type="button" class="pgs__modal-close" data-pgs-modal-close aria-label="Close quick view">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
       <div class="pgs__modal-image-wrap">
         <img class="pgs__modal-image" data-pgs-modal-image src="" alt="">
@@ -3966,7 +3966,7 @@
      Cart: shared helpers used by both the quick-add form and the quick
      view modal's add-to-cart form.
 
-     BUG FIX — the old code did:
+     BUG FIX #1 (existing) — the old code did:
          document.dispatchEvent(new CustomEvent('cart:updated'));
      right after /cart/add.js succeeded, and nothing else. That event
      carried no cart data, and this section has no guarantee your theme's
@@ -3983,6 +3983,18 @@
      small confirmation panel built into this section — so the item is
      visibly "in the cart" immediately, regardless of what the theme's
      own drawer does.
+
+     BUG FIX #2 (new) — this storefront runs Shopify's Horizon theme.
+     Horizon's real cart drawer is <cart-drawer-component> (nested inside
+     <theme-drawer id="cart-drawer">, see the cart-drawer.liquid snippet).
+     That component does NOT listen for a plain CustomEvent('cart:updated',
+     ...) — it only refreshes itself when it receives Horizon's own
+     CartUpdateEvent class, exported from the theme's "@theme/events"
+     module. That mismatch is exactly why products didn't show up in the
+     drawer without a full page reload. refreshHorizonCartDrawer() below
+     fires that exact event (Shopify's own documented fix for this issue)
+     in addition to the generic events already dispatched, and is a no-op
+     on any storefront where <cart-drawer-component> isn't registered.
      ------------------------------------------------------------------ */
   var cartToast = section.querySelector('[data-pgs-cart-toast]');
   var cartToastImage = cartToast ? cartToast.querySelector('[data-pgs-toast-image]') : null;
@@ -4048,6 +4060,40 @@
     });
   }
 
+  // NEW — Horizon theme's own cart drawer only refreshes its markup when
+  // it receives Horizon's CartUpdateEvent class from "@theme/events", not
+  // a generic CustomEvent. This mirrors Shopify's officially documented
+  // fix for this exact "drawer doesn't update without a refresh" issue.
+  function refreshHorizonCartDrawer(cart) {
+    if (typeof window.customElements === 'undefined' || !window.customElements.get('cart-drawer-component')) {
+      return; // Not a Horizon-style drawer theme, or the drawer isn't on this page — nothing to do.
+    }
+    import('@theme/events')
+      .then(function (mod) {
+        var CartUpdateEvent = mod.CartUpdateEvent;
+        if (!CartUpdateEvent) return;
+
+        var event = new CartUpdateEvent(cart, 'product-showcase', {
+          itemCount: cart.item_count,
+          source: 'product-showcase',
+          sections: {}
+        });
+        document.dispatchEvent(event);
+
+        // Respect the merchant's "Auto open cart drawer" setting, same as
+        // Horizon's own product-form component does — only force the
+        // drawer open if that setting is on (rendered as the `auto-open`
+        // attribute in cart-drawer.liquid).
+        var cartDrawer = document.querySelector('cart-drawer-component');
+        if (cartDrawer && typeof cartDrawer.open === 'function' && cartDrawer.hasAttribute('auto-open')) {
+          cartDrawer.open();
+        }
+      })
+      .catch(function (err) {
+        console.error('Could not refresh Horizon cart drawer', err);
+      });
+  }
+
   function notifyCartUpdated(itemInfo) {
     fetch('/cart.js', { headers: { Accept: 'application/json' } })
       .then(function (res) { return res.json(); })
@@ -4060,6 +4106,7 @@
         document.dispatchEvent(new CustomEvent('cart:refresh', { detail: { cart: cart } }));
         bestEffortUpdateThemeCartCount(cart);
         showCartToast(itemInfo, cart);
+        refreshHorizonCartDrawer(cart); // NEW — makes Horizon's own drawer refresh
       })
       .catch(function (err) {
         console.error('Could not refresh cart after add', err);
