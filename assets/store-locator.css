@@ -197,13 +197,21 @@
 
 /* ------------------------------- Filters --------------------------------- */
 
+.store-locator__filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto 12px;
+  max-width: 900px;
+}
+
 .store-locator__filters {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  margin: 0 auto 12px;
-  max-width: 900px;
 }
 
 .store-locator__filter-chip {
@@ -231,6 +239,40 @@
   background: var(--slr-accent);
   border-color: var(--slr-accent);
   color: var(--slr-accent-contrast);
+}
+
+.store-locator__radius-filter {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.store-locator__radius-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 9px 34px 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--slr-border);
+  background-color: var(--slr-card-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6b6b' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 10px 6px;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--slr-transition);
+}
+
+.store-locator__radius-select:hover {
+  border-color: var(--slr-accent);
+}
+
+.store-locator__radius-select:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
 }
 
 /* -------------------------------- Status --------------------------------- */
@@ -282,7 +324,6 @@
   border-radius: var(--slr-radius);
   overflow: hidden;
   border: 1px solid var(--slr-border);
-  z-index: 1;
 }
 
 .store-locator__map {
@@ -849,7 +890,7 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 2;
+  z-index: 1000;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -905,7 +946,7 @@
   position: absolute;
   left: 12px;
   bottom: 12px;
-  z-index: 2;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1048,6 +1089,13 @@
 @media (max-width: 640px) {
   .store-locator__inner {
     padding: 40px 16px;
+  }
+  .store-locator__filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .store-locator__radius-select {
+    width: 100%;
   }
   .store-locator__search {
     flex-direction: column;
