@@ -1001,7 +1001,7 @@
         "heading_tag": "h2",
         "product_source": "automatic",
         "collection": "",
-        "max_products": 3,
+        "max_products": 4,
         "include_current_product": true,
         "lock_current_product": true,
         "disable_smart_fallback": false,
