@@ -1,4 +1,5 @@
 
+{% assign proInfo = closest.product %}
 
 {% if closest.product == blank %}
   {% assign text = 'placeholders.product_title' | t %}
@@ -14,6 +15,8 @@
     {% render 'text', fallback_text: product_title, block: block %}
   </a>
 {% endif %}
+
+
 
 {% schema %}
 {
