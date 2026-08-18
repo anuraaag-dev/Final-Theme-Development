@@ -708,6 +708,25 @@
   typography settings is never fought by this section.
 ============================================================================
 {%- endcomment -%}
+{%- comment -%}
+============================================================================
+  COLLECTION BENTO SHOWCASE
+  Asymmetric "bento grid" of navigational tiles: one large tile (image or
+  uploaded video) spanning two rows on the left, two smaller tiles top
+  right, and one wide tile bottom right — each linking out to a product,
+  collection, or custom URL, with a title and optional status dot overlay.
+
+  Built with Liquid, HTML, CSS and vanilla JavaScript only — no external
+  libraries. Single self-contained file, Shopify Online Store 2.0
+  compatible.
+
+  NOTE ON TYPOGRAPHY: intentionally no font-family is set anywhere in this
+  file's CSS. Font size, weight, letter-spacing and color are exposed as
+  settings, but the typeface itself is left to inherit from the theme's
+  own global font settings, so changing the font in the Theme Editor's
+  typography settings is never fought by this section.
+============================================================================
+{%- endcomment -%}
 
 {%- liquid
   assign s = section.settings
@@ -715,7 +734,7 @@
 -%}
 
 <section
-  id="CollectionBento-{{ sec_id }}"  
+  id="CollectionBento-{{ sec_id }}"
   class="cbs"
   data-collection-bento
 >
@@ -825,12 +844,6 @@
     --cbs-grid-height: {{ s.grid_height_desktop }}px;
     --cbs-padding-top: {{ s.padding_top }}px;
     --cbs-padding-bottom: {{ s.padding_bottom }}px;
-    /* Real, scrollbar-excluded viewport width. Falls back to 100vw so the
-       layout still works before JS runs on the very first paint; JS then
-       overwrites this with document.documentElement.clientWidth, which is
-       the actual visible page width. See full_width block below for why
-       this indirection exists. */
-    --cbs-viewport-width: 100vw;
 
     display: block;
     background: var(--cbs-bg);
@@ -839,27 +852,13 @@
 
   {%- if s.full_width -%}
   #CollectionBento-{{ sec_id }} {
-    width: var(--cbs-viewport-width);
-    max-width: var(--cbs-viewport-width);
-    /* Breaks the section out of the theme's page-width/container wrapper
-       so its background spans the full viewport edge-to-edge, regardless
-       of that wrapper's own max-width or side padding.
-
-       BUG FIX: this used to be "100vw" directly, e.g.
-         width: 100vw;
-         margin-left: calc(50% - 50vw);
-         margin-right: calc(50% - 50vw);
-       100vw is the width of the viewport INCLUDING the vertical scrollbar,
-       which is a few pixels wider than the page's actual visible content
-       area (document.documentElement.clientWidth) whenever a vertical
-       scrollbar is present — which is most real pages. That made this
-       section a few pixels wider than the page itself, which is exactly
-       what forces a horizontal scrollbar to appear. Using the
-       --cbs-viewport-width custom property (set from clientWidth in JS,
-       see <script> below) instead of the raw vw unit fixes this at the
-       source instead of just hiding the symptom with overflow-x:hidden. */
-    margin-left: calc(50% - (var(--cbs-viewport-width) / 2));
-    margin-right: calc(50% - (var(--cbs-viewport-width) / 2));
+    /* No-JS / pre-JS fallback only: keeps the section a normal, contained
+       block (not full-bleed) until the script below measures the page and
+       sets exact pixel width/margins inline. We deliberately do NOT use a
+       vw/percentage-based negative-margin trick here — see the <script>
+       comment for why that approach is unreliable and was causing the
+       horizontal scrollbar. */
+    width: 100%;
   }
   {%- endif -%}
 
@@ -1047,22 +1046,52 @@
 
   {%- if s.full_width -%}
   /* ------------------------------------------------------------------
-     Full-width bug fix: keep --cbs-viewport-width in sync with the real,
-     scrollbar-excluded page width (document.documentElement.clientWidth)
-     instead of letting the CSS use the raw 100vw unit, which is wider
-     than the visible page whenever a vertical scrollbar is present and
-     was what caused the section to trigger a horizontal scrollbar.
+     Full-bleed width fix.
+
+     The classic "width:100vw; margin-left:calc(50% - 50vw)" trick (and an
+     earlier attempt here that swapped 100vw for a scrollbar-corrected
+     clientWidth value) both still resolve that "50%" against the
+     section's own containing block — normally its parent. If any
+     ancestor between this section and <body> is a width-constrained
+     wrapper (a max-width + side-padding "page width" container, which
+     almost every Shopify theme has around section content), that 50%
+     is NOT 50% of the viewport, so the negative margin over- or
+     under-shoots and the section ends up wider than the page — which is
+     exactly what forces the horizontal scrollbar.
+
+     The fix that's actually reliable regardless of how deeply nested or
+     padded the ancestors are: don't do the math with percentages/vw at
+     all. Instead, measure where the section currently sits relative to
+     the viewport with getBoundingClientRect(), then set an exact pixel
+     width and margin-left so its left edge lands at 0 and its right edge
+     lands at the true visible viewport width
+     (document.documentElement.clientWidth, which already excludes the
+     scrollbar). This works no matter what the ancestors do.
      ------------------------------------------------------------------ */
-  var setViewportWidth = function () {
-    section.style.setProperty('--cbs-viewport-width', document.documentElement.clientWidth + 'px');
+  var applyFullBleed = function () {
+    // Clear any previous inline overrides first so the measurement below
+    // reflects the section's normal, un-shifted position — otherwise a
+    // stale negative margin from a prior call would corrupt the new
+    // measurement (this matters on resize/orientation change).
+    section.style.width = '';
+    section.style.marginLeft = '';
+    section.style.marginRight = '';
+
+    var naturalLeft = section.getBoundingClientRect().left;
+    var viewportWidth = document.documentElement.clientWidth;
+
+    section.style.width = viewportWidth + 'px';
+    section.style.marginLeft = (-naturalLeft) + 'px';
+    section.style.marginRight = '0px';
   };
 
-  setViewportWidth();
+  applyFullBleed();
+  window.addEventListener('load', applyFullBleed);
 
   var resizeTimeout;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(setViewportWidth, 100);
+    resizeTimeout = setTimeout(applyFullBleed, 100);
   });
   {%- endif -%}
 
