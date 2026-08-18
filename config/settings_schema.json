@@ -2133,7 +2133,7 @@
       { "type": "range", "id": "fsb_dot_spacing", "label": "Extra spacing between dots (px)", "min": 0, "max": 20, "step": 1, "default": 0 },
 
       { "type": "header", "content": "Rewards Progress Bar" },
-      { "type": "checkbox", "id": "enable_free_shipping_bar", "label": "Show rewards progress bar in cart drawer", "default": true },
+      { "type": "checkbox", "id": "enable_free_shipping_bar", "label": "Show Reward Progress Bar", "default": true },
       { "type": "range", "id": "fsb_bar_width", "label": "Bar width (%)", "min": 50, "max": 100, "step": 5, "default": 90 },
       { "type": "range", "id": "fsb_bar_height", "label": "Bar height (px)", "min": 2, "max": 20, "step": 1, "default": 6 },
       { "type": "range", "id": "fsb_marker_font_size", "label": "Marker label font size (px)", "min": 8, "max": 16, "step": 1, "default": 11 },

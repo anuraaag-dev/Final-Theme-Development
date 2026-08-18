@@ -103,6 +103,8 @@
     "variant_button_border_width": 1,
     "variant_button_radius": 14,
     "variant_button_width": "equal-width-buttons",
+    "fsb_dot_icon_size": 85,
+    "enable_free_shipping_bar": true,
     "fsb_tier1_threshold": 100,
     "fsb_tier1_discount_percent": "20",
     "fsb_tier2_threshold": 500,
