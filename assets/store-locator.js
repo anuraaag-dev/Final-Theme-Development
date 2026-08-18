@@ -332,6 +332,7 @@
     this.searchInput = root.querySelector('[data-search-input]');
     this.locateBtn = root.querySelector('[data-locate-btn]');
     this.typeFiltersEl = root.querySelector('[data-type-filters]');
+    this.radiusFilterEl = root.querySelector('[data-radius-filter]');
     this.resultCountEl = root.querySelector('[data-result-count]');
     this.announcerEl = root.querySelector('[data-status-announcer]');
     this.emptyStateEl = root.querySelector('[data-empty-state]');
@@ -365,6 +366,8 @@
     this.searchLocation = null;
     this.lastLocationSource = null;
     this.activeTypeFilter = 'all';
+    this.activeRadiusKm = null;
+    this.radiusCircle = null;
     this.selectedStoreId = null;
     this.searchToken = 0;
     this.routeRequestToken = 0;
@@ -554,6 +557,13 @@
         self.setTypeFilter(btn.getAttribute('data-type-filter'));
       });
     }
+    if (this.radiusFilterEl) {
+      this.radiusFilterEl.addEventListener('change', function () {
+        var raw = self.radiusFilterEl.value;
+        var km = raw ? parseFloat(raw) : null;
+        self.setRadiusFilter(isFinite(km) ? km : null);
+      });
+    }
 
     if (this.listEl) {
       this.listEl.addEventListener('click', function (e) {
@@ -734,8 +744,49 @@
     if (this.searchInput) this.searchInput.value = '';
     this.currentQuery = '';
     this.searchLocation = null;
+    this.activeRadiusKm = null;
+    if (this.radiusFilterEl) this.radiusFilterEl.value = '';
     this.clearRoute();
     this.setTypeFilter('all');
+  };
+  /**
+   * A radius filter is only meaningful relative to a known origin (either a
+   * searched location or the customer's own position). If neither is known
+   * yet when a distance is picked, this asks for geolocation on the spot —
+   * same pattern as requestDirectionsTo() — rather than silently doing
+   * nothing or showing an empty list with no explanation.
+   */
+  StoreLocatorInstance.prototype.setRadiusFilter = function (km) {
+    var self = this;
+    this.activeRadiusKm = km;
+
+    if (km && !this.getCurrentOrigin()) {
+      if (!('geolocation' in navigator)) {
+        this.announce('Search a city or postcode, or allow location access, to filter by distance.');
+        this.applyFilters();
+        return;
+      }
+      this.announce('Getting your location to filter by distance…');
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          self.userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          self.lastLocationSource = 'user';
+          self.showUserMarker();
+          self.applyFilters();
+        },
+        function () {
+          self.announce('We could not access your location. Try searching a city or postcode, then choose a distance again.');
+          self.applyFilters();
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+      );
+      return;
+    }
+
+    this.applyFilters();
   };
 
   /**
@@ -793,6 +844,11 @@
           ? haversineKm(origin.lat, origin.lng, s.lat, s.lng)
           : null;
       });
+      if (this.activeRadiusKm) {
+        visible = visible.filter(function (s) {
+          return s.distanceKm !== null && s.distanceKm !== undefined && s.distanceKm <= self.activeRadiusKm;
+        });
+      }
       visible = visible.slice().sort(function (a, b) {
         if (a.distanceKm === null || a.distanceKm === undefined) return 1;
         if (b.distanceKm === null || b.distanceKm === undefined) return -1;
@@ -803,6 +859,11 @@
         return a.name.localeCompare(b.name);
       });
     }
+
+    // Must run before renderVisible(): fitMapToVisible() (called from within
+    // it) checks this.radiusCircle to decide whether to frame the search
+    // radius instead of just the visible markers.
+    this.updateRadiusCircle();
 
     this.renderVisible(visible);
   };
@@ -862,15 +923,21 @@
 
     var filtersActive = this.activeTypeFilter !== 'all';
     var searchActive = !!this.currentQuery;
+    var radiusActive = !!this.activeRadiusKm;
+    var activeCount = (filtersActive ? 1 : 0) + (searchActive ? 1 : 0) + (radiusActive ? 1 : 0);
+
     var message = 'No stores found near this location.';
     var buttonLabel = 'Clear Search';
 
-    if (filtersActive && !searchActive) {
+    if (activeCount > 1) {
+      message = 'No stores match your current search and filters.';
+      buttonLabel = 'Clear All';
+    } else if (radiusActive) {
+      message = 'No stores within ' + this.activeRadiusKm + ' km. Try a wider distance.';
+      buttonLabel = 'Clear Distance Filter';
+    } else if (filtersActive) {
       message = 'Try changing your filters.';
       buttonLabel = 'Clear Filters';
-    } else if (filtersActive && searchActive) {
-      message = 'No stores match your search and filters.';
-      buttonLabel = 'Clear All';
     }
 
     if (this.emptyMessageEl) this.emptyMessageEl.textContent = message;
@@ -1135,6 +1202,16 @@
   StoreLocatorInstance.prototype.fitMapToVisible = function (visible) {
     if (!this.map || !this.L || this.selectedStoreId) return;
     var L = this.L;
+
+    // When a distance filter is active, frame the search radius itself —
+    // this stays correct even if the radius currently contains zero stores
+    // (e.g. "5 km" with nothing that close), showing the customer exactly
+    // what area was searched instead of leaving the map wherever it was.
+    if (this.activeRadiusKm && this.radiusCircle) {
+      this.map.fitBounds(this.radiusCircle.getBounds(), { padding: [24, 24], animate: !this.prefersReducedMotion });
+      return;
+    }
+
     var coords = visible.filter(function (s) { return s.lat !== null && s.lng !== null; });
     if (!coords.length) return;
 
@@ -1154,6 +1231,39 @@
 
     var bounds = L.latLngBounds(latlngs);
     this.map.fitBounds(bounds, { padding: [48, 48], animate: !this.prefersReducedMotion });
+  };
+
+  /**
+   * Draws (or removes) a translucent circle on the map showing the active
+   * distance filter's radius around the current origin — this is the "also
+   * visible on the map" half of the distance filter, not just a list cutoff.
+   * Recreated on every applyFilters() call rather than resized in place,
+   * since both the radius and the origin can change independently and a
+   * plain L.circle has no cheap "move + resize" shortcut worth optimizing
+   * for something that redraws at most once per user interaction.
+   */
+  StoreLocatorInstance.prototype.updateRadiusCircle = function () {
+    if (this.radiusCircle && this.map) {
+      this.map.removeLayer(this.radiusCircle);
+      this.radiusCircle = null;
+    }
+
+    if (!this.map || !this.L || !this.activeRadiusKm) return;
+
+    var origin = this.getCurrentOrigin();
+    if (!origin) return;
+
+    var accent = getComputedStyle(this.root).getPropertyValue('--slr-accent').trim() || '#1a1a1a';
+
+    this.radiusCircle = this.L.circle([origin.lat, origin.lng], {
+      radius: this.activeRadiusKm * 1000, // Leaflet circles are always in meters
+      color: accent,
+      weight: 1.5,
+      opacity: 0.45,
+      fillColor: accent,
+      fillOpacity: 0.06,
+      interactive: false
+    }).addTo(this.map);
   };
 
   StoreLocatorInstance.prototype.getStoreById = function (id) {
