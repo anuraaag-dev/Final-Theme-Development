@@ -1020,7 +1020,7 @@
         "layout": "horizontal",
         "section_width": "page-width",
         "color_scheme": "",
-        "checkmark_color": "#ffffff",
+        "checkmark_color": "{{ settings.color_palette.foreground }}",
         "show_vendor": false,
         "image_ratio": "square",
         "image_fit": "cover",
