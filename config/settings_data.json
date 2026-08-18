@@ -106,6 +106,7 @@
     "fsb_tier1_threshold": 100,
     "fsb_tier1_discount_code": "10%OFF!",
     "fsb_tier2_threshold": 500,
+    "fsb_tier2_discount_code": "FREESHIPPING",
     "fsb_tier3_discount_code": "FREESHIPPING",
     "content_for_index": [],
     "color_palette": {
