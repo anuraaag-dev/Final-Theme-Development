@@ -2154,7 +2154,7 @@
       { "type": "text", "id": "fsb_tier1_icon", "label": "Icon (emoji)", "default": "🏷️" },
       { "type": "text", "id": "fsb_tier1_label", "label": "Label (shown on marker)", "default": "10% Off" },
       { "type": "text", "id": "fsb_tier1_discount_percent", "label": "Discount % (display only)", "default": "10" },
-      { "type": "text", "id": "fsb_tier1_discount_code", "label": "Automatic discount code to apply", "info": "Create this as a normal 'Discount code' in Shopify Admin with a matching minimum spend." },
+  
       { "type": "product", "id": "fsb_tier1_gift_product", "label": "Gift product (if type = Free gift)" },
       { "type": "text", "id": "fsb_tier1_unlocked_message", "label": "Unlocked message", "default": "You've unlocked 10% off!" },
       { "type": "select", "id": "fsb_tier1_label_position", "label": "Label position", "options": [
@@ -2174,7 +2174,7 @@
       { "type": "text", "id": "fsb_tier2_icon", "label": "Icon (emoji)", "default": "🚚" },
       { "type": "text", "id": "fsb_tier2_label", "label": "Label (shown on marker)", "default": "Free Shipping" },
       { "type": "text", "id": "fsb_tier2_discount_percent", "label": "Discount % (display only)", "default": "20" },
-      { "type": "text", "id": "fsb_tier2_discount_code", "label": "Automatic discount code to apply" },
+      
       { "type": "product", "id": "fsb_tier2_gift_product", "label": "Gift product (if type = Free gift)" },
       { "type": "text", "id": "fsb_tier2_unlocked_message", "label": "Unlocked message", "default": "You've unlocked Free Shipping!" },
       { "type": "select", "id": "fsb_tier2_label_position", "label": "Label position", "options": [
@@ -2194,7 +2194,7 @@
       { "type": "text", "id": "fsb_tier3_icon", "label": "Icon (emoji)", "default": "🎁" },
       { "type": "text", "id": "fsb_tier3_label", "label": "Label (shown on marker)", "default": "Free Gift" },
       { "type": "text", "id": "fsb_tier3_discount_percent", "label": "Discount % (display only)", "default": "0" },
-      { "type": "text", "id": "fsb_tier3_discount_code", "label": "Automatic discount code to apply" },
+     
       { "type": "product", "id": "fsb_tier3_gift_product", "label": "Gift product (if type = Free gift)" },
       { "type": "text", "id": "fsb_tier3_unlocked_message", "label": "Unlocked message", "default": "You've unlocked a free gift!" },
       { "type": "select", "id": "fsb_tier3_label_position", "label": "Label position", "options": [
@@ -2214,7 +2214,7 @@
       { "type": "text", "id": "fsb_tier4_icon", "label": "Icon (emoji)", "default": "⭐" },
       { "type": "text", "id": "fsb_tier4_label", "label": "Label (shown on marker)", "default": "VIP" },
       { "type": "text", "id": "fsb_tier4_discount_percent", "label": "Discount % (display only)", "default": "0" },
-      { "type": "text", "id": "fsb_tier4_discount_code", "label": "Automatic discount code to apply" },
+    
       { "type": "product", "id": "fsb_tier4_gift_product", "label": "Gift product (if type = Free gift)" },
       { "type": "text", "id": "fsb_tier4_unlocked_message", "label": "Unlocked message", "default": "VIP status unlocked!" },
       { "type": "select", "id": "fsb_tier4_label_position", "label": "Label position", "options": [
