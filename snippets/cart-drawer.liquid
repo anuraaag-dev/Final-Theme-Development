@@ -102,6 +102,23 @@
             %}
           {%- endif -%}
 
+          {% if settings.enable_free_shipping_bar %}
+            {%- liquid
+              assign fsb_gift_variant_ids = ''
+              for i in (1..4)
+                assign fsb_type_key = 'fsb_tier' | append: i | append: '_type'
+                if settings[fsb_type_key] == 'free_gift'
+                  assign fsb_gift_key = 'fsb_tier' | append: i | append: '_gift_product'
+                  assign fsb_variant = settings[fsb_gift_key].selected_or_first_available_variant.id
+                  if fsb_variant
+                    assign fsb_gift_variant_ids = fsb_gift_variant_ids | append: fsb_variant | append: ','
+                  endif
+                endif
+              endfor
+            -%}
+            {% render 'free-shipping-bar', settings: settings, section_id: 'cart-drawer-section' %}
+          {% endif %}
+
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
               {{ empty_cart_drawer_content }}
@@ -112,7 +129,7 @@
                 style="--header-height: 60px;"
               >
                 <scroll-hint class="cart-drawer__items">
-                  {% render 'cart-products', context: 'drawer' %}
+                  {% render 'cart-products', context: 'drawer', fsb_gift_variant_ids: fsb_gift_variant_ids %} 
                 </scroll-hint>
 
                 <div class="cart-drawer__summary">

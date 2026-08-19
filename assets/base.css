@@ -1,7 +1,11 @@
 * {
   box-sizing: border-box;
 }
-
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 body {
   color: var(--color-foreground);
   background: var(--color-background);
@@ -56,6 +60,7 @@ html[scroll-lock] .page-wrapper {
   .page-wrapper {
     height: 100dvh;
     overflow-y: auto;
+    overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--color-foreground-rgb) / var(--opacity-40)) var(--color-background);

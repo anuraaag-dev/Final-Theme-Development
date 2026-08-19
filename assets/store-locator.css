@@ -1,0 +1,1127 @@
+/* ==========================================================================
+   Store Locator
+   All selectors are scoped under .store-locator so this file cannot leak
+   into the rest of the theme. Colors, spacing tokens that merchants can
+   control from the Theme Editor are read as CSS custom properties set
+   inline on the section root (see sections/store-locator.liquid); the
+   values below are fallbacks only.
+   ========================================================================== */
+
+.store-locator {
+  --slr-accent: #1a1a1a;
+  --slr-accent-contrast: #ffffff;
+  --slr-card-bg: #ffffff;
+  --slr-border: #e5e5e5;
+  --slr-radius: 12px;
+  --slr-map-height: 560px;
+  --slr-max-width: 1760px;
+  --slr-danger: #c0392b;
+  --slr-success: #1f7a4d;
+  --slr-muted: #6b6b6b;
+  --slr-marker-color: #1a1a1a;
+  --slr-directions-bg: #1a1a1a;
+  --slr-directions-text: #ffffff;
+  --slr-shadow: 0 1px 2px rgba(20, 20, 20, 0.04), 0 8px 24px rgba(20, 20, 20, 0.06);
+  --slr-shadow-hover: 0 4px 10px rgba(20, 20, 20, 0.06), 0 16px 32px rgba(20, 20, 20, 0.09);
+  --slr-transition: 180ms cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  position: relative;
+  box-sizing: border-box;
+  color: inherit;
+}
+
+.store-locator *,
+.store-locator *::before,
+.store-locator *::after {
+  box-sizing: inherit;
+}
+
+.store-locator__inner {
+  max-width: var(--slr-max-width);
+  margin: 0 auto;
+  padding: 64px 32px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------ Header ---------------------------------- */
+
+.store-locator__header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 40px;
+}
+
+.store-locator__title {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.1;
+  margin: 0 0 12px;
+  letter-spacing: -0.01em;
+}
+
+.store-locator__subtitle {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--slr-muted);
+  margin: 0;
+}
+
+/* ------------------------------ Controls -------------------------------- */
+
+.store-locator__controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.store-locator__search {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  flex-wrap: wrap;
+}
+
+.store-locator__search-field {
+  position: relative;
+  flex: 1 1 320px;
+  display: flex;
+  align-items: center;
+  background: var(--slr-card-bg);
+  border: 1px solid var(--slr-border);
+  border-radius: var(--slr-radius);
+  padding: 0 8px 0 16px;
+  transition: border-color var(--slr-transition), box-shadow var(--slr-transition);
+}
+
+.store-locator__search-field:focus-within {
+  border-color: var(--slr-accent);
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+}
+
+.store-locator__search-field svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--slr-muted);
+}
+
+.store-locator__search-field input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 14px 10px;
+  font-size: 15px;
+  color: inherit;
+  min-width: 0;
+}
+
+.store-locator__search-field input:focus {
+  outline: none;
+}
+
+.store-locator__locate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: calc(var(--slr-radius) - 4px);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--slr-muted);
+  cursor: pointer;
+  transition: background var(--slr-transition), color var(--slr-transition);
+  flex-shrink: 0;
+}
+
+.store-locator__locate-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--slr-accent);
+}
+
+.store-locator__locate-btn:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
+}
+
+.store-locator__locate-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.store-locator__locate-btn.is-loading svg {
+  animation: store-locator-spin 900ms linear infinite;
+}
+
+.store-locator__search-btn {
+  flex: 0 0 auto;
+  padding: 0 28px;
+  border: 1px solid var(--slr-accent);
+  background: var(--slr-accent);
+  color: var(--slr-accent-contrast);
+  border-radius: var(--slr-radius);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--slr-transition), transform var(--slr-transition);
+}
+
+.store-locator__search-btn:hover {
+  opacity: 0.88;
+}
+
+.store-locator__search-btn:active {
+  transform: translateY(1px);
+}
+
+.store-locator__search-btn:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
+}
+
+.store-locator__search.is-loading .store-locator__search-btn {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ------------------------------- Filters --------------------------------- */
+
+.store-locator__filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto 12px;
+  max-width: 900px;
+}
+
+.store-locator__filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.store-locator__filter-chip {
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--slr-border);
+  background: var(--slr-card-bg);
+  color: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--slr-transition), color var(--slr-transition), border-color var(--slr-transition);
+}
+
+.store-locator__filter-chip:hover {
+  border-color: var(--slr-accent);
+}
+
+.store-locator__filter-chip:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
+}
+
+.store-locator__filter-chip.is-active {
+  background: var(--slr-accent);
+  border-color: var(--slr-accent);
+  color: var(--slr-accent-contrast);
+}
+
+.store-locator__radius-filter {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.store-locator__radius-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 9px 34px 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--slr-border);
+  background-color: var(--slr-card-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6b6b' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 10px 6px;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--slr-transition);
+}
+
+.store-locator__radius-select:hover {
+  border-color: var(--slr-accent);
+}
+
+.store-locator__radius-select:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
+}
+
+/* -------------------------------- Status --------------------------------- */
+
+.store-locator__status {
+  text-align: center;
+  font-size: 13px;
+  color: var(--slr-muted);
+  margin: 0 0 20px;
+  min-height: 18px;
+}
+
+/* -------------------------------- Layout ---------------------------------- */
+
+.store-locator__layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 32%) 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.store-locator__results {
+  position: relative;
+  height: var(--slr-map-height);
+  display: flex;
+  flex-direction: column;
+}
+
+.store-locator__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 4px 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  scrollbar-width: thin;
+}
+
+.store-locator__item[hidden] {
+  display: none;
+}
+
+.store-locator__map-wrap {
+  position: relative;
+  height: var(--slr-map-height);
+  border-radius: var(--slr-radius);
+  overflow: hidden;
+  border: 1px solid var(--slr-border);
+}
+
+.store-locator__map {
+  width: 100%;
+  height: 100%;
+}
+
+.store-locator__map-loading,
+.store-locator__map-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #f3f3f1;
+  color: var(--slr-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 24px;
+}
+
+.store-locator__map-loading[hidden],
+.store-locator__map-fallback[hidden] {
+  display: none;
+}
+
+.store-locator__spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 0, 0, 0.12);
+  border-top-color: var(--slr-accent);
+  animation: store-locator-spin 800ms linear infinite;
+}
+
+/* --------------------------------- Card ----------------------------------- */
+
+.store-locator__card {
+  position: relative;
+  border: 1px solid var(--slr-border);
+  border-radius: var(--slr-radius);
+  background: var(--slr-card-bg);
+  box-shadow: var(--slr-shadow);
+  transition: box-shadow 220ms cubic-bezier(0.2, 0.7, 0.3, 1),
+              border-color 220ms cubic-bezier(0.2, 0.7, 0.3, 1),
+              transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Hover-lift is scoped to devices with real hover (mouse/trackpad) so touch
+   taps never get a "stuck" hover state, and hover is never load-bearing for
+   any actual functionality — tapping still selects the store either way. */
+@media (hover: hover) and (pointer: fine) {
+  .store-locator__card:hover {
+    box-shadow: var(--slr-shadow-hover);
+    border-color: var(--slr-accent);
+    transform: translateY(-4px);
+  }
+
+  .store-locator__card:hover .store-locator__card-name {
+    color: var(--slr-accent);
+  }
+
+  .store-locator__card:hover .store-locator__card-image img {
+    transform: scale(1.05);
+  }
+}
+
+.store-locator__card.is-selected {
+  border-color: var(--slr-accent);
+  box-shadow: 0 0 0 2px var(--slr-accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Selected + hovered together: keep the selection ring, layer the lift's
+     shadow underneath it rather than letting one silently replace the other. */
+  .store-locator__card.is-selected:hover {
+    box-shadow: 0 0 0 2px var(--slr-accent), var(--slr-shadow-hover);
+  }
+}
+
+.store-locator__card-trigger {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.store-locator__card-trigger:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: -2px;
+  border-radius: calc(var(--slr-radius) - 4px);
+}
+
+.store-locator__card-image {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: calc(var(--slr-radius) - 4px);
+  overflow: hidden;
+  background: #f2f2f0;
+}
+
+.store-locator__card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 300ms ease;
+}
+
+.store-locator__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.store-locator__card-name {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  transition: color 220ms ease;
+}
+
+.store-locator__card-type {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 3px 9px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--slr-accent) 8%, transparent);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--slr-accent);
+}
+
+.store-locator__card-address {
+  font-size: 14px;
+  color: var(--slr-muted);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.store-locator__card-distance {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--slr-accent);
+  margin-top: 6px;
+}
+
+.store-locator__card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.store-locator__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--slr-muted);
+  flex-shrink: 0;
+}
+
+.store-locator__card.is-open .store-locator__status-dot {
+  background: var(--slr-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--slr-success) 18%, transparent);
+}
+
+.store-locator__card.is-closed .store-locator__status-dot {
+  background: var(--slr-danger);
+}
+
+.store-locator__card-phone {
+  font-size: 13px;
+  color: var(--slr-muted);
+  margin-top: 2px;
+}
+
+.store-locator__card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.store-locator__directions-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 16px;
+  border-radius: calc(var(--slr-radius) - 4px);
+  border: 1px solid var(--slr-directions-bg);
+  background: var(--slr-directions-bg);
+  color: var(--slr-directions-text);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+
+.store-locator__directions-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .store-locator__directions-btn:hover {
+    opacity: 0.9;
+    box-shadow: var(--slr-shadow-hover);
+  }
+
+  .store-locator__directions-btn:hover svg {
+    transform: translateX(2px);
+  }
+}
+
+.store-locator__directions-btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.store-locator__directions-btn:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
+}
+
+.store-locator__directions-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 6px 4px;
+  font-size: 12px;
+  color: var(--slr-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.store-locator__directions-link svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.store-locator__directions-link:hover,
+.store-locator__directions-link:focus-visible {
+  color: var(--slr-accent);
+}
+
+/* --------------------------------- Empty ----------------------------------- */
+
+.store-locator__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--slr-muted);
+  flex: 1;
+}
+
+.store-locator__empty[hidden] {
+  display: none;
+}
+
+.store-locator__reset-btn {
+  padding: 10px 20px;
+  border-radius: var(--slr-radius);
+  border: 1px solid var(--slr-accent);
+  background: transparent;
+  color: var(--slr-accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--slr-transition), color var(--slr-transition);
+}
+
+.store-locator__reset-btn:hover {
+  background: var(--slr-accent);
+  color: var(--slr-accent-contrast);
+}
+
+/* ------------------------------ Leaflet base --------------------------------- */
+
+.store-locator__map .leaflet-container {
+  font: inherit;
+  background: #f3f3f1;
+}
+
+.store-locator__map .leaflet-control-attribution {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* --------------------------------- Markers ------------------------------------ */
+
+.store-locator__marker-wrap {
+  background: transparent;
+  border: 0;
+}
+
+.store-locator__marker-icon {
+  position: relative;
+  width: 30px;
+  height: 40px;
+  color: var(--slr-marker-color);
+  --slr-marker-scale: 1;
+  transform: scale(var(--slr-marker-scale));
+  transform-origin: 50% 100%;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.store-locator__marker-pin {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: currentColor;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+}
+
+.store-locator__marker-icon.is-selected {
+  color: var(--slr-danger);
+  --slr-marker-scale: 1.2;
+}
+
+.store-locator__marker-icon.is-bouncing {
+  animation: store-locator-marker-bounce 700ms ease;
+}
+
+@keyframes store-locator-marker-bounce {
+  0%   { transform: scale(var(--slr-marker-scale)) translateY(0); }
+  25%  { transform: scale(var(--slr-marker-scale)) translateY(-14px); }
+  50%  { transform: scale(var(--slr-marker-scale)) translateY(0); }
+  70%  { transform: scale(var(--slr-marker-scale)) translateY(-6px); }
+  100% { transform: scale(var(--slr-marker-scale)) translateY(0); }
+}
+
+/* Hover cue: a brief one-shot hop on entry, then a smooth continuous glow
+   for as long as the card stays hovered. Distinct from the one-shot click
+   bounce above, which is stronger and persists until deselected. */
+.store-locator__marker-icon.is-hover {
+  color: var(--slr-danger);
+  --slr-marker-scale: 1.1;
+}
+
+/* Selected takes priority over hover when both apply — explicit rule so
+   this doesn't depend on which class happened to be added last. */
+.store-locator__marker-icon.is-selected.is-hover {
+  --slr-marker-scale: 1.2;
+}
+
+.store-locator__marker-icon.is-hover-hopping {
+  animation: store-locator-hover-hop 420ms ease-out;
+}
+
+@keyframes store-locator-hover-hop {
+  0%   { transform: scale(var(--slr-marker-scale)) translateY(0); }
+  35%  { transform: scale(var(--slr-marker-scale)) translateY(-8px); }
+  65%  { transform: scale(var(--slr-marker-scale)) translateY(0); }
+  100% { transform: scale(var(--slr-marker-scale)) translateY(0); }
+}
+
+.store-locator__marker-icon.is-hover-pulsing {
+  animation: store-locator-hover-glow 1s ease-in-out infinite;
+}
+
+@keyframes store-locator-hover-glow {
+  0%, 100% { transform: scale(var(--slr-marker-scale)); }
+  50% { transform: scale(calc(var(--slr-marker-scale) * 1.18)); }
+}
+
+.store-locator__marker-pulse.is-hover-active {
+  animation: store-locator-hover-ring 1.4s ease-in-out infinite;
+}
+
+@keyframes store-locator-hover-ring {
+  0% { transform: scale(0.6); opacity: 0.55; }
+  70% { transform: scale(1.5); opacity: 0; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.store-locator__marker-pulse {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  border-radius: 50%;
+  background: rgba(192, 57, 43, 0.35);
+  pointer-events: none;
+}
+
+.store-locator__marker-pulse.is-active {
+  animation: store-locator-pulse 1.1s ease-out 1;
+}
+
+@keyframes store-locator-pulse {
+  0% { transform: scale(0.3); opacity: 0.9; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+.leaflet-marker-icon:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.store-locator__user-marker-wrap {
+  background: transparent;
+  border: 0;
+}
+
+.store-locator__user-marker-dot {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2b6cb0;
+  opacity: 0.2;
+  position: relative;
+}
+
+.store-locator__user-marker-dot::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: #2b6cb0;
+  opacity: 1;
+  border: 2px solid #ffffff;
+}
+
+@keyframes store-locator-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --------------------------------- Popup ------------------------------------ */
+
+.store-locator__popup-wrap .leaflet-popup-content-wrapper {
+  border-radius: var(--slr-radius);
+  box-shadow: var(--slr-shadow-hover);
+  padding: 4px;
+}
+
+.store-locator__popup-wrap .leaflet-popup-content {
+  margin: 10px 14px;
+}
+
+.store-locator__popup-wrap .leaflet-popup-tip {
+  box-shadow: none;
+}
+
+.store-locator__popup {
+  max-width: 240px;
+  font-family: inherit;
+  padding: 4px 2px;
+}
+
+.store-locator__popup-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.store-locator__popup-type {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slr-muted);
+  margin: 0 0 6px;
+}
+
+.store-locator__popup-address,
+.store-locator__popup-phone {
+  font-size: 13px;
+  color: var(--slr-muted);
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.store-locator__popup-status {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.store-locator__popup-directions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--slr-directions-bg);
+  color: var(--slr-directions-text) !important;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.store-locator__popup-directions svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.store-locator__popup-external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--slr-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.store-locator__popup-external-link svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.store-locator__popup-external-link:hover {
+  color: var(--slr-accent);
+}
+
+/* --------------------------------- Route -------------------------------------- */
+
+.store-locator__route-summary {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--slr-card-bg);
+  border-radius: 999px;
+  box-shadow: var(--slr-shadow-hover);
+  padding: 8px 8px 8px 16px;
+  max-width: calc(100% - 24px);
+}
+
+.store-locator__route-summary[hidden] {
+  display: none;
+}
+
+.store-locator__route-summary-text {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.store-locator__route-clear {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.store-locator__route-clear:hover {
+  background: var(--slr-accent);
+  color: var(--slr-accent-contrast);
+}
+
+/* Leaflet Routing Machine's own itinerary panel is disabled via the `show`
+   option in JS; this is a defensive backstop in case that ever changes. */
+.leaflet-routing-container {
+  display: none !important;
+}
+
+/* ---------------------------- Map controls ------------------------------------ */
+
+.store-locator__map-controls {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.store-locator__map-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--slr-card-bg);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  box-shadow: var(--slr-shadow);
+  cursor: pointer;
+  transition: background var(--slr-transition), color var(--slr-transition);
+}
+
+.store-locator__map-control-btn:hover,
+.store-locator__map-control-btn.is-active {
+  background: var(--slr-accent);
+  color: var(--slr-accent-contrast);
+}
+
+.store-locator__map-control-btn:focus-visible {
+  outline: 2px solid var(--slr-accent);
+  outline-offset: 2px;
+}
+
+.store-locator__map-control-btn--icon {
+  width: 32px;
+  padding: 0;
+}
+
+.store-locator__map-control-btn--icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Native Fullscreen API sizing — the browser makes the element fill the
+   screen, this just ensures Leaflet's own container tracks that height. */
+.store-locator__map-wrap:fullscreen,
+.store-locator__map-wrap:-webkit-full-screen {
+  height: 100vh;
+  width: 100vw;
+}
+
+.store-locator__map-wrap:fullscreen .store-locator__map,
+.store-locator__map-wrap:-webkit-full-screen .store-locator__map {
+  height: 100%;
+}
+
+/* ------------------------------ Reduced motion ------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .store-locator * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .store-locator__marker-pulse {
+    display: none;
+  }
+}
+
+/* -------------------------------- Benefits ----------------------------------- */
+
+.store-locator__benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+  margin-top: 64px;
+  padding-top: 48px;
+  border-top: 1px solid var(--slr-border);
+}
+
+.store-locator__benefit {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.store-locator__benefit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--slr-accent);
+}
+
+.store-locator__benefit-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.store-locator__benefit-heading {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.store-locator__benefit-text {
+  font-size: 14px;
+  color: var(--slr-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ---------------------------------- Tablet ----------------------------------- */
+
+@media (max-width: 989px) {
+  .store-locator__layout {
+    grid-template-columns: 1fr;
+  }
+  .store-locator__results {
+    height: auto;
+    order: 2;
+  }
+  .store-locator__list {
+    overflow: visible;
+  }
+  .store-locator__map-wrap {
+    order: 1;
+    height: min(var(--slr-map-height), 420px);
+  }
+}
+
+/* ---------------------------------- Mobile ------------------------------------ */
+
+@media (max-width: 640px) {
+  .store-locator__inner {
+    padding: 40px 16px;
+  }
+  .store-locator__filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .store-locator__radius-select {
+    width: 100%;
+  }
+  .store-locator__search {
+    flex-direction: column;
+  }
+  .store-locator__search-btn {
+    width: 100%;
+    padding: 14px 16px;
+  }
+  .store-locator__map-wrap {
+    height: 320px;
+  }
+  .store-locator__card-trigger {
+    padding: 14px;
+  }
+  .store-locator__card-image {
+    width: 56px;
+    height: 56px;
+  }
+  .store-locator__route-summary {
+    top: 8px;
+    right: 8px;
+    left: 8px;
+    padding: 6px 6px 6px 12px;
+    max-width: none;
+  }
+  .store-locator__route-summary-text {
+    font-size: 12px;
+  }
+}

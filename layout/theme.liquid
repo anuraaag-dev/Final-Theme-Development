@@ -151,5 +151,16 @@
     {% if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add-modal' %}
     {% endif %}
+
+    <script src="{{ 'free-shipping-bar.js' | asset_url }}" defer></script>
+  <script type="module">
+    import { hydrate } from '@theme/section-hydration';
+
+    window.fsbSharedHydrate = function (sectionId) {
+      var url = new URL(window.location.href);
+      url.searchParams.delete('page');
+      return hydrate(sectionId, url);
+    };
+  </script>
   </body>
 </html>
