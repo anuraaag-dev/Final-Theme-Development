@@ -956,6 +956,48 @@
         "max_products": 4,
         "empty_text": "You haven't viewed any products yet."
       }
+    },
+    "bundle_builder_cUQG9G": {
+      "type": "bundle-builder",
+      "blocks": {
+        "step_Ek4aWW": {
+          "type": "step",
+          "settings": {
+            "tier1_head": "Step 1",
+            "step_title": "Prep Your Skin",
+            "collection": "mens-clothing",
+            "required_qty": 1,
+            "step_icon": "sun"
+          }
+        },
+        "step_f4KK3T": {
+          "type": "step",
+          "settings": {
+            "tier1_head": "Step 1",
+            "step_title": "Prep Your Skin",
+            "collection": "new-arrivals",
+            "required_qty": 1,
+            "step_icon": "moon"
+          }
+        }
+      },
+      "block_order": [
+        "step_Ek4aWW",
+        "step_f4KK3T"
+      ],
+      "name": "Bundle Builder",
+      "settings": {
+        "heading": "Unbeatable prices with bundle.",
+        "subtext": "Create your personalized skincare ritual.",
+        "bundle_h": "Bundle Content",
+        "tier1_qty": 3,
+        "tier1_discount": 5,
+        "tier2_qty": 5,
+        "tier2_discount": 10,
+        "tier3_qty": 8,
+        "tier3_discount": 15,
+        "p_color": "#000000"
+      }
     }
   },
   "order": [
@@ -972,6 +1014,7 @@
     "custom_review_section_jEnYjt",
     "brand_story_slider_Knke4L",
     "shopable_video_X6CF9T",
-    "recently_viewed_products_mzP4rX"
+    "recently_viewed_products_mzP4rX",
+    "bundle_builder_cUQG9G"
   ]
 }
