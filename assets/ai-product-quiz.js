@@ -8,7 +8,7 @@
       this.products = this.readJSON('[data-quiz-products]');
       this.questions = this.readJSON('[data-quiz-questions]');
       this.fallbackProducts = this.readJSON('[data-quiz-fallback]');
-      this.minScore = parseInt(root.dataset.minScore, 10) || 35;
+      this.minScore = parseInt(root.dataset.minScore, 10) || 10;
       this.maxResults = parseInt(root.dataset.maxResults, 10) || 3;
       this.launchMode = root.dataset.launchMode;
       this.popupDelay = parseInt(root.dataset.popupDelay, 10) || 8;
@@ -81,6 +81,10 @@
       this.lastFocusedEl = document.activeElement;
       this.modal.hidden = false;
       document.body.style.overflow = 'hidden';
+      this.answers = {};
+      this.currentIndex = 0;
+      this.nextBtn.hidden = false;
+      this.backBtn.hidden = true;
       this.renderQuestion();
       requestAnimationFrame(() => {
         const firstFocusable = this.panel.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -110,8 +114,6 @@
       }
     }
 
-    // ---------- QUESTION FLOW ----------
-
     renderQuestion() {
       if (this.currentIndex >= this.questions.length) {
         this.renderLoading();
@@ -123,7 +125,7 @@
       const pct = Math.round((this.currentIndex / this.questions.length) * 100);
       this.progressBar.style.width = pct + '%';
       this.backBtn.hidden = this.currentIndex === 0;
-      this.nextBtn.disabled = !this.answers[q.attribute_key];
+      this.nextBtn.disabled = !this.answers[q.id];
       this.nextBtn.textContent = this.currentIndex === this.questions.length - 1 ? 'See My Matches' : 'Next';
 
       const options = Array.isArray(q.options) ? q.options : [];
@@ -135,11 +137,10 @@
             .map(
               (opt) => `
             <button type="button"
-              class="ai-quiz-option ${this.answers[q.attribute_key] === opt.value ? 'is-selected' : ''}"
+              class="ai-quiz-option ${this.answers[q.id] === opt.value ? 'is-selected' : ''}"
               data-quiz-option
               data-value="${this.escape(opt.value)}"
-              aria-pressed="${this.answers[q.attribute_key] === opt.value}">
-              ${opt.icon ? `<span class="ai-quiz-option-icon">${this.escape(opt.icon)}</span>` : ''}
+              aria-pressed="${this.answers[q.id] === opt.value}">
               <span>${this.escape(opt.label)}</span>
             </button>
           `
@@ -150,7 +151,7 @@
 
       this.body.querySelectorAll('[data-quiz-option]').forEach((btn) => {
         btn.addEventListener('click', () => {
-          this.answers[q.attribute_key] = btn.dataset.value;
+          this.answers[q.id] = btn.dataset.value;
           this.body.querySelectorAll('[data-quiz-option]').forEach((b) => {
             b.classList.remove('is-selected');
             b.setAttribute('aria-pressed', 'false');
@@ -184,47 +185,31 @@
       `;
     }
 
-    // ---------- SCORING ENGINE ----------
-
     scoreProduct(product) {
-      const profile = product.profile || {};
+      const tags = (product.tags || []).map((t) => String(t).toLowerCase());
       let score = 0;
 
-      for (const [attrKey, answerValue] of Object.entries(this.answers)) {
-        const bucketKey = this.attrKeyToBucket(attrKey);
-        const excludeKey = `exclude_${bucketKey}`;
+      for (const q of this.questions) {
+        const answerValue = this.answers[q.id];
+        if (!answerValue) continue;
 
-        if (Array.isArray(profile[excludeKey]) && profile[excludeKey].includes(answerValue)) {
-          return -1; // hard exclusion
-        }
+        const matchTag = `${q.tag_prefix}-${answerValue}`.toLowerCase();
+        const excludeTag = `exclude-${q.tag_prefix}-${answerValue}`.toLowerCase();
 
-        const bucket = profile[bucketKey];
-        if (bucket && typeof bucket[answerValue] === 'number') {
-          score += bucket[answerValue];
-        }
+        if (tags.includes(excludeTag)) return -1;
+        if (tags.includes(matchTag)) score += Number(q.weight) || 0;
       }
 
-      score += typeof profile.priority === 'number' ? profile.priority : 0;
       return score;
     }
 
-    attrKeyToBucket(attrKey) {
-      const map = {
-        goal: 'goals',
-        skin_type: 'skin_types',
-        concern: 'concerns',
-        routine: 'routines',
-      };
-      return map[attrKey] || `${attrKey}s`;
-    }
-
     matchLabel(score) {
-      if (score >= 85) return 'Best Match';
-      if (score >= 60) return 'Great Match';
+      const maxPossible = this.questions.reduce((sum, q) => sum + (Number(q.weight) || 0), 0) || 1;
+      const pct = Math.round((score / maxPossible) * 100);
+      if (pct >= 85) return 'Best Match';
+      if (pct >= 60) return 'Great Match';
       return 'Good Match';
     }
-
-    // ---------- RESULTS ----------
 
     renderResults() {
       const scored = this.products
@@ -273,13 +258,12 @@
     renderProductCard(entry, featured) {
       const p = entry.product;
       const hasMultipleVariants = Array.isArray(p.variants) && p.variants.length > 1;
-      const singleAvailableVariant =
-        Array.isArray(p.variants) && p.variants.length === 1 ? p.variants[0] : null;
+      const singleVariant = Array.isArray(p.variants) && p.variants.length === 1 ? p.variants[0] : null;
 
       return `
         <div class="ai-quiz-product-card ${featured ? 'is-featured' : ''}" data-quiz-product="${p.id}">
           ${entry.score !== null ? `<span class="ai-quiz-match-badge">${this.matchLabel(entry.score)}</span>` : ''}
-          <img src="${p.image || ''}" alt="${this.escape(p.title)}" loading="lazy" width="300" height="300">
+          <img src="${p.image || ''}" alt="${this.escape(p.title)}" loading="lazy" width="90" height="90">
           <h3>${this.escape(p.title)}</h3>
           <p class="ai-quiz-price">${this.formatMoney(p.price)}</p>
           ${!p.available ? '<p class="ai-quiz-soldout">Currently sold out</p>' : ''}
@@ -304,7 +288,7 @@
             <button type="button"
               class="ai-quiz-btn ai-quiz-btn--primary"
               data-quiz-add-to-cart
-              data-single-variant-id="${singleAvailableVariant ? singleAvailableVariant.id : ''}"
+              data-single-variant-id="${singleVariant ? singleVariant.id : ''}"
               ${!p.available ? 'disabled' : ''}>
               Add to Cart
             </button>
@@ -356,7 +340,6 @@
 
         statusEl.textContent = `${product ? product.title : 'Item'} added to your cart.`;
         btn.textContent = 'Added ✓';
-
         this.refreshCartUI();
       } catch (err) {
         console.error('AIQuiz add to cart failed:', err);
@@ -375,23 +358,16 @@
     }
 
     refreshCartUI() {
-      // Universal: refresh cart count bubble if theme exposes /cart.js data attributes.
       fetch('/cart.js')
         .then((r) => r.json())
         .then((cart) => {
           document.querySelectorAll('[data-cart-count]').forEach((el) => {
             el.textContent = cart.item_count;
           });
-          // Best-effort: many themes (incl. recent Horizon builds) listen for this.
-          // If your theme's drawer doesn't respond, open /cart as a reliable fallback.
           document.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
         })
-        .catch(() => {
-          /* non-fatal — cart was still added successfully */
-        });
+        .catch(() => {});
     }
-
-    // ---------- UTIL ----------
 
     escape(str) {
       if (str == null) return '';
