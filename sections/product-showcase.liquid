@@ -2672,7 +2672,7 @@
        NOT depend on the store's own cart drawer existing or listening for
        any particular event, so it always shows the item that was just
        added, right away, no page refresh needed. -->
-  <div class="pgs__cart-toast" data-pgs-cart-toast hidden aria-live="polite" role="status">
+  {% comment %} <div class="pgs__cart-toast" data-pgs-cart-toast hidden aria-live="polite" role="status">
     <div class="pgs__cart-toast-header">
       <span class="pgs__cart-toast-label">Added to cart</span>
       <button type="button" class="pgs__cart-toast-close" data-pgs-toast-close aria-label="Close">
@@ -2693,7 +2693,7 @@
         <a href="{{ routes.checkout_url }}" class="pgs__cart-toast-checkout">Checkout</a>
       </div>
     </div>
-  </div>
+  </div> {% endcomment %}
 </section>
 
 {% render 'compare-widget' %}
