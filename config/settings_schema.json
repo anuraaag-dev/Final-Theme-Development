@@ -2116,5 +2116,111 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "Rewards Progress Bar",
+    "settings": [
+      { "type": "header", "content": "Milestone Dot Styling" },
+      { "type": "range", "id": "fsb_dot_size", "label": "Dot diameter (px)", "min": 12, "max": 48, "step": 1, "default": 24 },
+      { "type": "range", "id": "fsb_dot_icon_size", "label": "Icon size (% of dot)", "min": 30, "max": 90, "step": 5, "default": 55 },
+      { "type": "range", "id": "fsb_dot_border_width", "label": "Border width (px)", "min": 0, "max": 6, "step": 1, "default": 2 },
+      { "type": "color", "id": "fsb_dot_border_color", "label": "Border color", "default": "#E5E5E5" },
+      { "type": "color", "id": "fsb_dot_bg_color", "label": "Background color", "default": "#FFFFFF" },
+      { "type": "color", "id": "fsb_dot_active_border_color", "label": "Active border color", "default": "#1F8A4C" },
+      { "type": "color", "id": "fsb_dot_active_bg_color", "label": "Active background color", "default": "#FFFFFF" },
+      { "type": "range", "id": "fsb_dot_hover_scale", "label": "Hover scale (%)", "min": 100, "max": 150, "step": 5, "default": 110 },
+      { "type": "range", "id": "fsb_dot_transition_speed", "label": "Transition speed (ms)", "min": 0, "max": 600, "step": 50, "default": 250 },
+      { "type": "range", "id": "fsb_dot_spacing", "label": "Extra spacing between dots (px)", "min": 0, "max": 20, "step": 1, "default": 0 },
+
+      { "type": "header", "content": "Rewards Progress Bar" },
+      { "type": "checkbox", "id": "enable_free_shipping_bar", "label": "Show Reward Progress Bar", "default": true },
+      { "type": "range", "id": "fsb_bar_width", "label": "Bar width (%)", "min": 50, "max": 100, "step": 5, "default": 90 },
+      { "type": "range", "id": "fsb_bar_height", "label": "Bar height (px)", "min": 2, "max": 20, "step": 1, "default": 6 },
+      { "type": "range", "id": "fsb_marker_font_size", "label": "Marker label font size (px)", "min": 8, "max": 16, "step": 1, "default": 11 },
+      { "type": "color", "id": "fsb_track_color", "label": "Track background", "default": "#E5E5E5" },
+      { "type": "color", "id": "fsb_fill_color", "label": "Progress fill color", "default": "#1F8A4C" },
+      { "type": "color", "id": "fsb_text_color", "label": "Message text color", "default": "#000000" },
+      { "type": "range", "id": "fsb_message_font_size", "label": "Main message font size (px)", "min": 12, "max": 24, "step": 1, "default": 16 },
+
+      { "type": "header", "content": "Tier 1" },
+      { "type": "checkbox", "id": "fsb_tier1_enable", "label": "Enable tier 1", "default": true },
+      { "type": "number", "id": "fsb_tier1_threshold", "label": "Spend threshold ($)", "default": 30 },
+      { "type": "select", "id": "fsb_tier1_type", "label": "Reward type", "options": [
+          { "value": "discount", "label": "Percentage discount (auto-apply code)" },
+          { "value": "free_shipping", "label": "Free shipping" },
+          { "value": "free_gift", "label": "Free gift" },
+          { "value": "custom", "label": "Custom message only" }
+        ], "default": "discount" },
+      { "type": "text", "id": "fsb_tier1_icon", "label": "Icon (emoji)", "default": "🏷️" },
+      { "type": "text", "id": "fsb_tier1_label", "label": "Label (shown on marker)", "default": "10% Off" },
+      { "type": "text", "id": "fsb_tier1_discount_percent", "label": "Discount % (display only)", "default": "10" },
+  
+      { "type": "product", "id": "fsb_tier1_gift_product", "label": "Gift product (if type = Free gift)" },
+      { "type": "text", "id": "fsb_tier1_unlocked_message", "label": "Unlocked message", "default": "You've unlocked 10% off!" },
+      { "type": "select", "id": "fsb_tier1_label_position", "label": "Label position", "options": [
+          { "value": "top", "label": "Above bar" },
+          { "value": "bottom", "label": "Below bar" }
+        ], "default": "bottom" },
+
+      { "type": "header", "content": "Tier 2" },
+      { "type": "checkbox", "id": "fsb_tier2_enable", "label": "Enable tier 2", "default": true },
+      { "type": "number", "id": "fsb_tier2_threshold", "label": "Spend threshold ($)", "default": 50 },
+      { "type": "select", "id": "fsb_tier2_type", "label": "Reward type", "options": [
+          { "value": "discount", "label": "Percentage discount (auto-apply code)" },
+          { "value": "free_shipping", "label": "Free shipping" },
+          { "value": "free_gift", "label": "Free gift" },
+          { "value": "custom", "label": "Custom message only" }
+        ], "default": "free_shipping" },
+      { "type": "text", "id": "fsb_tier2_icon", "label": "Icon (emoji)", "default": "🚚" },
+      { "type": "text", "id": "fsb_tier2_label", "label": "Label (shown on marker)", "default": "Free Shipping" },
+      { "type": "text", "id": "fsb_tier2_discount_percent", "label": "Discount % (display only)", "default": "20" },
+      
+      { "type": "product", "id": "fsb_tier2_gift_product", "label": "Gift product (if type = Free gift)" },
+      { "type": "text", "id": "fsb_tier2_unlocked_message", "label": "Unlocked message", "default": "You've unlocked Free Shipping!" },
+      { "type": "select", "id": "fsb_tier2_label_position", "label": "Label position", "options": [
+          { "value": "top", "label": "Above bar" },
+          { "value": "bottom", "label": "Below bar" }
+        ], "default": "bottom" },
+
+      { "type": "header", "content": "Tier 3" },
+      { "type": "checkbox", "id": "fsb_tier3_enable", "label": "Enable tier 3", "default": false },
+      { "type": "number", "id": "fsb_tier3_threshold", "label": "Spend threshold ($)", "default": 100 },
+      { "type": "select", "id": "fsb_tier3_type", "label": "Reward type", "options": [
+          { "value": "discount", "label": "Percentage discount (auto-apply code)" },
+          { "value": "free_shipping", "label": "Free shipping" },
+          { "value": "free_gift", "label": "Free gift" },
+          { "value": "custom", "label": "Custom message only" }
+        ], "default": "free_gift" },
+      { "type": "text", "id": "fsb_tier3_icon", "label": "Icon (emoji)", "default": "🎁" },
+      { "type": "text", "id": "fsb_tier3_label", "label": "Label (shown on marker)", "default": "Free Gift" },
+      { "type": "text", "id": "fsb_tier3_discount_percent", "label": "Discount % (display only)", "default": "0" },
+     
+      { "type": "product", "id": "fsb_tier3_gift_product", "label": "Gift product (if type = Free gift)" },
+      { "type": "text", "id": "fsb_tier3_unlocked_message", "label": "Unlocked message", "default": "You've unlocked a free gift!" },
+      { "type": "select", "id": "fsb_tier3_label_position", "label": "Label position", "options": [
+          { "value": "top", "label": "Above bar" },
+          { "value": "bottom", "label": "Below bar" }
+        ], "default": "bottom" },
+
+      { "type": "header", "content": "Tier 4" },
+      { "type": "checkbox", "id": "fsb_tier4_enable", "label": "Enable tier 4", "default": false },
+      { "type": "number", "id": "fsb_tier4_threshold", "label": "Spend threshold ($)", "default": 150 },
+      { "type": "select", "id": "fsb_tier4_type", "label": "Reward type", "options": [
+          { "value": "discount", "label": "Percentage discount (auto-apply code)" },
+          { "value": "free_shipping", "label": "Free shipping" },
+          { "value": "free_gift", "label": "Free gift" },
+          { "value": "custom", "label": "Custom message only" }
+        ], "default": "custom" },
+      { "type": "text", "id": "fsb_tier4_icon", "label": "Icon (emoji)", "default": "⭐" },
+      { "type": "text", "id": "fsb_tier4_label", "label": "Label (shown on marker)", "default": "VIP" },
+      { "type": "text", "id": "fsb_tier4_discount_percent", "label": "Discount % (display only)", "default": "0" },
+    
+      { "type": "product", "id": "fsb_tier4_gift_product", "label": "Gift product (if type = Free gift)" },
+      { "type": "text", "id": "fsb_tier4_unlocked_message", "label": "Unlocked message", "default": "VIP status unlocked!" },
+      { "type": "select", "id": "fsb_tier4_label_position", "label": "Label position", "options": [
+          { "value": "top", "label": "Above bar" },
+          { "value": "bottom", "label": "Below bar" }
+        ], "default": "bottom" }
+    ]
   }
 ]
