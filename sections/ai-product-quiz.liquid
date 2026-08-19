@@ -1,15 +1,5 @@
-{%- comment -%}
-  AI Product Recommendation Quiz — data-driven, deterministic scoring.
-  Zero output when disabled.
-{%- endcomment -%}
-
 {%- if section.settings.enable_quiz -%}
   {%- assign quiz_id = section.id -%}
-
-  {%- comment -%} Collect questions from metaobjects, sorted by order {%- endcomment -%}
-  {%- assign questions = shop.metaobjects.quiz_question.values | sort: 'order' -%}
-
-  {%- comment -%} Collect candidate products (adjust collection as needed) {%- endcomment -%}
   {%- assign candidate_collection = collections[section.settings.product_collection] -%}
 
   <div
@@ -18,7 +8,7 @@
     data-launch-mode="{{ section.settings.launch_mode }}"
     data-popup-delay="{{ section.settings.popup_delay | default: 8 }}"
     data-popup-frequency="{{ section.settings.popup_frequency }}"
-    data-min-score="{{ section.settings.min_match_score | default: 35 }}"
+    data-min-score="{{ section.settings.min_match_score | default: 10 }}"
     data-max-results="{{ section.settings.max_results | default: 3 }}"
     style="
       --quiz-primary: {{ section.settings.color_primary }};
@@ -28,47 +18,57 @@
     "
   >
 
-    {%- comment -%} Product data payload — everything the JS needs, no extra fetches {%- endcomment -%}
     <script type="application/json" data-quiz-products>
       [
         {%- for product in candidate_collection.products -%}
-          {%- assign profile = product.metafields.custom.quiz_profile.value -%}
-          {%- if profile != blank -%}
-            {
-              "id": {{ product.id | json }},
-              "title": {{ product.title | json }},
-              "url": {{ product.url | json }},
-              "image": {{ product.featured_image | image_url: width: 600 | json }},
-              "price": {{ product.price | json }},
-              "compare_at_price": {{ product.compare_at_price | json }},
-              "available": {{ product.available | json }},
-              "profile": {{ profile | json }},
-              "variants": [
-                {%- for variant in product.variants -%}
-                  {
-                    "id": {{ variant.id | json }},
-                    "title": {{ variant.title | json }},
-                    "available": {{ variant.available | json }},
-                    "price": {{ variant.price | json }}
-                  }{%- unless forloop.last -%},{%- endunless -%}
-                {%- endfor -%}
-              ]
-            }{%- unless forloop.last -%},{%- endunless -%}
-          {%- endif -%}
+          {
+            "id": {{ product.id | json }},
+            "title": {{ product.title | json }},
+            "url": {{ product.url | json }},
+            "image": {{ product.featured_image | image_url: width: 600 | json }},
+            "price": {{ product.price | json }},
+            "available": {{ product.available | json }},
+            "tags": {{ product.tags | json }},
+            "variants": [
+              {%- for variant in product.variants -%}
+                {
+                  "id": {{ variant.id | json }},
+                  "title": {{ variant.title | json }},
+                  "available": {{ variant.available | json }}
+                }{%- unless forloop.last -%},{%- endunless -%}
+              {%- endfor -%}
+            ]
+          }{%- unless forloop.last -%},{%- endunless -%}
         {%- endfor -%}
       ]
     </script>
 
     <script type="application/json" data-quiz-questions>
       [
-        {%- for q in questions -%}
-          {
-            "id": {{ q.id | json }},
-            "title": {{ q.title.value | json }},
-            "subtitle": {{ q.subtitle.value | json }},
-            "attribute_key": {{ q.attribute_key.value | json }},
-            "options": {{ q.options.value | json }}
-          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'question' -%}
+            {
+              "id": {{ block.id | json }},
+              "title": {{ block.settings.title | json }},
+              "subtitle": {{ block.settings.subtitle | json }},
+              "tag_prefix": {{ block.settings.tag_prefix | json }},
+              "weight": {{ block.settings.weight | json }},
+              "options": [
+                {%- assign has_prev = false -%}
+                {%- for i in (1..6) -%}
+                  {%- assign label_key = 'option_' | append: i | append: '_label' -%}
+                  {%- assign value_key = 'option_' | append: i | append: '_value' -%}
+                  {%- assign label = block.settings[label_key] -%}
+                  {%- assign value = block.settings[value_key] -%}
+                  {%- if label != blank and value != blank -%}
+                    {%- if has_prev -%},{%- endif -%}
+                    { "label": {{ label | json }}, "value": {{ value | json }} }
+                    {%- assign has_prev = true -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              ]
+            }{%- unless forloop.last -%},{%- endunless -%}
+          {%- endif -%}
         {%- endfor -%}
       ]
     </script>
@@ -95,11 +95,7 @@
     {%- endif -%}
 
     {%- if section.settings.launch_mode == 'floating' or section.settings.launch_mode == 'both' -%}
-      <button
-        type="button"
-        class="ai-quiz-launch ai-quiz-launch--floating ai-quiz-launch--{{ section.settings.floating_position }}"
-        data-quiz-open
-      >
+      <button type="button" class="ai-quiz-launch ai-quiz-launch--floating ai-quiz-launch--{{ section.settings.floating_position }}" data-quiz-open>
         {{ section.settings.button_text | default: '✨ Find My Match' }}
       </button>
     {%- endif -%}
@@ -107,23 +103,17 @@
     <div class="ai-quiz-modal" data-quiz-modal role="dialog" aria-modal="true" aria-labelledby="quiz-title-{{ quiz_id }}" hidden>
       <div class="ai-quiz-backdrop" data-quiz-close></div>
       <div class="ai-quiz-panel" data-quiz-panel>
-
         <div class="ai-quiz-header">
           <div class="ai-quiz-progress" data-quiz-progress>
             <div class="ai-quiz-progress-bar" data-quiz-progress-bar></div>
           </div>
           <button type="button" class="ai-quiz-close" data-quiz-close aria-label="Close quiz">✕</button>
         </div>
-
-        <div class="ai-quiz-body" data-quiz-body>
-          {%- comment -%} Rendered entirely by JS from the questions JSON above {%- endcomment -%}
-        </div>
-
+        <div class="ai-quiz-body" data-quiz-body></div>
         <div class="ai-quiz-footer" data-quiz-footer>
           <button type="button" class="ai-quiz-btn ai-quiz-btn--ghost" data-quiz-back hidden>Back</button>
           <button type="button" class="ai-quiz-btn ai-quiz-btn--primary" data-quiz-next disabled>Next</button>
         </div>
-
       </div>
     </div>
   </div>
@@ -137,8 +127,6 @@
   "name": "AI Product Quiz",
   "settings": [
     { "type": "checkbox", "id": "enable_quiz", "label": "Enable quiz", "default": true },
-    { "type": "checkbox", "id": "enable_desktop", "label": "Enable on desktop", "default": true },
-    { "type": "checkbox", "id": "enable_mobile", "label": "Enable on mobile", "default": true },
     {
       "type": "select",
       "id": "launch_mode",
@@ -175,14 +163,59 @@
       "default": "session"
     },
     { "type": "collection", "id": "product_collection", "label": "Products eligible for recommendation" },
-    { "type": "collection", "id": "fallback_collection", "label": "Fallback products (shown if no strong match)" },
-    { "type": "range", "id": "min_match_score", "label": "Minimum score to count as a match", "min": 0, "max": 100, "default": 35 },
+    { "type": "collection", "id": "fallback_collection", "label": "Fallback products" },
+    { "type": "range", "id": "min_match_score", "label": "Minimum score to count as a match", "min": 0, "max": 100, "default": 10 },
     { "type": "range", "id": "max_results", "label": "Max recommendations shown", "min": 1, "max": 6, "default": 3 },
     { "type": "color", "id": "color_primary", "label": "Primary color", "default": "#1a1a1a" },
     { "type": "color", "id": "color_text", "label": "Text color", "default": "#1a1a1a" },
     { "type": "color", "id": "color_background", "label": "Background", "default": "#ffffff" },
     { "type": "range", "id": "border_radius", "label": "Border radius", "min": 0, "max": 24, "default": 12 }
   ],
-  "presets": [{ "name": "AI Product Quiz" }]
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Quiz Question",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Question text", "default": "What's your skin type?" },
+        { "type": "text", "id": "subtitle", "label": "Subtitle (optional)" },
+        { "type": "text", "id": "tag_prefix", "label": "Tag prefix", "info": "Products tagged '{prefix}-{value}' will match. e.g. prefix 'skin' + value 'oily' looks for tag 'skin-oily'", "default": "skin" },
+        { "type": "range", "id": "weight", "label": "Points awarded for a match", "min": 5, "max": 50, "step": 5, "default": 25 },
+
+        { "type": "header", "content": "Option 1" },
+        { "type": "text", "id": "option_1_label", "label": "Label" },
+        { "type": "text", "id": "option_1_value", "label": "Value (e.g. 'oily')" },
+
+        { "type": "header", "content": "Option 2" },
+        { "type": "text", "id": "option_2_label", "label": "Label" },
+        { "type": "text", "id": "option_2_value", "label": "Value" },
+
+        { "type": "header", "content": "Option 3" },
+        { "type": "text", "id": "option_3_label", "label": "Label" },
+        { "type": "text", "id": "option_3_value", "label": "Value" },
+
+        { "type": "header", "content": "Option 4 (optional)" },
+        { "type": "text", "id": "option_4_label", "label": "Label" },
+        { "type": "text", "id": "option_4_value", "label": "Value" },
+
+        { "type": "header", "content": "Option 5 (optional)" },
+        { "type": "text", "id": "option_5_label", "label": "Label" },
+        { "type": "text", "id": "option_5_value", "label": "Value" },
+
+        { "type": "header", "content": "Option 6 (optional)" },
+        { "type": "text", "id": "option_6_label", "label": "Label" },
+        { "type": "text", "id": "option_6_value", "label": "Value" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "AI Product Quiz",
+      "blocks": [
+        { "type": "question" },
+        { "type": "question" },
+        { "type": "question" }
+      ]
+    }
+  ]
 }
 {% endschema %}
