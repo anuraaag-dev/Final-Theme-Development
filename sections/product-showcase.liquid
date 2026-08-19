@@ -2646,7 +2646,7 @@
   <div class="pgs__modal-overlay" data-pgs-modal-overlay hidden>
     <div class="pgs__modal" role="dialog" aria-modal="true" aria-label="Quick view">
       <button type="button" class="pgs__modal-close" data-pgs-modal-close aria-label="Close quick view">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
       <div class="pgs__modal-image-wrap">
         <img class="pgs__modal-image" data-pgs-modal-image src="" alt="">
@@ -2664,33 +2664,6 @@
           <button type="submit" class="pgs__modal-add-btn" data-pgs-modal-add-btn>Add to Cart</button>
         </form>
         <a href="#" class="pgs__modal-link" data-pgs-modal-link>View full details</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add to Cart confirmation toast / mini-cart (theme-agnostic: this does
-       NOT depend on the store's own cart drawer existing or listening for
-       any particular event, so it always shows the item that was just
-       added, right away, no page refresh needed. -->
-  <div class="pgs__cart-toast" data-pgs-cart-toast hidden aria-live="polite" role="status">
-    <div class="pgs__cart-toast-header">
-      <span class="pgs__cart-toast-label">Added to cart</span>
-      <button type="button" class="pgs__cart-toast-close" data-pgs-toast-close aria-label="Close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <div class="pgs__cart-toast-item">
-      <img class="pgs__cart-toast-image" data-pgs-toast-image src="" alt="">
-      <div class="pgs__cart-toast-info">
-        <span class="pgs__cart-toast-title" data-pgs-toast-title></span>
-        <span class="pgs__cart-toast-price" data-pgs-toast-price></span>
-      </div>
-    </div>
-    <div class="pgs__cart-toast-footer">
-      <span class="pgs__cart-toast-count" data-pgs-toast-count></span>
-      <div class="pgs__cart-toast-actions">
-        <a href="{{ routes.cart_url }}" class="pgs__cart-toast-view">View cart</a>
-        <a href="{{ routes.checkout_url }}" class="pgs__cart-toast-checkout">Checkout</a>
       </div>
     </div>
   </div>
@@ -3361,153 +3334,6 @@
     text-decoration: underline;
   }
 
-  /* ---- Add to Cart toast ---- */
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 1100;
-    width: 320px;
-    max-width: calc(100vw - 32px);
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
-    padding: 16px;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    pointer-events: none;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast[hidden] {
-    display: none;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast.is-open {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #1a8a3e;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-close {
-    background: none;
-    border: none;
-    padding: 2px;
-    cursor: pointer;
-    color: #777;
-    display: flex;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-close svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-item {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 14px;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-image {
-    width: 52px;
-    height: 52px;
-    object-fit: cover;
-    border-radius: 6px;
-    background: #f4f4f5;
-    flex: 0 0 auto;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--pgs-heading-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-price {
-    font-size: 0.82rem;
-    color: #666;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-footer {
-    border-top: 1px solid #ececec;
-    padding-top: 12px;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-count {
-    display: block;
-    font-size: 0.78rem;
-    color: #666;
-    margin-bottom: 10px;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-view,
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-checkout {
-    flex: 1 1 0;
-    text-align: center;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 9px 10px;
-    border-radius: 6px;
-    text-decoration: none;
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-view {
-    background: #f2f2f2;
-    color: var(--pgs-heading-color);
-  }
-
-  #ProductShowcase-{{ sec_id }} .pgs__cart-toast-checkout {
-    background: var(--pgs-button-bg);
-    color: var(--pgs-button-icon);
-  }
-
-  @media screen and (max-width: 749px) {
-    #ProductShowcase-{{ sec_id }} .pgs__cart-toast {
-      left: 16px;
-      right: 16px;
-      top: auto;
-      bottom: 16px;
-      width: auto;
-      transform: translateY(10px);
-    }
-
-    #ProductShowcase-{{ sec_id }} .pgs__cart-toast.is-open {
-      transform: translateY(0);
-    }
-  }
-
   /* ---- Tablet ---- */
   @media screen and (max-width: 989px) {
     #ProductShowcase-{{ sec_id }}.pgs--grid .pgs__track {
@@ -3616,8 +3442,7 @@
     #ProductShowcase-{{ sec_id }} .pgs__wishlist,
     #ProductShowcase-{{ sec_id }} .pgs__track,
     #ProductShowcase-{{ sec_id }} .pgs__modal-overlay,
-    #ProductShowcase-{{ sec_id }} .pgs__modal,
-    #ProductShowcase-{{ sec_id }} .pgs__cart-toast {
+    #ProductShowcase-{{ sec_id }} .pgs__modal {
       transition: none !important;
     }
   }
@@ -4233,12 +4058,12 @@
       document.body.style.overflow = 'hidden';
     }
 
-     function closeModal() {
+    function closeModal() {
       overlay.classList.remove('is-open');
       document.body.style.overflow = '';
       setTimeout(function () {
         overlay.hidden = true;
-      }, 250); 
+      }, 250);
     }
 
     section.querySelectorAll('[data-pgs-quickview]').forEach(function (btn) {
