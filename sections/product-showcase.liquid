@@ -2668,32 +2668,7 @@
     </div>
   </div>
 
-  <!-- Add to Cart confirmation toast / mini-cart (theme-agnostic: this does
-       NOT depend on the store's own cart drawer existing or listening for
-       any particular event, so it always shows the item that was just
-       added, right away, no page refresh needed. -->
-  {% comment %} <div class="pgs__cart-toast" data-pgs-cart-toast hidden aria-live="polite" role="status">
-    <div class="pgs__cart-toast-header">
-      <span class="pgs__cart-toast-label">Added to cart</span>
-      <button type="button" class="pgs__cart-toast-close" data-pgs-toast-close aria-label="Close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <div class="pgs__cart-toast-item">
-      <img class="pgs__cart-toast-image" data-pgs-toast-image src="" alt="">
-      <div class="pgs__cart-toast-info">
-        <span class="pgs__cart-toast-title" data-pgs-toast-title></span>
-        <span class="pgs__cart-toast-price" data-pgs-toast-price></span>
-      </div>
-    </div>
-    <div class="pgs__cart-toast-footer">
-      <span class="pgs__cart-toast-count" data-pgs-toast-count></span>
-      <div class="pgs__cart-toast-actions">
-        <a href="{{ routes.cart_url }}" class="pgs__cart-toast-view">View cart</a>
-        <a href="{{ routes.checkout_url }}" class="pgs__cart-toast-checkout">Checkout</a>
-      </div>
-    </div>
-  </div> {% endcomment %}
+  
 </section>
 
 {% render 'compare-widget' %}
