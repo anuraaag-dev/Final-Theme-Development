@@ -1,6 +1,8 @@
+{% comment %}
+  Added the compare feature
+{% endcomment %}
 
-
-{%- comment -%}
+  {%- liquid
   assign s = section.settings
   assign sec_id = section.id
   assign layout = s.layout_type
@@ -139,6 +141,18 @@
                   </button>
                 {%- endif -%}
 
+                <label class="pgs__compare-toggle" title="Add to compare" onclick="event.stopPropagation()">
+                  <input
+                    type="checkbox"
+                    data-compare-checkbox
+                    data-product-id="{{ product.id }}"
+                    data-product-handle="{{ product.handle }}"
+                    data-product-title="{{ product.title | escape }}"
+                    aria-label="Compare {{ product.title | escape }}"
+                  >
+                  <span>Compare</span>
+                </label>
+
                 <a href="{{ product.url }}" class="pgs__image-link" data-pgs-image-link>
                   {%- if product.featured_image -%}
                     <img
@@ -166,7 +180,6 @@
                   {%- endif -%}
                 </a>
 
-                {% comment %} ------------------ THIS IS CODE WHAT WE NEED --------------------- {% endcomment %}
                 {%- if s.show_quick_add -%}
                   <form class="pgs__quick-add-form" data-quick-add-form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="{{ variant.id }}" data-pgs-variant-input>
@@ -175,7 +188,7 @@
                     </button>
                   </form>
                 {%- endif -%}
-                </div>
+              </div>
 
               <div class="pgs__info">
                 {%- if s.show_vendor -%}
@@ -333,6 +346,18 @@
                   </button>
                 {%- endif -%}
 
+                <label class="pgs__compare-toggle" title="Add to compare" onclick="event.stopPropagation()">
+                  <input
+                    type="checkbox"
+                    data-compare-checkbox
+                    data-product-id="{{ product.id }}"
+                    data-product-handle="{{ product.handle }}"
+                    data-product-title="{{ product.title | escape }}"
+                    aria-label="Compare {{ product.title | escape }}"
+                  >
+                  <span>Compare</span>
+                </label>
+
                 <a href="{{ product.url }}" class="pgs__image-link" data-pgs-image-link>
                   {%- if product.featured_image -%}
                     <img
@@ -361,32 +386,12 @@
                 </a>
 
                 {%- if s.show_quick_add -%}
-
-                  {% if product.metafields.custom.request_product_info.value %}
-                              <div class="pgs__quick-add-form">
-                              <button
-                                type="button"
-                                class="button pgs__quick-add-btn"
-                                data-request-info-open
-                                data-ri-title="{{ product.title | escape }}"
-                                data-ri-id="{{ product.id }}"
-                                data-ri-url="{{ shop.url }}{{ product.url }}"
-                                style="width: 100%"
-                              >
-                                Request Product Info
-                              </button>
-                            </div>
-                      
-                      {% else %}
-
-
                   <form class="pgs__quick-add-form" data-quick-add-form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="{{ variant.id }}" data-pgs-variant-input>
                     <button type="submit" class="pgs__quick-add-btn" aria-label="Add {{ product.title | escape }} to cart" {% unless variant.available %}disabled{% endunless %}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                     </button>
                   </form>
-                {% endif %}
                 {%- endif -%}
               </div>
 
@@ -409,16 +414,12 @@
                 {%- endif -%}
 
                 <div class="pgs__price-row" data-pgs-price-row>
-                  {% if product.metafields.custom.request_product_info.value %}
-                    <div style="font-style: italic;">You can request product info</div>
-                  {% else %}
                   <span class="pgs__price" data-pgs-price>{{ variant.price | money }}</span>
                   {%- if s.show_compare_price and variant.compare_at_price > variant.price -%}
                     <s class="pgs__compare" data-pgs-compare>{{ variant.compare_at_price | money }}</s>
                   {%- else -%}
                     <s class="pgs__compare" data-pgs-compare hidden></s>
                   {%- endif -%}
-                {% endif %}
                 </div>
 
                 {%- if has_swatches -%}
@@ -500,30 +501,10 @@
     </div>
   </div>
 
-    <!-- Request Product Info Modal (shared, one per section) -->
-  <div class="request-info-modal" data-request-info-modal style="display:none;">
-    <div class="request-info-modal__content">
-      <div style="width: 100%; display: flex; justify-content: end;">
-        <button type="button" data-request-info-close style="border-radius: 100%; width: 20px;">✕</button>
-      </div>
-
-      {% form 'contact' %}
-        <h4>Request Product Information</h4>
-        <input class="as-email-input" type="email" name="contact[email]" placeholder="Enter your email" required>
-        <input type="hidden" name="contact[Product Title]" value="" data-ri-title-input>
-        <input type="hidden" name="contact[Product ID]" value="" data-ri-id-input>
-        <input type="hidden" name="contact[Product URL]" value="" data-ri-url-input>
-        <input type="hidden" name="contact[Message]" value="Customer requested product information.">
-        <button type="submit" class="button button--primary" style="width: 100%;">Submit</button>
-      {% endform %}
-    </div>
-  </div>
   
 </section>
 
-
-
-
+{% render 'compare-widget' %}
 
 <style>
   #ProductShowcase-{{ sec_id }} {
@@ -577,8 +558,7 @@
   }
 
   #ProductShowcase-{{ sec_id }} .pgs__heading {
-    font-size: clamp(1.8rem, 2.4rem, 2.4rem);
-     {% comment %} font-size: 1.8rem; {% endcomment %}
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
     font-weight: 700;
     color: var(--pgs-heading-color);
     margin: 0 0 4px;
@@ -586,8 +566,7 @@
   }
 
   #ProductShowcase-{{ sec_id }} .pgs__subheading {
-    font-size: 1.1rem;
-    {% comment %} font-size: 0.9rem; {% endcomment %}
+    font-size: 0.9rem;
     font-style: italic;
     color: var(--pgs-subheading-color);
     margin: 0;
@@ -806,6 +785,15 @@
     opacity: 0;
   }
 
+  #ProductShowcase-{{ sec_id }} .pgs__image-wrap:hover .pgs__image--primary {
+    transform: scale(1.06);
+  }
+
+  #ProductShowcase-{{ sec_id }} .pgs__image-wrap:hover .pgs__image--secondary {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+
   #ProductShowcase-{{ sec_id }} .pgs__wishlist {
     position: absolute;
     top: 10px;
@@ -838,6 +826,42 @@
   #ProductShowcase-{{ sec_id }} .pgs__wishlist.is-active svg {
     fill: #e0455b;
     stroke: #e0455b;
+  }
+
+  /* ---- Compare toggle ---- */
+  #ProductShowcase-{{ sec_id }} .pgs__compare-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  #ProductShowcase-{{ sec_id }} .pgs__card:hover .pgs__compare-toggle,
+  #ProductShowcase-{{ sec_id }} .pgs__compare-toggle:focus-within,
+  #ProductShowcase-{{ sec_id }} .pgs__compare-toggle:has(input:checked) {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #ProductShowcase-{{ sec_id }} .pgs__compare-toggle input {
+    cursor: pointer;
+    width: 13px;
+    height: 13px;
+    margin: 0;
   }
 
   #ProductShowcase-{{ sec_id }} .pgs__quick-add-form {
@@ -1225,7 +1249,8 @@
     }
 
     #ProductShowcase-{{ sec_id }} .pgs__quick-look,
-    #ProductShowcase-{{ sec_id }} .pgs__wishlist {
+    #ProductShowcase-{{ sec_id }} .pgs__wishlist,
+    #ProductShowcase-{{ sec_id }} .pgs__compare-toggle {
       opacity: 1;
       transform: none;
     }
@@ -1240,7 +1265,8 @@
      regardless of viewport width. */
   @media (hover: none) {
     #ProductShowcase-{{ sec_id }} .pgs__quick-look,
-    #ProductShowcase-{{ sec_id }} .pgs__wishlist {
+    #ProductShowcase-{{ sec_id }} .pgs__wishlist,
+    #ProductShowcase-{{ sec_id }} .pgs__compare-toggle {
       opacity: 1;
       transform: none;
     }
@@ -1258,53 +1284,6 @@
       transition: none !important;
     }
   }
-
-  .req-product-info-button{
-    width: 100%;
-  }
-  .request-info-modal{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.5);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      z-index:9999;
-  }
-
-  .request-info-modal__content{
-      background:#fff;
-      padding:24px;
-      border-radius:10px;
-      width:400px;
-      max-width:90%;
-  }
-
-  .request-info-modal input{
-      width:100%;
-      margin-bottom:16px;
-  }
-
-  .request-info-modal button{
-      cursor:pointer;
-  }
-
-  .as-email-input{
-    height: 2.25rem;
-    width: 100%;
-    border-radius: 10px;
-    border: 1px solid black;
-    background-color: transparent;
-    font-size: 0.875rem;
-    tansition: border-color 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0m 1px 2px 0 rgba(0, 0, 0, 0.05);
-    box-sizing: border-box;
-    padding: 0.25rem 0.75rem;
-    margin-top: 20px;
-
-  }
-
-
 </style>
 
 <script>
@@ -1646,44 +1625,6 @@
   updateWishlistUI();
 
   /* ------------------------------------------------------------------
-     Request Product Info modal (single shared modal per section, kept
-     outside the carousel track in the Liquid markup so it isn't clipped
-     by the track's transform/overflow — populated per-product via data
-     attributes on the trigger button, same pattern as Quick View below).
-     ------------------------------------------------------------------ */
-  var riModal = section.querySelector('[data-request-info-modal]');
-  if (riModal) {
-    var riTitleInput = riModal.querySelector('[data-ri-title-input]');
-    var riIdInput = riModal.querySelector('[data-ri-id-input]');
-    var riUrlInput = riModal.querySelector('[data-ri-url-input]');
-
-    section.addEventListener('click', function (e) {
-      var openBtn = e.target.closest('[data-request-info-open]');
-      if (openBtn) {
-        if (riTitleInput) riTitleInput.value = openBtn.getAttribute('data-ri-title') || '';
-        if (riIdInput) riIdInput.value = openBtn.getAttribute('data-ri-id') || '';
-        if (riUrlInput) riUrlInput.value = openBtn.getAttribute('data-ri-url') || '';
-        riModal.style.display = 'flex';
-        return;
-      }
-      if (e.target.closest('[data-request-info-close]')) {
-        riModal.style.display = 'none';
-      }
-    });
-
-    // Click on the dark backdrop (outside the modal content box) closes it,
-    // matching the Quick View modal's outside-click behavior.
-    riModal.addEventListener('click', function (e) {
-      if (e.target === riModal) riModal.style.display = 'none';
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && riModal.style.display !== 'none') {
-        riModal.style.display = 'none';
-      }
-    });
-  }
-
      Cart: shared helpers used by both the quick-add form and the quick
      view modal's add-to-cart form.
 
@@ -2450,4 +2391,3 @@
   ]
 }
 {% endschema %}
-
