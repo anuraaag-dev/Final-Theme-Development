@@ -876,37 +876,43 @@
         "reel_bLMNTi": {
           "type": "reel",
           "settings": {
-            "featured_product": ""
+            "video": "shopify://files/videos/4647181-sd_506_960_30fps.mp4",
+            "featured_product": "cable-knit-sweater"
           }
         },
         "reel_FgRFXx": {
           "type": "reel",
           "settings": {
-            "featured_product": ""
+            "video": "shopify://files/videos/7251560-sd_540_960_25fps.mp4",
+            "featured_product": "bomber-jacket"
           }
         },
         "reel_b7fjHU": {
           "type": "reel",
           "settings": {
-            "featured_product": ""
+            "video": "shopify://files/videos/7681929-sd_540_960_25fps.mp4",
+            "featured_product": "crop-hoodie"
           }
         },
         "reel_kyDHHM": {
           "type": "reel",
           "settings": {
-            "featured_product": ""
+            "video": "shopify://files/videos/8513154-sd_540_960_30fps.mp4",
+            "featured_product": "floral-midi-dress"
           }
         },
         "reel_jJaaLU": {
           "type": "reel",
           "settings": {
-            "featured_product": ""
+            "video": "shopify://files/videos/7653872-sd_506_960_25fps.mp4",
+            "featured_product": "classic-cotton-t-shirt"
           }
         },
         "reel_jPc8PK": {
           "type": "reel",
           "settings": {
-            "featured_product": ""
+            "video": "shopify://files/videos/7223711-sd_540_960_25fps.mp4",
+            "featured_product": "sweatpants"
           }
         }
       },
@@ -918,7 +924,6 @@
         "reel_jJaaLU",
         "reel_jPc8PK"
       ],
-      "disabled": true,
       "name": "Video Reels",
       "settings": {
         "heading": "Best Sellers in Motion",
