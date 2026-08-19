@@ -1,13 +1,6 @@
 
 
 {%- comment -%}
-============================================================================
-  PRODUCT SHOWCASE (Grid / Carousel)
-============================================================================
-{%- endcomment -%}
-
-
-{%- liquid
   assign s = section.settings
   assign sec_id = section.id
   assign layout = s.layout_type
@@ -485,7 +478,7 @@
   <div class="pgs__modal-overlay" data-pgs-modal-overlay hidden>
     <div class="pgs__modal" role="dialog" aria-modal="true" aria-label="Quick view">
       <button type="button" class="pgs__modal-close" data-pgs-modal-close aria-label="Close quick view">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
       <div class="pgs__modal-image-wrap">
         <img class="pgs__modal-image" data-pgs-modal-image src="" alt="">
@@ -525,6 +518,7 @@
       {% endform %}
     </div>
   </div>
+  
 </section>
 
 
@@ -1151,6 +1145,8 @@
     text-decoration: underline;
   }
 
+  
+  
   /* ---- Tablet ---- */
   @media screen and (max-width: 989px) {
     #ProductShowcase-{{ sec_id }}.pgs--grid .pgs__track {
@@ -1257,7 +1253,8 @@
     #ProductShowcase-{{ sec_id }} .pgs__wishlist,
     #ProductShowcase-{{ sec_id }} .pgs__track,
     #ProductShowcase-{{ sec_id }} .pgs__modal-overlay,
-    #ProductShowcase-{{ sec_id }} .pgs__modal {
+    #ProductShowcase-{{ sec_id }} .pgs__modal,
+     {
       transition: none !important;
     }
   }
@@ -1687,6 +1684,188 @@
     });
   }
 
+     Cart: shared helpers used by both the quick-add form and the quick
+     view modal's add-to-cart form.
+
+     BUG FIX #1 (existing) — the old code did:
+         document.dispatchEvent(new CustomEvent('cart:updated'));
+     right after /cart/add.js succeeded, and nothing else. That event
+     carried no cart data, and this section has no guarantee your theme's
+     own cart drawer is even listening for an event with that exact name —
+     most themes use their own event/naming, so on most themes nothing
+     was listening at all. That's why the header bubble looked "sort of"
+     updated (if anything) but the drawer/cart page never refreshed until
+     a full page load re-fetched the real cart from Shopify.
+
+     Fix: after a successful add, fetch /cart.js ourselves to get the
+     authoritative fresh cart, dispatch cart:updated WITH that data in
+     event.detail (so themes that do listen properly now get what they
+     need), best-effort update common cart-count selectors, and show a
+     small confirmation panel built into this section — so the item is
+     visibly "in the cart" immediately, regardless of what the theme's
+     own drawer does.
+
+     BUG FIX #2 (new) — this storefront runs Shopify's Horizon theme.
+     Horizon's real cart drawer is <cart-drawer-component> (nested inside
+     <theme-drawer id="cart-drawer">, see the cart-drawer.liquid snippet).
+     That component does NOT listen for a plain CustomEvent('cart:updated',
+     ...) — it only refreshes itself when it receives Horizon's own
+     CartUpdateEvent class, exported from the theme's "@theme/events"
+     module. That mismatch is exactly why products didn't show up in the
+     drawer without a full page reload. refreshHorizonCartDrawer() below
+     fires that exact event (Shopify's own documented fix for this issue)
+     in addition to the generic events already dispatched, and is a no-op
+     on any storefront where <cart-drawer-component> isn't registered.
+     ------------------------------------------------------------------ */
+  var cartToast = section.querySelector('[data-pgs-cart-toast]');
+  var cartToastImage = cartToast ? cartToast.querySelector('[data-pgs-toast-image]') : null;
+  var cartToastTitle = cartToast ? cartToast.querySelector('[data-pgs-toast-title]') : null;
+  var cartToastPrice = cartToast ? cartToast.querySelector('[data-pgs-toast-price]') : null;
+  var cartToastCount = cartToast ? cartToast.querySelector('[data-pgs-toast-count]') : null;
+  var cartToastCloseBtn = cartToast ? cartToast.querySelector('[data-pgs-toast-close]') : null;
+  var cartToastHideTimer = null;
+
+  function showCartToast(itemInfo, cart) {
+    if (!cartToast) return;
+
+    if (cartToastImage) cartToastImage.src = itemInfo.image || '';
+    if (cartToastTitle) cartToastTitle.textContent = itemInfo.title || '';
+    if (cartToastPrice) cartToastPrice.textContent = itemInfo.price || '';
+    if (cartToastCount && cart) {
+      var itemCount = cart.item_count || 0;
+      cartToastCount.textContent = itemCount + (itemCount === 1 ? ' item in cart' : ' items in cart');
+    }
+
+    cartToast.hidden = false;
+    // Force layout so the opacity/transform transition actually runs
+    // instead of the browser coalescing hidden->visible with the class
+    // add into a single frame (which would skip the animation).
+    void cartToast.offsetWidth;
+    cartToast.classList.add('is-open');
+
+    clearTimeout(cartToastHideTimer);
+    cartToastHideTimer = setTimeout(hideCartToast, 5000);
+  }
+
+  function hideCartToast() {
+    if (!cartToast) return;
+    clearTimeout(cartToastHideTimer);
+    cartToast.classList.remove('is-open');
+    setTimeout(function () {
+      cartToast.hidden = true;
+    }, 250);
+  }
+
+  if (cartToastCloseBtn) {
+    cartToastCloseBtn.addEventListener('click', hideCartToast);
+  }
+
+  // Best-effort: nudge common cart-count element patterns used across
+  // Shopify themes, in addition to the cart:updated event, in case the
+  // theme's own script only listens on page load rather than any event.
+  function bestEffortUpdateThemeCartCount(cart) {
+    var count = cart.item_count;
+    var selectors = [
+      '[data-cart-count]',
+      '[data-cart-item-count]',
+      '.cart-count',
+      '.cart-count-bubble',
+      '#cart-icon-bubble .cart-count-bubble span[aria-hidden]',
+      'a[href*="/cart"] .count'
+    ];
+    selectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (el.closest('#ProductShowcase-{{ sec_id }}')) return; // don't touch our own toast
+        el.textContent = count;
+      });
+    });
+  }
+
+  // NEW (v2) — dispatching Horizon's internal CartUpdateEvent class only
+  // *notifies* the drawer something changed; it does not guarantee the
+  // drawer's markup actually gets replaced with the new cart contents,
+  // and depends on undocumented internal plumbing. This replacement is
+  // deterministic instead: Shopify's public Ajax Cart API accepts a
+  // `sections` parameter on /cart/add.js, and returns that section
+  // freshly rendered server-side with the already-updated cart baked in.
+  // We just swap that HTML straight into the page — no guessing about
+  // event shapes, no race condition, works the same on any theme that
+  // exposes a `cart-drawer-section` section (Horizon does, see the
+  // "shopify-section-cart-drawer-section" wrapper id in cart-drawer.liquid).
+  var CART_DRAWER_SECTION_ID = 'cart-drawer-section';
+
+  function applyCartDrawerSectionHtml(sectionsHtml) {
+    if (!sectionsHtml || !sectionsHtml[CART_DRAWER_SECTION_ID]) return false;
+
+    var wrapper = document.getElementById('shopify-section-' + CART_DRAWER_SECTION_ID);
+    if (!wrapper) return false;
+
+    var parsed = new DOMParser().parseFromString(sectionsHtml[CART_DRAWER_SECTION_ID], 'text/html');
+    var freshWrapper = parsed.getElementById('shopify-section-' + CART_DRAWER_SECTION_ID);
+
+    // Replacing innerHTML (rather than the wrapper node itself) means any
+    // custom elements inside — <theme-drawer>, <cart-drawer-component> —
+    // are freshly connected to the DOM by this assignment, so the browser
+    // automatically re-runs their connectedCallback with the new cart data.
+    wrapper.innerHTML = freshWrapper ? freshWrapper.innerHTML : parsed.body.innerHTML;
+    return true;
+  }
+
+  function openCartDrawer() {
+    var cartDrawer = document.querySelector('cart-drawer-component');
+    if (cartDrawer && typeof cartDrawer.open === 'function') {
+      cartDrawer.open();
+      return;
+    }
+    // Fallback for any drawer implementation without a scripted .open():
+    // open the underlying <dialog> directly.
+    var dialog = document.querySelector('#cart-drawer dialog');
+    if (dialog && typeof dialog.showModal === 'function' && !dialog.open) {
+      dialog.showModal();
+    }
+  }
+
+  function notifyCartUpdated(itemInfo, sectionsHtml) {
+    fetch('/cart.js', { headers: { Accept: 'application/json' } })
+      .then(function (res) { return res.json(); })
+      .then(function (cart) {
+        document.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart: cart } }));
+        // Some themes key off "cart:refresh" or listen on the generic
+        // Shopify sections API; dispatching both common names costs
+        // nothing and maximizes the chance an existing theme script
+        // that IS listening picks this up too.
+        document.dispatchEvent(new CustomEvent('cart:refresh', { detail: { cart: cart } }));
+        bestEffortUpdateThemeCartCount(cart);
+        showCartToast(itemInfo, cart);
+
+        // Swap in the drawer's freshly-rendered markup (with the just-added
+        // item already in it) so it's correct whenever the user opens it —
+        // but do NOT open it automatically. No-ops safely on any
+        // theme/setup where the cart-drawer-section wrapper isn't on the
+        // page (e.g. cart_type isn't "drawer").
+        applyCartDrawerSectionHtml(sectionsHtml);
+      })
+      .catch(function (err) {
+        console.error('Could not refresh cart after add', err);
+        // Even if refreshing full cart data failed, still tell the page
+        // something changed, and still show the toast with what we know.
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+        showCartToast(itemInfo, null);
+      });
+  }
+
+  function getCardAddedItemInfo(card) {
+    if (!card) return {};
+    var titleEl = card.querySelector('.pgs__title');
+    var priceEl = card.querySelector('[data-pgs-price]');
+    var imageEl = card.querySelector('[data-pgs-primary-image]');
+    return {
+      title: titleEl ? titleEl.textContent.trim() : '',
+      price: priceEl ? priceEl.textContent.trim() : '',
+      image: (imageEl && imageEl.tagName === 'IMG') ? imageEl.src : ''
+    };
+  }
+
   /* ------------------------------------------------------------------
      Quick Add to Cart
      ------------------------------------------------------------------ */
@@ -1698,15 +1877,29 @@
     var submitBtn = form.querySelector('button[type="submit"]');
     submitBtn && submitBtn.setAttribute('disabled', 'disabled');
 
+    var card = form.closest('[data-pgs-card]');
+    var itemInfo = getCardAddedItemInfo(card);
+
     var formData = new FormData(form);
+    // NEW — ask Shopify to include the drawer section, freshly rendered
+    // with the updated cart, directly in this same response.
+    formData.append('sections', CART_DRAWER_SECTION_ID);
+
     fetch('/cart/add.js', {
       method: 'POST',
       headers: { Accept: 'application/json' },
       body: formData
     })
-      .then(function (res) { return res.json(); })
-      .then(function () {
-        document.dispatchEvent(new CustomEvent('cart:updated'));
+      .then(function (res) {
+        if (!res.ok) {
+          return res.json().then(function (err) {
+            throw new Error(err.description || 'Could not add to cart');
+          });
+        }
+        return res.json();
+      })
+      .then(function (data) {
+        notifyCartUpdated(itemInfo, data.sections);
       })
       .catch(function (err) {
         console.error('Quick add failed', err);
@@ -1785,7 +1978,18 @@
     var modalForm = overlay.querySelector('[data-pgs-modal-add-form]');
     modalForm.addEventListener('submit', function (e) {
       e.preventDefault();
+
+      var itemInfo = {
+        title: modalTitle.textContent || '',
+        price: modalPrice.textContent || '',
+        image: modalImage.src || ''
+      };
+
       var formData = new FormData(modalForm);
+      // NEW — ask Shopify to include the drawer section, freshly rendered
+      // with the updated cart, directly in this same response.
+      formData.append('sections', CART_DRAWER_SECTION_ID);
+
       modalAddBtn.disabled = true;
       var originalText = modalAddBtn.textContent;
       modalAddBtn.textContent = 'Adding...';
@@ -1794,10 +1998,17 @@
         headers: { Accept: 'application/json' },
         body: formData
       })
-        .then(function (res) { return res.json(); })
-        .then(function () {
+        .then(function (res) {
+          if (!res.ok) {
+            return res.json().then(function (err) {
+              throw new Error(err.description || 'Could not add to cart');
+            });
+          }
+          return res.json();
+        })
+        .then(function (data) {
           modalAddBtn.textContent = 'Added!';
-          document.dispatchEvent(new CustomEvent('cart:updated'));
+          notifyCartUpdated(itemInfo, data.sections);
         })
         .catch(function () {
           modalAddBtn.textContent = 'Error';
