@@ -425,7 +425,7 @@
       ],
       "name": "Project Showcase",
       "settings": {
-        "heading": "Explore Men's & Women's Fashion",
+        "heading": "Explore Clothes for Men & Women",
         "subheading": "Discover thoughtfully curated collections for men and women.",
         "heading_color": "",
         "subheading_color": "{{ settings.color_palette.foreground }}",
