@@ -135,11 +135,11 @@
               </div>
 
               <div class="pgs__image-wrap">
-                {%- if s.show_wishlist -%}
+                {% comment %} {%- if s.show_wishlist -%}
                   <button type="button" class="pgs__wishlist" data-wishlist-toggle data-product-id="{{ product.id }}" aria-label="Add {{ product.title | escape }} to wishlist">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6.7-4.35-9.3-8.28C1 10.1 1.5 6.5 4.6 5 7 3.8 9.6 4.7 12 7c2.4-2.3 5-3.2 7.4-2 3.1 1.5 3.6 5.1 1.9 7.72C18.7 16.65 12 21 12 21z"/></svg>
                   </button>
-                {%- endif -%}
+                {%- endif -%} {% endcomment %}
 
                 <label class="pgs__compare-toggle" title="Add to compare" onclick="event.stopPropagation()">
                   <input
