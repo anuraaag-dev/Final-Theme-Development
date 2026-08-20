@@ -32,19 +32,22 @@
           <div
             class="bundle-grid-wrapper"
             data-scroll-dir="{{ section.settings.grid_scroll_direction }}"
-            style="
-              --h-cols: {{ section.settings.h_cols_desktop }};
-              --h-rows: {{ section.settings.h_rows_desktop }};
-              --v-cols: {{ section.settings.v_cols_desktop }};
-              --v-rows: {{ section.settings.v_rows_desktop }};
-            "
           >
 
             <button class="bundle-scroll-arrow prev" type="button" aria-label="Previous products">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
 
-            <div class="bundle-grid" data-scroll-dir="{{ section.settings.grid_scroll_direction }}">
+            <div
+              class="bundle-grid"
+              data-scroll-dir="{{ section.settings.grid_scroll_direction }}"
+              style="
+                --h-cols: {{ section.settings.h_cols_desktop }};
+                --h-rows: {{ section.settings.h_rows_desktop }};
+                --v-cols: {{ section.settings.v_cols_desktop }};
+                --v-rows: {{ section.settings.v_rows_desktop }};
+              "
+            >
               {% for product in block.settings.collection.products limit: 12 %}
                 <div class="bundle-product-card" style="padding-top:40px;">
                   <img
@@ -250,9 +253,13 @@
     overflow-x: hidden !important;
   }
 
-  /* Mobile overrides — values come from the block's own settings */
+   /* Mobile overrides — set directly on .bundle-grid now, not the wrapper.
+     These used to sit on .bundle-grid-wrapper and rely on CSS inheritance
+     to reach .bundle-grid, which is the exact indirection that was
+     unreliable. Declaring them on the element that actually consumes them
+     removes that step completely. */
   @media (max-width: 1024px) {
-    .bundle-grid-wrapper {
+    .bundle-grid {
       --h-cols: {{ section.settings.h_cols_mobile }} !important;
       --h-rows: {{ section.settings.h_rows_mobile }} !important;
       --v-cols: {{ section.settings.v_cols_mobile }} !important;
@@ -536,7 +543,7 @@
       }
 
       function readVar(name, fallback) {
-        const raw = getComputedStyle(wrapper).getPropertyValue(name);
+        const raw = getComputedStyle(grid).getPropertyValue(name);
         const n = parseFloat(raw);
         return n > 0 ? n : fallback;
       }
