@@ -4,24 +4,23 @@
   Drop this file in: /blocks/quantity-break-pricing.liquid
 
   What it does:
-  - Two-column layout: tier list on the left, live price preview +
-    "Add to cart" button on the right.
-  - Clicking a tier selects it (and shows its discounted per-unit
-    price + total). Clicking "Add to cart" sets the real quantity
-    input to that tier's minimum quantity and submits the theme's
-    own product form — so Horizon's normal add-to-cart / cart-drawer
-    behaviour runs unchanged.
+  - Renders a pricing table: Setting | Quantity | Unit price | Add to cart,
+    with a "Minimum" row at full price plus one row per configured
+    price break / discount tier.
+  - Each row's "Add to cart" button sets the real quantity input to
+    that row's quantity and submits the theme's own product form, so
+    Horizon's normal add-to-cart / cart-drawer behaviour runs as-is.
 
   IMPORTANT — about the price shown:
-  This block calculates a *preview* price from the discount % you
-  set here. It cannot change what the customer is actually charged
-  by itself — no theme code can safely override checkout pricing.
-  For the cart/checkout total to match what's shown, create matching
-  Automatic Discounts in Shopify Admin -> Discounts (e.g. "min qty 2,
-  2% off" and "min qty 6, 5% off") scoped to this product. Once those
-  exist, adding the tier's quantity via this block's button will make
-  the real cart total match the preview, because Shopify's discount
-  engine reprices the cart itself.
+  The "Unit price" column is a *preview* calculated from the discount
+  % you set here. No theme code can safely change what's actually
+  charged at checkout — that has to come from Shopify's own discount
+  engine. For the cart/checkout total to match this table, create
+  matching Automatic Discounts in Shopify Admin -> Discounts (e.g.
+  min qty 20 -> the same % this tier implies) scoped to this product.
+  Once those exist, clicking a row's Add to cart button makes the
+  real cart total match the table, because Shopify reprices the cart
+  itself once the discount's quantity condition is met.
 
   Add it to the product page:
   Theme editor -> Product page -> select the block/section that holds
@@ -65,73 +64,78 @@
   assign tiers_json = '[' | append: tiers | append: ']'
 %}
 
-{% if tiers != '' %}
-  <quantity-break-pricing
-    class="qbp"
-    data-base-price="{{ variant.price | default: 0 }}"
-    data-variant-id="{{ variant.id }}"
-    data-money-format="{{ shop.money_format | escape }}"
-    data-tiers='{{ tiers_json }}'
-    {{ block.shopify_attributes }}
-  >
-    {% if block.settings.heading != blank %}
-      <p class="qbp__heading">{{ block.settings.heading }}</p>
-    {% endif %}
+<quantity-break-pricing
+  class="qbp"
+  data-base-price="{{ variant.price | default: 0 }}"
+  data-variant-id="{{ variant.id }}"
+  data-money-format="{{ shop.money_format | escape }}"
+  data-tiers='{{ tiers_json }}'
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.heading != blank %}
+    <p class="qbp__heading">{{ block.settings.heading }}</p>
+  {% endif %}
 
-    <div class="qbp__layout">
-      <div class="qbp__col qbp__col--tiers">
-        <ul class="qbp__list" role="list">
-          {% for i in (1..4) %}
-            {% case i %}
-              {% when 1 %}
-                {% assign t_min = block.settings.tier1_min %}{% assign t_max = block.settings.tier1_max %}{% assign t_pct = block.settings.tier1_discount %}
-              {% when 2 %}
-                {% assign t_min = block.settings.tier2_min %}{% assign t_max = block.settings.tier2_max %}{% assign t_pct = block.settings.tier2_discount %}
-              {% when 3 %}
-                {% assign t_min = block.settings.tier3_min %}{% assign t_max = block.settings.tier3_max %}{% assign t_pct = block.settings.tier3_discount %}
-              {% when 4 %}
-                {% assign t_min = block.settings.tier4_min %}{% assign t_max = block.settings.tier4_max %}{% assign t_pct = block.settings.tier4_discount %}
-            {% endcase %}
-            {% if t_min > 0 and t_pct > 0 %}
-              <li class="qbp__tier">
-                <button
-                  type="button"
-                  class="qbp__tier-button"
-                  data-min="{{ t_min }}"
-                  data-max="{{ t_max }}"
-                  data-pct="{{ t_pct }}"
-                  aria-pressed="false"
-                >
-                  <span class="qbp__tier-range">
-                    {%- if t_max > 0 -%}
-                      {{ t_min }}–{{ t_max }} {{ 'products.product.quantity_break.units' | default: 'units' }}
-                    {%- else -%}
-                      {{ t_min }}+ {{ 'products.product.quantity_break.units' | default: 'units' }}
-                    {%- endif -%}
-                  </span>
-                  <span class="qbp__tier-discount">{{ t_pct }}% off</span>
-                </button>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
+  <table class="qbp__table">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'products.product.quantity_break.setting' | default: 'Setting' }}</th>
+        <th scope="col">{{ 'products.product.quantity_break.quantity' | default: 'Quantity' }}</th>
+        <th scope="col">{{ 'products.product.quantity_break.unit_price' | default: 'Unit price' }}</th>
+        <th scope="col"><span class="visually-hidden">{{ block.settings.button_label | default: 'Add to cart' }}</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="qbp__row" data-min="1" data-max="0" data-pct="0">
+        <td>{{ 'products.product.quantity_break.minimum' | default: 'Minimum' }}</td>
+        <td>1</td>
+        <td class="qbp__row-price">{{ variant.price | money }}</td>
+        <td>
+          <button type="button" class="qbp__row-add" data-min="1">
+            {{ block.settings.button_label | default: 'Add to cart' }}
+          </button>
+        </td>
+      </tr>
 
-      <div class="qbp__col qbp__col--action">
-        <p class="qbp__price-line">
-          <span class="qbp__current-price"></span>
-          <s class="qbp__compare-price" hidden></s>
-        </p>
-        <p class="qbp__savings" hidden></p>
-        <p class="qbp__total" hidden></p>
-        <button type="button" class="qbp__add-to-cart">
-          {{ block.settings.button_label | default: 'Add to cart' }}
-        </button>
-        <p class="qbp__status" role="status" hidden></p>
-      </div>
-    </div>
-  </quantity-break-pricing>
-{% endif %}
+      {% assign break_count = 0 %}
+      {% for i in (1..4) %}
+        {% case i %}
+          {% when 1 %}
+            {% assign t_min = block.settings.tier1_min %}{% assign t_max = block.settings.tier1_max %}{% assign t_pct = block.settings.tier1_discount %}
+          {% when 2 %}
+            {% assign t_min = block.settings.tier2_min %}{% assign t_max = block.settings.tier2_max %}{% assign t_pct = block.settings.tier2_discount %}
+          {% when 3 %}
+            {% assign t_min = block.settings.tier3_min %}{% assign t_max = block.settings.tier3_max %}{% assign t_pct = block.settings.tier3_discount %}
+          {% when 4 %}
+            {% assign t_min = block.settings.tier4_min %}{% assign t_max = block.settings.tier4_max %}{% assign t_pct = block.settings.tier4_discount %}
+        {% endcase %}
+        {% if t_min > 0 and t_pct > 0 %}
+          {% assign break_count = break_count | plus: 1 %}
+          {% assign discount_multiplier = 100 | minus: t_pct %}
+          {% assign unit_price = variant.price | times: discount_multiplier | divided_by: 100 %}
+          <tr class="qbp__row" data-min="{{ t_min }}" data-max="{{ t_max }}" data-pct="{{ t_pct }}">
+            <td>{{ 'products.product.quantity_break.price_break' | default: 'Price break' }} {{ break_count }}</td>
+            <td>
+              {%- if t_max > 0 -%}
+                {{ t_min }}–{{ t_max }}
+              {%- else -%}
+                {{ t_min }}
+              {%- endif -%}
+            </td>
+            <td class="qbp__row-price">{{ unit_price | money }}</td>
+            <td>
+              <button type="button" class="qbp__row-add" data-min="{{ t_min }}">
+                {{ block.settings.button_label | default: 'Add to cart' }}
+              </button>
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="qbp__status" role="status" hidden></p>
+</quantity-break-pricing>
 
 <style>
   .qbp {
@@ -144,113 +148,59 @@
     font-weight: 600;
   }
 
-  .qbp__layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-    align-items: start;
-  }
-
-  @media (max-width: 640px) {
-    .qbp__layout {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .qbp__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .qbp__tier-button {
+  .qbp__table {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    background: transparent;
-    border: 1px solid currentColor;
-    border-radius: 0.5rem;
-    padding: 0.6rem 0.85rem;
-    font: inherit;
-    color: inherit;
-    cursor: pointer;
-    opacity: 0.65;
-    transition: opacity 0.15s ease, border-color 0.15s ease;
+    border-collapse: collapse;
   }
 
-  .qbp__tier-button[aria-pressed="true"] {
-    opacity: 1;
-    border-width: 2px;
-    padding: calc(0.6rem - 1px) calc(0.85rem - 1px);
-  }
-
-  .qbp__tier-range {
-    font-size: 0.9em;
-  }
-
-  .qbp__tier-discount {
-    font-weight: 600;
-  }
-
-  .qbp__col--action {
-    border: 1px solid currentColor;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .qbp__price-line {
-    margin: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    font-size: 1.1em;
-    font-weight: 600;
-  }
-
-  .qbp__compare-price {
-    font-weight: 400;
-    opacity: 0.6;
-  }
-
-  .qbp__savings,
-  .qbp__total {
-    margin: 0;
-    font-size: 0.85em;
-    opacity: 0.8;
-  }
-
-  .qbp__add-to-cart {
-    margin-top: 0.5rem;
-    border: 1px solid currentColor;
-    border-radius: 0.5rem;
+  .qbp__table th,
+  .qbp__table td {
+    text-align: left;
     padding: 0.75rem 1rem;
-    background: currentColor;
-    cursor: pointer;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  }
+
+  .qbp__table thead th {
+    background: color-mix(in srgb, currentColor 8%, transparent);
+    font-weight: 600;
+  }
+
+  .qbp__row-price {
+    white-space: nowrap;
+  }
+
+  .qbp__row-add {
+    border: 1px solid currentColor;
+    border-radius: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    background: transparent;
+    color: inherit;
     font: inherit;
+    cursor: pointer;
+    white-space: nowrap;
   }
 
-  .qbp__add-to-cart span,
-  .qbp__add-to-cart {
-    color: Canvas;
+  .qbp__row-add:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
   }
 
-  .qbp__add-to-cart:disabled {
+  .qbp__row-add:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
   .qbp__status {
-    margin: 0;
+    margin: 0.5rem 0 0;
     font-size: 0.85em;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 </style>
 
@@ -264,12 +214,6 @@
         this.variantId = this.dataset.variantId;
         this.moneyFormat = this.dataset.moneyFormat || '${{amount}}';
 
-        try {
-          this.tiers = JSON.parse(this.dataset.tiers || '[]');
-        } catch (e) {
-          this.tiers = [];
-        }
-
         // The quantity input + submit button live in the theme's own
         // product form, which may be a sibling block rather than a
         // descendant of this element.
@@ -281,16 +225,11 @@
         const sectionRoot = this.closest('.shopify-section') || this.form || document;
         sectionRoot.addEventListener('variant:update', this._onVariantUpdate);
 
-        this.tierButtons = Array.from(this.querySelectorAll('.qbp__tier-button'));
-        this.tierButtons.forEach((btn) => {
-          btn.addEventListener('click', () => this.selectTier(btn));
+        this.rows = Array.from(this.querySelectorAll('.qbp__row'));
+        this.rows.forEach((row) => {
+          const btn = row.querySelector('.qbp__row-add');
+          btn.addEventListener('click', () => this.addToCart(row));
         });
-
-        this.addToCartButton = this.querySelector('.qbp__add-to-cart');
-        this.addToCartButton.addEventListener('click', () => this.addToCart());
-
-        // Default to the first tier so the panel is always usable.
-        if (this.tierButtons.length) this.selectTier(this.tierButtons[0]);
       }
 
       disconnectedCallback() {
@@ -303,19 +242,8 @@
         if (variant && typeof variant.price === 'number') {
           this.basePrice = variant.price;
           this.variantId = variant.id;
-          this.updatePricePreview();
+          this.refreshPrices();
         }
-      }
-
-      selectTier(button) {
-        this.tierButtons.forEach((btn) => btn.setAttribute('aria-pressed', 'false'));
-        button.setAttribute('aria-pressed', 'true');
-        this.selectedTier = {
-          min: parseInt(button.dataset.min, 10),
-          max: parseInt(button.dataset.max, 10),
-          pct: parseInt(button.dataset.pct, 10),
-        };
-        this.updatePricePreview();
       }
 
       formatMoney(cents) {
@@ -326,28 +254,12 @@
         return this.moneyFormat.replace(/\{\{\s*amount\s*\}\}/, amount);
       }
 
-      updatePricePreview() {
-        const tier = this.selectedTier;
-        const currentEl = this.querySelector('.qbp__current-price');
-        const compareEl = this.querySelector('.qbp__compare-price');
-        const savingsEl = this.querySelector('.qbp__savings');
-        const totalEl = this.querySelector('.qbp__total');
-
-        if (!tier) return;
-
-        const unitPrice = Math.round(this.basePrice * (1 - tier.pct / 100));
-        const total = unitPrice * tier.min;
-
-        currentEl.textContent = this.formatMoney(unitPrice) + ' / unit';
-        compareEl.textContent = this.formatMoney(this.basePrice);
-        compareEl.hidden = tier.pct <= 0;
-
-        savingsEl.textContent = 'You save ' + tier.pct + '%';
-        savingsEl.hidden = false;
-
-        totalEl.textContent =
-          'Est. total for ' + tier.min + ': ' + this.formatMoney(total);
-        totalEl.hidden = false;
+      refreshPrices() {
+        this.rows.forEach((row) => {
+          const pct = parseInt(row.dataset.pct, 10) || 0;
+          const unitPrice = Math.round(this.basePrice * (1 - pct / 100));
+          row.querySelector('.qbp__row-price').textContent = this.formatMoney(unitPrice);
+        });
       }
 
       setStatus(message) {
@@ -356,21 +268,22 @@
         statusEl.hidden = !message;
       }
 
-      addToCart() {
-        const tier = this.selectedTier;
-        if (!tier || !this.form) {
+      addToCart(row) {
+        if (!this.form) {
           this.setStatus('Could not find the product form on this page.');
           return;
         }
 
+        const qty = parseInt(row.dataset.min, 10) || 1;
         const qtyInput = this.form.querySelector('input[name="quantity"]');
         if (qtyInput) {
-          qtyInput.value = tier.min;
+          qtyInput.value = qty;
           qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
           qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
-        this.addToCartButton.disabled = true;
+        const btn = row.querySelector('.qbp__row-add');
+        btn.disabled = true;
         this.setStatus('Adding to cart…');
 
         // Submit the theme's own product form so its existing
@@ -382,10 +295,8 @@
           if (submitBtn) submitBtn.click();
         }
 
-        // Re-enable shortly after; the theme's own form handles the
-        // actual network request and its own loading state.
         window.setTimeout(() => {
-          this.addToCartButton.disabled = false;
+          btn.disabled = false;
           this.setStatus('');
         }, 1500);
       }
@@ -413,7 +324,7 @@
     },
     {
       "type": "header",
-      "content": "Tier 1"
+      "content": "Price break 1"
     },
     {
       "type": "range",
@@ -422,7 +333,7 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 2
+      "default": 20
     },
     {
       "type": "range",
@@ -431,7 +342,7 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 5
+      "default": 0
     },
     {
       "type": "range",
@@ -441,11 +352,11 @@
       "max": 100,
       "step": 1,
       "unit": "%",
-      "default": 2
+      "default": 8
     },
     {
       "type": "header",
-      "content": "Tier 2"
+      "content": "Price break 2"
     },
     {
       "type": "range",
@@ -454,7 +365,7 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 6
+      "default": 50
     },
     {
       "type": "range",
@@ -463,7 +374,7 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 8
+      "default": 0
     },
     {
       "type": "range",
@@ -473,11 +384,11 @@
       "max": 100,
       "step": 1,
       "unit": "%",
-      "default": 5
+      "default": 12
     },
     {
       "type": "header",
-      "content": "Tier 3 (optional)"
+      "content": "Price break 3"
     },
     {
       "type": "range",
@@ -486,7 +397,7 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 0
+      "default": 100
     },
     {
       "type": "range",
@@ -505,11 +416,11 @@
       "max": 100,
       "step": 1,
       "unit": "%",
-      "default": 0
+      "default": 20
     },
     {
       "type": "header",
-      "content": "Tier 4 (optional)"
+      "content": "Price break 4 (optional)"
     },
     {
       "type": "range",
