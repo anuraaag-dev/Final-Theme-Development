@@ -140,90 +140,114 @@
 </section>
 
 <style>
+  /* Force a consistent box model on everything in this section — a theme's
+     global reset may not apply border-box the same way, which throws off
+     every width/padding calculation above. */
+  .bundle-builder, .bundle-builder * { box-sizing: border-box !important; }
+
   .selected-items-sidebar {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 10px;
-    padding: 10px 0;
-    -webkit-overflow-scrolling: touch;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 10px !important;
+    padding: 10px 0 !important;
+    -webkit-overflow-scrolling: touch !important;
   }
-  .selected-items-sidebar::-webkit-scrollbar { height: 4px; }
-  .selected-items-sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+  .selected-items-sidebar::-webkit-scrollbar { height: 4px !important; }
+  .selected-items-sidebar::-webkit-scrollbar-thumb { background: #ccc !important; border-radius: 10px !important; }
 
   .sidebar-item {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
   .toggle-sidebar-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    font-weight: 600;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
   }
 
-  .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
-  .switch input { opacity: 0; width: 0; height: 0; }
-  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-  input:checked + .slider { background-color: #000; }
-  input:checked + .slider:before { transform: translateX(18px); }
+  .switch { position: relative !important; display: inline-block !important; width: 40px !important; height: 22px !important; }
+  .switch input { opacity: 0 !important; width: 0 !important; height: 0 !important; }
+  .slider { position: absolute !important; cursor: pointer !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; background-color: #ccc !important; transition: .4s !important; border-radius: 34px !important; }
+  .slider:before { position: absolute !important; content: "" !important; height: 16px !important; width: 16px !important; left: 3px !important; bottom: 3px !important; background-color: white !important; transition: .4s !important; border-radius: 50% !important; }
+  input:checked + .slider { background-color: #000 !important; }
+  input:checked + .slider:before { transform: translateX(18px) !important; }
   .hide-sidebar-list { display: none !important; }
 
-  .bundle-builder { padding: 40px 0; background: #fff; position: relative; }
-  .bundle-container { display: flex; gap: 30px; max-width: 1300px; margin: 0 auto; padding: 0 20px; align-items: start; }
-  .bundle-products-area { flex: 1; min-width: 0; }
-  .bundle-summary { width: 360px; position: sticky; top: 20px; background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 20px; box-sizing: border-box; }
+  .bundle-builder { padding: 40px 0 !important; background: #fff !important; position: relative !important; }
+  .bundle-container { display: flex !important; gap: 30px !important; max-width: 1300px !important; margin: 0 auto !important; padding: 0 20px !important; align-items: start !important; }
+  .bundle-products-area { flex: 1 !important; min-width: 0 !important; }
+  .bundle-summary { width: 360px !important; position: sticky !important; top: 20px !important; background: #fff !important; border: 1px solid #eee !important; border-radius: 16px !important; padding: 20px !important; }
 
-  .progress-line { height: 5px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 8px; position: relative; width: 100%; }
-  #progress-bar-fill { height: 100%; width: 0%; transition: width 0.4s ease; display: block; background-color: {{ section.settings.p_color }} !important; }
-  .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-bottom: 20px; }
-  .tier-label.active { color: {{ section.settings.p_color }}; font-weight: 700; text-decoration: underline; }
+  .progress-line { height: 5px !important; background: #e0e0e0 !important; border-radius: 10px !important; overflow: hidden !important; margin-bottom: 8px !important; position: relative !important; width: 100% !important; }
+  #progress-bar-fill { height: 100% !important; width: 0% !important; transition: width 0.4s ease !important; display: block !important; background-color: {{ section.settings.p_color }} !important; }
+  .progress-labels { display: flex !important; justify-content: space-between !important; font-size: 11px !important; color: #999 !important; margin-bottom: 20px !important; }
+  .tier-label.active { color: {{ section.settings.p_color }} !important; font-weight: 700 !important; text-decoration: underline !important; }
 
-  .bundle-tabs { display: flex; gap: 8px; background: #f4f4f4; padding: 6px; border-radius: 100px; width: 100%; margin: 0 auto 30px; }
-  .bundle-tab { flex: 1; border: none; background: transparent; padding: 10px 18px; border-radius: 100px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; }
-  .bundle-tab.active { background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+  .bundle-tabs { display: flex !important; gap: 8px !important; background: #f4f4f4 !important; padding: 6px !important; border-radius: 100px !important; width: 100% !important; margin: 0 auto 30px !important; }
+  .bundle-tab {
+    flex: 1 !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 10px 18px !important;
+    border-radius: 100px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-weight: 500 !important;
+    height: auto !important;
+    line-height: normal !important;
+    box-shadow: none !important;
+  }
+  .bundle-tab.active { background: #fff !important; box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important; }
 
-  .bundle-tab-content { display: none; }
-  .bundle-tab-content.active { display: block; }
+  .bundle-tab-content { display: none !important; }
+  .bundle-tab-content.active { display: block !important; }
 
   /* --- Scrollable product grid --- */
   .bundle-grid-wrapper {
-    position: relative;
-    padding: 0 6px 22px;
+    position: relative !important;
+    padding: 0 6px 22px !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .bundle-grid {
-    display: grid;
-    gap: 15px;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
+    display: grid !important;
+    gap: 15px !important;
+    scroll-behavior: smooth !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
   }
-  .bundle-grid::-webkit-scrollbar { display: none; }
-  .bundle-grid { scrollbar-width: none; -ms-overflow-style: none; }
+  .bundle-grid::-webkit-scrollbar { display: none !important; }
+  .bundle-grid { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 
-  /* Horizontal mode: N rows x M columns per "page", scrolls sideways for more columns */
-  /* Horizontal mode: column width is set in JS as a plain px value (--card-w),
-     not a percentage — percentages inside grid-auto-columns don't reliably
-     resolve on a scrolling grid, so this guarantees exact counts. */
+  /* Horizontal mode: N rows x M columns per "page", scrolls sideways for more columns.
+     Column width is set in JS as a plain px custom property (--card-w) rather than a
+     percentage — percentages inside grid-auto-columns don't reliably resolve when the
+     grid also has overflow-x:auto in every browser, so this guarantees exact counts. */
   .bundle-grid[data-scroll-dir="horizontal"] {
-    grid-auto-flow: column;
-    grid-template-rows: repeat(var(--h-rows, 1), 1fr);
-    grid-auto-columns: var(--card-w, 200px);
-    overflow-x: auto;
-    overflow-y: hidden;
+    grid-auto-flow: column !important;
+    grid-template-rows: repeat(var(--h-rows, 1), 1fr) !important;
+    grid-auto-columns: var(--card-w, 200px) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
   }
 
   /* Vertical mode: M columns, height locked to N rows worth, scrolls down for more */
   .bundle-grid[data-scroll-dir="vertical"] {
-    grid-template-columns: repeat(var(--v-cols, 3), 1fr);
-    overflow-y: auto;
-    overflow-x: hidden;
+    grid-auto-flow: row !important;
+    grid-template-columns: repeat(var(--v-cols, 3), 1fr) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 
   /* Mobile overrides — values come from the block's own settings */
@@ -237,96 +261,151 @@
   }
 
   .bundle-scroll-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 1px solid #eee;
-    background: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: opacity 0.2s, transform 0.2s;
-    color: #333;
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    border: 1px solid #eee !important;
+    background: #fff !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    transition: opacity 0.2s, transform 0.2s !important;
+    color: #333 !important;
+    padding: 0 !important;
   }
-  .bundle-scroll-arrow.prev { left: -6px; }
-  .bundle-scroll-arrow.next { right: -6px; }
-  .bundle-scroll-arrow:hover { transform: translateY(-50%) scale(1.06); }
-  .bundle-scroll-arrow.disabled { opacity: 0.25; pointer-events: none; }
+  .bundle-scroll-arrow.prev { left: -6px !important; }
+  .bundle-scroll-arrow.next { right: -6px !important; }
+  .bundle-scroll-arrow:hover { transform: translateY(-50%) scale(1.06) !important; }
+  .bundle-scroll-arrow.disabled { opacity: 0.25 !important; pointer-events: none !important; }
 
   .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.prev {
-    top: -6px; left: 50%; transform: translateX(-50%) rotate(90deg);
+    top: -6px !important; left: 50% !important; transform: translateX(-50%) rotate(90deg) !important;
   }
   .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.next {
-    top: auto; bottom: -6px; left: 50%; right: auto; transform: translateX(-50%) rotate(90deg);
+    top: auto !important; bottom: -6px !important; left: 50% !important; right: auto !important; transform: translateX(-50%) rotate(90deg) !important;
   }
   .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.prev:hover,
   .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.next:hover {
-    transform: translateX(-50%) rotate(90deg) scale(1.06);
+    transform: translateX(-50%) rotate(90deg) scale(1.06) !important;
   }
-  .bundle-grid-wrapper[data-scroll-dir="vertical"] { padding: 22px 6px 0; }
+  .bundle-grid-wrapper[data-scroll-dir="vertical"] { padding: 22px 6px 0 !important; }
 
   /* Custom "comet" progress track: fades out behind, stays dark ahead */
   .bundle-scroll-track {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 3px;
-    background: rgba(0,0,0,0.08);
-    border-radius: 10px;
-    overflow: hidden;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 3px !important;
+    background: rgba(0,0,0,0.08) !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
   }
   .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-track {
-    top: 0;
-    bottom: 0;
-    left: auto;
-    right: 0;
-    width: 3px;
-    height: auto;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    right: 0 !important;
+    width: 3px !important;
+    height: auto !important;
   }
   .bundle-scroll-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    border-radius: 10px;
-    transition: left 0.35s ease, top 0.35s ease, width 0.35s ease, height 0.35s ease, background 0.35s ease;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100% !important;
+    border-radius: 10px !important;
+    transition: left 0.35s ease, top 0.35s ease, width 0.35s ease, height 0.35s ease, background 0.35s ease !important;
   }
 
-   .bundle-product-card { background: #f8fbf8; border-radius: 12px; padding: 15px; text-align: center; min-width: 0; overflow: hidden; }
+  .bundle-product-card {
+    background: #f8fbf8 !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    text-align: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    display: block !important;
+  }
   .bundle-product-card img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    mix-blend-mode: multiply;
-    background: #ececec; /* visible neutral square if a product has no image, instead of an oversized broken-image box */
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+    mix-blend-mode: multiply !important;
+    background: #ececec !important;
+    display: block !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
   }
-  .price-container { margin: 10px 0; display: flex; justify-content: center; gap: 8px; }
-  .compare-price-strike { text-decoration: line-through; color: #999; font-size: 13px; }
-  .bundle-add { width: 100%; padding: 10px; border-radius: 100px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-weight: 600; font-size: 12px; }
+  .bundle-product-card h4 {
+    margin: 10px 0 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+  .price-container { margin: 10px 0 !important; display: flex !important; justify-content: center !important; gap: 8px !important; }
+  .compare-price-strike { text-decoration: line-through !important; color: #999 !important; font-size: 13px !important; }
+  .bundle-add {
+    width: 100% !important;
+    padding: 10px !important;
+    border-radius: 100px !important;
+    border: 1px solid #ddd !important;
+    background: #fff !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    height: auto !important;
+    line-height: normal !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+  }
 
-  .sidebar-item { display: flex; align-items: center; gap: 10px; background: #fafafa; padding: 8px; border-radius: 8px; border: 1px solid #f0f0f0; margin-bottom: 8px; }
-  .sidebar-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
-  .sidebar-item span { flex: 1; font-size: 12px; font-weight: 500; text-align: left; }
-  .remove-item { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; }
+  .sidebar-item { display: flex !important; align-items: center !important; gap: 10px !important; background: #fafafa !important; padding: 8px !important; border-radius: 8px !important; border: 1px solid #f0f0f0 !important; margin-bottom: 8px !important; }
+  .sidebar-item img { width: 40px !important; height: 40px !important; max-width: none !important; object-fit: cover !important; border-radius: 4px !important; }
+  .sidebar-item span { flex: 1 !important; font-size: 12px !important; font-weight: 500 !important; text-align: left !important; }
+  .remove-item { background: none !important; border: none !important; color: #ccc !important; cursor: pointer !important; font-size: 18px !important; padding: 0 !important; }
 
-  .total-strike { text-decoration: line-through; color: #999; font-size: 15px; display: none; }
-  #bundle-total { font-size: 24px; font-weight: 700; color: #000; }
-  #bundle-add-cart { width: 100%; margin-top: 15px; padding: 15px; border-radius: 100px; border: none; background: #ccc; color: #fff; font-weight: 700; cursor: not-allowed; transition: 0.3s; }
-  #bundle-add-cart.ready { background: #000; cursor: pointer; }
+  .total-strike { text-decoration: line-through !important; color: #999 !important; font-size: 15px !important; display: none !important; }
+  #bundle-total { font-size: 24px !important; font-weight: 700 !important; color: #000 !important; }
+  #bundle-add-cart {
+    width: 100% !important;
+    margin-top: 15px !important;
+    padding: 15px !important;
+    border-radius: 100px !important;
+    border: none !important;
+    background: #ccc !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    cursor: not-allowed !important;
+    transition: 0.3s !important;
+    height: auto !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+  }
+  #bundle-add-cart.ready { background: #000 !important; cursor: pointer !important; }
 
-  #bundle-toast { position: fixed; bottom: 20px; right: 20px; background: #000; color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 12px; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 999; }
-  #bundle-toast.show { opacity: 1; visibility: visible; }
+  #bundle-toast { position: fixed !important; bottom: 20px !important; right: 20px !important; background: #000 !important; color: #fff !important; padding: 10px 20px !important; border-radius: 50px !important; font-size: 12px !important; opacity: 0 !important; visibility: hidden !important; transition: 0.3s !important; z-index: 999 !important; }
+  #bundle-toast.show { opacity: 1 !important; visibility: visible !important; }
 
   @media (max-width: 1024px) {
-    .bundle-container { flex-direction: column; }
-    .bundle-summary { width: 100%; position: static; margin-top: 30px; }
+    .bundle-container { flex-direction: column !important; }
+    .bundle-summary { width: 100% !important; position: static !important; margin-top: 30px !important; }
   }
 </style>
 
