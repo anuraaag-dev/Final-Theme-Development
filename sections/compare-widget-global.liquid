@@ -1,0 +1,25 @@
+{% comment %}
+  Section: Compare Widget (Global)
+  Renders the floating compare bar exactly once. Add this section to the
+  footer group via the theme customizer (Customize > scroll to the footer
+  area > Add section > "Compare Widget") so it renders on every page,
+  the same way the header and footer do - without needing direct access
+  to layout/theme.liquid.
+
+  Previously this was rendered from inside snippets/product-card.liquid,
+  once per product card. That caused two problems: it never appeared on
+  pages with no product cards (like the product page itself), and having
+  several copies of the same #pgs-compare-bar id meant only the first one
+  in the DOM actually got updated by the script. Rendering it once here,
+  outside of any card markup (which may use CSS transforms that break
+  position: fixed on nested elements), fixes both issues.
+{% endcomment %}
+
+{% render 'compare-widget' %}
+
+{% schema %}
+{
+  "name": "Compare Widget",
+  "settings": []
+}
+{% endschema %}
