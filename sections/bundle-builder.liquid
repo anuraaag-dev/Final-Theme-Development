@@ -299,8 +299,14 @@
     transition: left 0.35s ease, top 0.35s ease, width 0.35s ease, height 0.35s ease, background 0.35s ease;
   }
 
-  .bundle-product-card { background: #f8fbf8; border-radius: 12px; padding: 15px; text-align: center; }
-  .bundle-product-card img { width: 100%; height: auto; mix-blend-mode: multiply; }
+   .bundle-product-card { background: #f8fbf8; border-radius: 12px; padding: 15px; text-align: center; min-width: 0; overflow: hidden; }
+  .bundle-product-card img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+    background: #ececec; /* visible neutral square if a product has no image, instead of an oversized broken-image box */
+  }
   .price-container { margin: 10px 0; display: flex; justify-content: center; gap: 8px; }
   .compare-price-strike { text-decoration: line-through; color: #999; font-size: 13px; }
   .bundle-add { width: 100%; padding: 10px; border-radius: 100px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-weight: 600; font-size: 12px; }
@@ -475,9 +481,13 @@
         const cols = readVar('--h-cols', 4);
         const gap = parseFloat(getComputedStyle(grid).gap) || 15;
         const containerWidth = grid.clientWidth;
-        if (containerWidth > 0) {
-          const cardWidth = (containerWidth - gap * (cols - 1)) / cols;
-          grid.style.setProperty('--card-w', Math.max(cardWidth, 100) + 'px');
+        if (containerWidth > 0 && Number.isFinite(cols) && cols > 0) {
+          let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
+          if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
+          // Never let a single card exceed the visible container — this is the
+          // hard stop that prevents any runaway/"auto" collapse from filling the screen.
+          cardWidth = Math.min(Math.max(cardWidth, 100), containerWidth);
+          grid.style.setProperty('--card-w', cardWidth + 'px');
         }
       }
 
