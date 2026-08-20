@@ -562,7 +562,6 @@
       const prevBtn = wrapper.querySelector('.bundle-scroll-arrow.prev');
       const nextBtn = wrapper.querySelector('.bundle-scroll-arrow.next');
       const fill = wrapper.querySelector('.bundle-scroll-fill');
-      let lastPos = 0;
 
       function measureCard() {
         const card = grid.querySelector('.bundle-product-card');
@@ -645,45 +644,17 @@
         const fullSize = direction === 'vertical' ? grid.scrollHeight : grid.scrollWidth;
         const maxScroll = Math.max(fullSize - viewSize, 0);
 
-        // Scroll-snap can lock the reachable position slightly short of the
-        // true geometric max when items don't divide evenly into snap points
-        // — likely here, since Mobile's column count allows fractional values
-        // like 1.2 on purpose. Treat anything within ~60% of one card's width
-        // of the true end as "fully scrolled", so the bar and the arrow both
-        // agree with where scrolling can actually reach, instead of the bar
-        // showing a gap that's physically impossible to close.
-        const { size: cardSize } = measureCard();
-        const snapTolerance = cardSize > 0 ? cardSize * 0.6 : 20;
-        const atEnd = maxScroll <= 0 || pos >= maxScroll - snapTolerance;
-
         if (prevBtn) prevBtn.classList.toggle('disabled', pos <= 2);
-        if (nextBtn) nextBtn.classList.toggle('disabled', atEnd);
+        if (nextBtn) nextBtn.classList.toggle('disabled', pos >= maxScroll - 2 || maxScroll <= 0);
 
         if (fill) {
-          const visibleRatio = fullSize > 0 ? viewSize / fullSize : 1;
-          const headPct = Math.min(Math.max(visibleRatio * 100, 10), 100);
-          const remainingPct = 100 - headPct;
-          const pct = atEnd ? 1 : (maxScroll > 0 ? pos / maxScroll : 0);
-          const headStart = pct * remainingPct;
-          const goingForward = pos >= lastPos;
-          lastPos = pos;
-
+          // Directly proportional, always. No thresholds, no "close enough"
+          // guessing — this is the actual scrolled fraction, full stop.
+          const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) * 100 : 100;
           if (direction === 'vertical') {
-            fill.style.top = headStart + '%';
-            fill.style.height = headPct + '%';
-            fill.style.left = '0';
-            fill.style.width = '100%';
-            fill.style.background = goingForward
-              ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
-              : 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
+            fill.style.height = pct + '%';
           } else {
-            fill.style.left = headStart + '%';
-            fill.style.width = headPct + '%';
-            fill.style.top = '0';
-            fill.style.height = '100%';
-            fill.style.background = goingForward
-              ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
-              : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
+            fill.style.width = pct + '%';
           }
         }
       }
