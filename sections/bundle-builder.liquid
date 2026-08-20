@@ -545,35 +545,48 @@
         return readVar(direction === 'vertical' ? '--v-rows' : '--h-rows', direction === 'vertical' ? 2 : 1);
       }
 
-      function applyHorizontalWidth() {
-        if (direction !== 'horizontal') return;
-        let cols = readVar('--h-cols', 4);
-        // Hard sanity clamp: no measurement glitch, mid-resize timing issue, or
-        // unexpected value can ever push cols to near-zero (which is what causes
-        // a divide-by-almost-nothing → millions-of-pixels card width).
-        if (!Number.isFinite(cols)) cols = 4;
-        cols = Math.min(Math.max(cols, 0.5), 10);
-
+      // The one true source of "how wide is a single card right now" — for
+      // BOTH directions. Pure calculation from the container's own width and
+      // the active column count. Deliberately does NOT read any element's
+      // rendered/clientWidth, because that depends on layout having already
+      // settled with the correct value — which is the exact race that was
+      // producing the runaway sizes.
+      function getCardWidthPx() {
         const gap = parseFloat(getComputedStyle(grid).gap) || 15;
         const containerWidth = grid.clientWidth;
-        if (containerWidth > 0) {
-          let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
-          if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
-          // Absolute ceiling as a second, independent safety net — a card can
-          // never be wider than its own container, full stop.
-          cardWidth = Math.min(Math.max(cardWidth, 100), containerWidth);
-          grid.style.setProperty('--card-w', cardWidth + 'px');
-        }
+        if (containerWidth <= 0) return 200;
+
+        let cols = readVar(direction === 'vertical' ? '--v-cols' : '--h-cols', direction === 'vertical' ? 3 : 4);
+        if (!Number.isFinite(cols)) cols = direction === 'vertical' ? 3 : 4;
+        cols = Math.min(Math.max(cols, 0.5), 10);
+
+        let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
+        if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
+        // A card can never be wider than its own container. Full stop, no exceptions.
+        return Math.min(Math.max(cardWidth, 80), containerWidth);
       }
 
-      // Same logic, both directions: whatever width a card ends up with —
-      // from --card-w in horizontal mode, or from the N-column track in
-      // vertical mode — force its image to a real, explicit square in px.
-      // Clamped for the same reason as applyHorizontalWidth.
+      function applyHorizontalWidth() {
+        if (direction !== 'horizontal') return;
+        grid.style.setProperty('--card-w', getCardWidthPx() + 'px');
+      }
+
+      // Same formula, both directions — sizes every product image to a real,
+      // explicit square in px, computed from the card width above rather than
+      // measured back off the DOM.
       function applyImageSquares() {
+        const cardWidth = getCardWidthPx();
+        const sample = grid.querySelector('.bundle-product-card');
+        let padH = 30; // fallback: matches .bundle-product-card's 15px+15px padding
+        if (sample) {
+          const cs = getComputedStyle(sample);
+          const pl = parseFloat(cs.paddingLeft) || 0;
+          const pr = parseFloat(cs.paddingRight) || 0;
+          if (pl + pr > 0) padH = pl + pr;
+        }
+        const imgSize = Math.max(cardWidth - padH, 40);
         grid.querySelectorAll('.bundle-product-card img').forEach((img) => {
-          const w = img.clientWidth;
-          if (w > 0) img.style.height = Math.min(w, 2000) + 'px';
+          img.style.height = imgSize + 'px';
         });
       }
 
