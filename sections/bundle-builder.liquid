@@ -642,39 +642,35 @@
         if (nextBtn) nextBtn.classList.toggle('disabled', pos >= maxScroll - 2 || maxScroll <= 0);
 
         if (fill) {
-          // Same reliable fraction as before — no "close enough" guessing.
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
-
-          // Fixed head size (not tied to how much content is visible) — this
-          // guarantees the head always has a full, generous range to slide
-          // through. Tying it to content ratio meant a short product list
-          // left almost no room to slide, making a single arrow click barely
-          // move anything.
-          const headPct = 35;
-          const remainingPct = 100 - headPct;
-          const headStart = pct * remainingPct;
+          const pctStr = (pct * 100) + '%';
           const goingForward = pos >= lastPos;
           lastPos = pos;
 
+          // The fill's own SIZE is the scroll fraction — this is what makes
+          // it visibly grow ("fill") as you scroll, rather than a fixed-size
+          // block sliding around. The gradient still fades transparent at the
+          // origin (back) and solid at the current edge (front) — since the
+          // element's near edge is always pinned at the track's start, the
+          // "back" stays fixed and only the growing tip moves.
           if (direction === 'vertical') {
-            fill.style.top = headStart + '%';
-            fill.style.height = headPct + '%';
+            fill.style.top = '0';
             fill.style.left = '0';
             fill.style.width = '100%';
+            fill.style.height = pctStr;
             fill.style.background = goingForward
               ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
               : 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
           } else {
-            fill.style.left = headStart + '%';
-            fill.style.width = headPct + '%';
             fill.style.top = '0';
+            fill.style.left = '0';
             fill.style.height = '100%';
+            fill.style.width = pctStr;
             fill.style.background = goingForward
               ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
               : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
           }
         }
-      }
 
       // Order matters: get the card's width settled first (horizontal), then
       // square the images to match, then (vertical only) measure the resulting
