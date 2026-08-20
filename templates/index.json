@@ -964,8 +964,8 @@
           "type": "step",
           "settings": {
             "tier1_head": "Step 1",
-            "step_title": "Men's Clothing",
-            "collection": "mens-clothing",
+            "step_title": "Foundations",
+            "collection": "foundations",
             "required_qty": 1,
             "step_icon": "none"
           }
@@ -974,8 +974,8 @@
           "type": "step",
           "settings": {
             "tier1_head": "Step 1",
-            "step_title": "Women's clothing",
-            "collection": "womens-clothing",
+            "step_title": "Statements",
+            "collection": "statements",
             "required_qty": 1,
             "step_icon": "none"
           }
