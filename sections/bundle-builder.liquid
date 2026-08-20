@@ -645,12 +645,12 @@
           // Same reliable fraction as before — no "close enough" guessing.
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
 
-          // The "head" is the segment that's dark, sized to roughly how much
-          // of the whole strip is visible at once. It fades to transparent on
-          // whichever side you're scrolling AWAY from, and stays solid on the
-          // side you're heading TOWARD.
-          const visibleRatio = fullSize > 0 ? viewSize / fullSize : 1;
-          const headPct = Math.min(Math.max(visibleRatio * 100, 10), 100);
+          // Fixed head size (not tied to how much content is visible) — this
+          // guarantees the head always has a full, generous range to slide
+          // through. Tying it to content ratio meant a short product list
+          // left almost no room to slide, making a single arrow click barely
+          // move anything.
+          const headPct = 35;
           const remainingPct = 100 - headPct;
           const headStart = pct * remainingPct;
           const goingForward = pos >= lastPos;
