@@ -648,17 +648,28 @@
       refresh();
     }
 
-       document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
+    document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
 
-    // Re-measure once images have had a chance to load/settle, and on resize
-    // (resize also covers crossing the 749px desktop/mobile breakpoint)
-    setTimeout(() => gridRefreshers.forEach((fn) => fn()), 150);
-    window.addEventListener('resize', () => gridRefreshers.forEach((fn) => fn()));
+    // Coalesce every refresh request (load, resize, tab switch, ResizeObserver)
+    // into a single call per animation frame. Sizing this section also changes
+    // its own rendered size (card width -> image height -> section height),
+    // which re-triggers the ResizeObserver below — without this coalescing,
+    // that back-and-forth can compound in the same tick instead of settling.
+    let refreshScheduled = false;
+    function scheduleRefresh() {
+      if (refreshScheduled) return;
+      refreshScheduled = true;
+      requestAnimationFrame(() => {
+        refreshScheduled = false;
+        gridRefreshers.forEach((fn) => fn());
+      });
+    }
 
-    // The Theme Editor's mobile/desktop preview toggle resizes the iframe without
-    // always firing a window 'resize' event — ResizeObserver catches it either way.
+    setTimeout(scheduleRefresh, 150);
+    window.addEventListener('resize', scheduleRefresh);
+
     if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => gridRefreshers.forEach((fn) => fn()));
+      const ro = new ResizeObserver(() => scheduleRefresh());
       document.querySelectorAll('.bundle-builder').forEach((section) => ro.observe(section));
     }
 
@@ -671,7 +682,8 @@
         const target = document.querySelector(`[data-content="${tabBtn.dataset.tab}"]`);
         if (target) target.classList.add('active');
         // Newly-visible tab's grid had 0 dimensions while hidden — remeasure now
-        gridRefreshers.forEach((fn) => fn());
+        // Newly-visible tab's grid had 0 dimensions while hidden — remeasure now
+        scheduleRefresh();
         return;
       }
 
