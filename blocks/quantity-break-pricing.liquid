@@ -1,0 +1,435 @@
+{% doc %}
+  Quantity Break Pricing block (Horizon theme)
+  ------------------------------------------------
+  Drop this file in: /blocks/quantity-break-pricing.liquid
+
+  What it does:
+  - Shows a tiered "buy more, save more" table on the product page
+    (e.g. 2-5 units = 2% off, 6-8 units = 5% off).
+  - Live-updates the shown price as the shopper changes the quantity
+    input, and re-reads the base price when the variant changes.
+  - Purely a front-end display. It does NOT change the price charged
+    at checkout by itself — see the note at the end of the chat
+    response for how to make the checkout price match these tiers.
+
+  Add it to the product page:
+  Theme editor -> Product page -> select the block/section that holds
+  price + buy buttons (e.g. "Price" or the product information group)
+  -> Add block -> Quantity break pricing.
+{% enddoc %}
+
+{% liquid
+  assign variant = product.selected_or_first_available_variant
+  assign tiers = ''
+
+  for i in (1..4)
+    case i
+      when 1
+        assign t_min = block.settings.tier1_min
+        assign t_max = block.settings.tier1_max
+        assign t_pct = block.settings.tier1_discount
+      when 2
+        assign t_min = block.settings.tier2_min
+        assign t_max = block.settings.tier2_max
+        assign t_pct = block.settings.tier2_discount
+      when 3
+        assign t_min = block.settings.tier3_min
+        assign t_max = block.settings.tier3_max
+        assign t_pct = block.settings.tier3_discount
+      when 4
+        assign t_min = block.settings.tier4_min
+        assign t_max = block.settings.tier4_max
+        assign t_pct = block.settings.tier4_discount
+    endcase
+
+    if t_min > 0 and t_pct > 0
+      assign tier_json = '{"min":' | append: t_min | append: ',"max":' | append: t_max | append: ',"pct":' | append: t_pct | append: '}'
+      if tiers == ''
+        assign tiers = tier_json
+      else
+        assign tiers = tiers | append: ',' | append: tier_json
+      endif
+    endif
+  endfor
+
+  assign tiers_json = '[' | append: tiers | append: ']'
+%}
+
+{% if tiers != '' %}
+  <quantity-break-pricing
+    class="qbp"
+    data-base-price="{{ variant.price | default: 0 }}"
+    data-money-format="{{ shop.money_format | escape }}"
+    data-tiers='{{ tiers_json }}'
+    {{ block.shopify_attributes }}
+  >
+    {% if block.settings.heading != blank %}
+      <p class="qbp__heading">{{ block.settings.heading }}</p>
+    {% endif %}
+
+    <ul class="qbp__list" role="list">
+      {% assign tier_list = tiers_json %}
+      {% for i in (1..4) %}
+        {% case i %}
+          {% when 1 %}
+            {% assign t_min = block.settings.tier1_min %}{% assign t_max = block.settings.tier1_max %}{% assign t_pct = block.settings.tier1_discount %}
+          {% when 2 %}
+            {% assign t_min = block.settings.tier2_min %}{% assign t_max = block.settings.tier2_max %}{% assign t_pct = block.settings.tier2_discount %}
+          {% when 3 %}
+            {% assign t_min = block.settings.tier3_min %}{% assign t_max = block.settings.tier3_max %}{% assign t_pct = block.settings.tier3_discount %}
+          {% when 4 %}
+            {% assign t_min = block.settings.tier4_min %}{% assign t_max = block.settings.tier4_max %}{% assign t_pct = block.settings.tier4_discount %}
+        {% endcase %}
+        {% if t_min > 0 and t_pct > 0 %}
+          <li class="qbp__tier" data-min="{{ t_min }}" data-max="{{ t_max }}">
+            <span class="qbp__tier-range">
+              {%- if t_max > 0 -%}
+                {{ t_min }}–{{ t_max }} {{ 'products.product.quantity_break.units' | default: 'units' }}
+              {%- else -%}
+                {{ t_min }}+ {{ 'products.product.quantity_break.units' | default: 'units' }}
+              {%- endif -%}
+            </span>
+            <span class="qbp__tier-discount">{{ t_pct }}% off</span>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+
+    <p class="qbp__price-line" hidden>
+      <span class="qbp__current-price"></span>
+      <s class="qbp__compare-price" hidden></s>
+      <span class="qbp__savings" hidden></span>
+    </p>
+  </quantity-break-pricing>
+{% endif %}
+
+<style>
+  .qbp {
+    display: block;
+    margin-block: 1rem;
+  }
+
+  .qbp__heading {
+    margin: 0 0 0.5em;
+    font-weight: 600;
+  }
+
+  .qbp__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .qbp__tier {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    border: 1px solid currentColor;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    opacity: 0.6;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+  }
+
+  .qbp__tier.is-active {
+    opacity: 1;
+    border-width: 2px;
+    padding: calc(0.5rem - 1px) calc(0.85rem - 1px);
+  }
+
+  .qbp__tier-range {
+    font-size: 0.85em;
+  }
+
+  .qbp__tier-discount {
+    font-weight: 600;
+  }
+
+  .qbp__price-line {
+    margin: 0.75rem 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .qbp__compare-price {
+    opacity: 0.6;
+  }
+
+  .qbp__savings {
+    font-size: 0.85em;
+    opacity: 0.8;
+  }
+</style>
+
+<script>
+  (function () {
+    if (customElements.get('quantity-break-pricing')) return;
+
+    class QuantityBreakPricing extends HTMLElement {
+      connectedCallback() {
+        this.basePrice = parseInt(this.dataset.basePrice, 10) || 0;
+        this.moneyFormat = this.dataset.moneyFormat || '${{amount}}';
+
+        try {
+          this.tiers = JSON.parse(this.dataset.tiers || '[]');
+        } catch (e) {
+          this.tiers = [];
+        }
+
+        // Quantity input can live in a sibling block within the same
+        // product form, so listen on the nearest form/section instead
+        // of just this element's own subtree.
+        this.root =
+          this.closest('form') ||
+          this.closest('.shopify-section') ||
+          document;
+
+        this._onQtyEvent = this._onQtyEvent.bind(this);
+        this._onVariantUpdate = this._onVariantUpdate.bind(this);
+
+        this.root.addEventListener('input', this._onQtyEvent);
+        this.root.addEventListener('change', this._onQtyEvent);
+
+        // Horizon dispatches a bubbling "variant:update" event on the
+        // section when the shopper picks a different variant.
+        const sectionRoot = this.closest('.shopify-section') || this.root;
+        sectionRoot.addEventListener('variant:update', this._onVariantUpdate);
+
+        this.updateDisplay();
+      }
+
+      disconnectedCallback() {
+        this.root.removeEventListener('input', this._onQtyEvent);
+        this.root.removeEventListener('change', this._onQtyEvent);
+        const sectionRoot = this.closest('.shopify-section') || this.root;
+        sectionRoot.removeEventListener('variant:update', this._onVariantUpdate);
+      }
+
+      _onQtyEvent(event) {
+        if (event.target && event.target.matches && event.target.matches('input[name="quantity"]')) {
+          this.updateDisplay();
+        }
+      }
+
+      _onVariantUpdate(event) {
+        const variant = event && event.detail && event.detail.data && event.detail.data.variant;
+        if (variant && typeof variant.price === 'number') {
+          this.basePrice = variant.price;
+          this.updateDisplay();
+        }
+      }
+
+      getQuantity() {
+        const input = this.root.querySelector('input[name="quantity"]');
+        const qty = input ? parseInt(input.value, 10) : 1;
+        return Number.isFinite(qty) && qty > 0 ? qty : 1;
+      }
+
+      findTier(qty) {
+        let match = null;
+        for (const tier of this.tiers) {
+          const withinMin = qty >= tier.min;
+          const withinMax = tier.max > 0 ? qty <= tier.max : true;
+          if (withinMin && withinMax) {
+            if (!match || tier.min > match.min) match = tier;
+          }
+        }
+        return match;
+      }
+
+      formatMoney(cents) {
+        if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+          return window.Shopify.formatMoney(cents, this.moneyFormat);
+        }
+        const amount = (cents / 100).toFixed(2);
+        return this.moneyFormat.replace(/\{\{\s*amount\s*\}\}/, amount);
+      }
+
+      updateDisplay() {
+        const qty = this.getQuantity();
+        const tier = this.findTier(qty);
+
+        this.querySelectorAll('.qbp__tier').forEach((el) => {
+          const min = parseInt(el.dataset.min, 10);
+          const max = parseInt(el.dataset.max, 10);
+          const active = tier && tier.min === min && (tier.max || 0) === (max || 0);
+          el.classList.toggle('is-active', !!active);
+        });
+
+        const priceLine = this.querySelector('.qbp__price-line');
+        const currentEl = this.querySelector('.qbp__current-price');
+        const compareEl = this.querySelector('.qbp__compare-price');
+        const savingsEl = this.querySelector('.qbp__savings');
+
+        if (!tier) {
+          priceLine.hidden = true;
+          return;
+        }
+
+        const unitPrice = Math.round(this.basePrice * (1 - tier.pct / 100));
+
+        currentEl.textContent = this.formatMoney(unitPrice) + ' / unit';
+        compareEl.textContent = this.formatMoney(this.basePrice);
+        savingsEl.textContent = 'You save ' + tier.pct + '%';
+
+        priceLine.hidden = false;
+        compareEl.hidden = false;
+        savingsEl.hidden = false;
+      }
+    }
+
+    customElements.define('quantity-break-pricing', QuantityBreakPricing);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Quantity break pricing",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Buy more, save more"
+    },
+    {
+      "type": "header",
+      "content": "Tier 1"
+    },
+    {
+      "type": "range",
+      "id": "tier1_min",
+      "label": "Minimum quantity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "tier1_max",
+      "label": "Maximum quantity (0 = no upper limit)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "tier1_discount",
+      "label": "Discount",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Tier 2"
+    },
+    {
+      "type": "range",
+      "id": "tier2_min",
+      "label": "Minimum quantity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "tier2_max",
+      "label": "Maximum quantity (0 = no upper limit)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "tier2_discount",
+      "label": "Discount",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Tier 3 (optional)"
+    },
+    {
+      "type": "range",
+      "id": "tier3_min",
+      "label": "Minimum quantity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "tier3_max",
+      "label": "Maximum quantity (0 = no upper limit)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "tier3_discount",
+      "label": "Discount",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Tier 4 (optional)"
+    },
+    {
+      "type": "range",
+      "id": "tier4_min",
+      "label": "Minimum quantity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "tier4_max",
+      "label": "Maximum quantity (0 = no upper limit)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "tier4_discount",
+      "label": "Discount",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quantity break pricing"
+    }
+  ]
+}
+{% endschema %}
