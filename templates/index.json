@@ -992,7 +992,7 @@
         "grid_scroll_direction": "horizontal",
         "h_cols_desktop": 3,
         "h_rows_desktop": 1,
-        "h_cols_mobile": 1.6,
+        "h_cols_mobile": 1,
         "h_rows_mobile": 1,
         "v_cols_desktop": 2,
         "v_rows_desktop": 1,
