@@ -341,15 +341,9 @@
   .bundle-product-card img {
     width: 100% !important;
     max-width: 100% !important;
-    aspect-ratio: 1 / 1; /* fallback only, for the instant before JS runs — not !important, so JS can set the real height */
+    aspect-ratio: 1 / 1 !important; /* height is fully CSS-driven now — no JS pixel math to go wrong */
     object-fit: cover !important;
-    mix-blend-mode: multiply !important;
-    background: #ececec !important;
-    display: block !important;
-    border: none !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-  }
+
   .bundle-product-card h4 {
     margin: 10px 0 0 !important;
     font-size: 14px !important;
@@ -574,7 +568,7 @@
       // Same formula, both directions — sizes every product image to a real,
       // explicit square in px, computed from the card width above rather than
       // measured back off the DOM.
-      function applyImageSquares() {
+      {% comment %} function applyImageSquares() {
         const cardWidth = getCardWidthPx();
         const sample = grid.querySelector('.bundle-product-card');
         let padH = 30; // fallback: matches .bundle-product-card's 15px+15px padding
@@ -591,7 +585,7 @@
         grid.querySelectorAll('.bundle-product-card img').forEach((img) => {
           img.style.height = imgSize + 'px';
         });
-      }
+      } {% endcomment %}
 
       function applyVerticalCap() {
         if (direction !== 'vertical') return;
@@ -643,7 +637,7 @@
       // card height to set the 2-row cap.
       function refresh() {
         applyHorizontalWidth();
-        applyImageSquares();
+        {% comment %} applyImageSquares(); {% endcomment %}
         applyVerticalCap();
         updateScrollUI();
       }
