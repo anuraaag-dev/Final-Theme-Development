@@ -974,10 +974,10 @@
           "type": "step",
           "settings": {
             "tier1_head": "Step 1",
-            "step_title": "Prep Your Skin",
-            "collection": "new-arrivals",
+            "step_title": "Women's clothing",
+            "collection": "womens-clothing",
             "required_qty": 1,
-            "step_icon": "moon"
+            "step_icon": "none"
           }
         }
       },
