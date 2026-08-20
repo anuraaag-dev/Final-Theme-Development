@@ -584,7 +584,10 @@
           const pr = parseFloat(cs.paddingRight) || 0;
           if (pl + pr > 0) padH = pl + pr;
         }
-        const imgSize = Math.max(cardWidth - padH, 40);
+                // Cap how tall a square photo can get, independent of how wide the
+        // card is — otherwise a low column count (wide cards) always means
+        // a very tall image, since it's forced to stay a perfect square.
+        const imgSize = Math.min(Math.max(cardWidth - padH, 40), 220);
         grid.querySelectorAll('.bundle-product-card img').forEach((img) => {
           img.style.height = imgSize + 'px';
         });
