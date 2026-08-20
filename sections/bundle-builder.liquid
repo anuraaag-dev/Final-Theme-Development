@@ -143,9 +143,6 @@
 </section>
 
 <style>
-  /* Force a consistent box model on everything in this section — a theme's
-     global reset may not apply border-box the same way, which throws off
-     every width/padding calculation above. */
   .bundle-builder, .bundle-builder * { box-sizing: border-box !important; }
 
   .selected-items-sidebar {
@@ -215,7 +212,6 @@
   .bundle-tab-content { display: none !important; }
   .bundle-tab-content.active { display: block !important; }
 
-  /* --- Scrollable product grid --- */
   .bundle-grid-wrapper {
     position: relative !important;
     padding: 0 6px 22px !important;
@@ -233,10 +229,6 @@
   .bundle-grid::-webkit-scrollbar { display: none !important; }
   .bundle-grid { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 
-  /* Horizontal mode: N rows x M columns per "page", scrolls sideways for more columns.
-     Column width is set in JS as a plain px custom property (--card-w) rather than a
-     percentage — percentages inside grid-auto-columns don't reliably resolve when the
-     grid also has overflow-x:auto in every browser, so this guarantees exact counts. */
   .bundle-grid[data-scroll-dir="horizontal"] {
     grid-auto-flow: column !important;
     grid-template-rows: repeat(var(--h-rows, 1), 1fr) !important;
@@ -246,7 +238,6 @@
     scroll-snap-type: x mandatory !important;
   }
 
-  /* Vertical mode: M columns, height locked to N rows worth, scrolls down for more */
   .bundle-grid[data-scroll-dir="vertical"] {
     grid-auto-flow: row !important;
     grid-template-columns: repeat(var(--v-cols, 3), 1fr) !important;
@@ -255,14 +246,10 @@
     scroll-snap-type: y mandatory !important;
   }
 
-    /* Mobile column-count overrides, at the ACTUAL mobile breakpoint (749px) —
-     deliberately separate from the 1024px breakpoint below, where the
-     summary stacks underneath the grid. Merging these two was the real bug:
-     at 1024px the product area suddenly gets much wider, and if that same
-     moment also drops to Mobile's column count (as low as 1.2), you get the
-     widest possible container divided by the smallest possible number at
-     once. Keeping this at 749px means 750–1024px stays stacked but still
-     uses Desktop's column count — a far saner combination. */
+  /* Mobile column-count overrides, at the ACTUAL mobile breakpoint (749px) —
+     deliberately separate from the 1024px breakpoint below where the summary
+     stacks underneath the grid, so the two never combine into "widest
+     container ÷ smallest column count" at the same moment. */
   @media (max-width: 749px) {
     .bundle-grid {
       --h-cols: {{ section.settings.h_cols_mobile }} !important;
@@ -308,7 +295,9 @@
   }
   .bundle-grid-wrapper[data-scroll-dir="vertical"] { padding: 22px 6px 0 !important; }
 
-  /* Custom "comet" progress track: fades out behind, stays dark ahead */
+  /* Growing/fading "comet" progress fill: the bar's own size IS the scroll
+     fraction (so it visibly grows), and the gradient fades transparent at
+     the origin (back) while staying solid at the growing tip (front). */
   .bundle-scroll-track {
     position: absolute !important;
     left: 0 !important;
@@ -332,8 +321,9 @@
     top: 0 !important;
     left: 0 !important;
     height: 100% !important;
+    width: 0%;
     border-radius: 10px !important;
-    transition: left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease, background 0.3s ease !important;
+    transition: width 0.3s ease, height 0.3s ease, background 0.3s ease !important;
   }
 
   .bundle-product-card {
@@ -356,7 +346,7 @@
     width: 100% !important;
     max-width: 100% !important;
     aspect-ratio: 1 / 1 !important;
-    max-height: 280px !important; /* independent ceiling: even if a card ends up wide for any reason, the photo stops growing here instead of becoming a giant square */
+    max-height: 280px !important;
     object-fit: cover !important;
     mix-blend-mode: multiply !important;
     background: #ececec !important;
@@ -366,9 +356,8 @@
     margin: 0 !important;
   }
   @media (max-width: 749px) {
-    
+    .bundle-product-card { scroll-snap-align: center !important; }
     .bundle-product-card img { max-height: 220px !important; }
-    {% comment %} .bundle-product-card img { max-width: 220px !important; } {% endcomment %}
   }
   .bundle-product-card h4 {
     margin: 10px 0 0 !important;
@@ -376,17 +365,9 @@
     font-weight: 600 !important;
     line-height: 1.3 !important;
   }
-  /* TABLET */
   @media (min-width: 750px) and (max-width: 1024px) {
-
-  
-
-  .bundle-product-card img {
-    max-height: 260px !important;
-    {% comment %} max-width: 260px !important; {% endcomment %}
+    .bundle-product-card img { max-height: 260px !important; }
   }
-
-}
   .price-container { margin: 10px 0 !important; display: flex !important; justify-content: center !important; gap: 8px !important; }
   .compare-price-strike { text-decoration: line-through !important; color: #999 !important; font-size: 13px !important; }
   .bundle-add {
@@ -577,12 +558,6 @@
         return readVar(direction === 'vertical' ? '--v-rows' : '--h-rows', direction === 'vertical' ? 2 : 1);
       }
 
-      // The one true source of "how wide is a single card right now" — for
-      // BOTH directions. Pure calculation from the container's own width and
-      // the active column count. Deliberately does NOT read any element's
-      // rendered/clientWidth, because that depends on layout having already
-      // settled with the correct value — which is the exact race that was
-      // producing the runaway sizes.
       function getCardWidthPx() {
         const gap = parseFloat(getComputedStyle(grid).gap) || 15;
         const containerWidth = grid.clientWidth;
@@ -594,36 +569,18 @@
 
         let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
         if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
-        // A card can never be wider than its own container. Full stop, no exceptions.
-        return Math.min(Math.max(cardWidth, 80), containerWidth);
+
+        let maxCard = 360;
+        if (window.innerWidth <= 749) maxCard = 280;
+        else if (window.innerWidth <= 1024) maxCard = 320;
+
+        return Math.min(Math.max(cardWidth, 80), containerWidth, maxCard);
       }
 
       function applyHorizontalWidth() {
         if (direction !== 'horizontal') return;
         grid.style.setProperty('--card-w', getCardWidthPx() + 'px');
       }
-
-      // Same formula, both directions — sizes every product image to a real,
-      // explicit square in px, computed from the card width above rather than
-      // measured back off the DOM.
-      {% comment %} function applyImageSquares() {
-        const cardWidth = getCardWidthPx();
-        const sample = grid.querySelector('.bundle-product-card');
-        let padH = 30; // fallback: matches .bundle-product-card's 15px+15px padding
-        if (sample) {
-          const cs = getComputedStyle(sample);
-          const pl = parseFloat(cs.paddingLeft) || 0;
-          const pr = parseFloat(cs.paddingRight) || 0;
-          if (pl + pr > 0) padH = pl + pr;
-        }
-                // Cap how tall a square photo can get, independent of how wide the
-        // card is — otherwise a low column count (wide cards) always means
-        // a very tall image, since it's forced to stay a perfect square.
-        const imgSize = Math.min(Math.max(cardWidth - padH, 40), 220);
-        grid.querySelectorAll('.bundle-product-card img').forEach((img) => {
-          img.style.height = imgSize + 'px';
-        });
-      } {% endcomment %}
 
       function applyVerticalCap() {
         if (direction !== 'vertical') return;
@@ -642,33 +599,24 @@
         if (nextBtn) nextBtn.classList.toggle('disabled', pos >= maxScroll - 2 || maxScroll <= 0);
 
         if (fill) {
-          // Same reliable fraction as before — no "close enough" guessing.
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
-
-          // Fixed head size (not tied to how much content is visible) — this
-          // guarantees the head always has a full, generous range to slide
-          // through. Tying it to content ratio meant a short product list
-          // left almost no room to slide, making a single arrow click barely
-          // move anything.
-          const headPct = 35;
-          const remainingPct = 100 - headPct;
-          const headStart = pct * remainingPct;
+          const pctStr = (pct * 100) + '%';
           const goingForward = pos >= lastPos;
           lastPos = pos;
 
           if (direction === 'vertical') {
-            fill.style.top = headStart + '%';
-            fill.style.height = headPct + '%';
+            fill.style.top = '0';
             fill.style.left = '0';
             fill.style.width = '100%';
+            fill.style.height = pctStr;
             fill.style.background = goingForward
               ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
               : 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
           } else {
-            fill.style.left = headStart + '%';
-            fill.style.width = headPct + '%';
             fill.style.top = '0';
+            fill.style.left = '0';
             fill.style.height = '100%';
+            fill.style.width = pctStr;
             fill.style.background = goingForward
               ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
               : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
@@ -676,12 +624,8 @@
         }
       }
 
-      // Order matters: get the card's width settled first (horizontal), then
-      // square the images to match, then (vertical only) measure the resulting
-      // card height to set the 2-row cap.
       function refresh() {
         applyHorizontalWidth();
-        {% comment %} applyImageSquares(); {% endcomment %}
         applyVerticalCap();
         updateScrollUI();
       }
@@ -704,11 +648,6 @@
 
     document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
 
-    // Coalesce every refresh request (load, resize, tab switch, ResizeObserver)
-    // into a single call per animation frame. Sizing this section also changes
-    // its own rendered size (card width -> image height -> section height),
-    // which re-triggers the ResizeObserver below — without this coalescing,
-    // that back-and-forth can compound in the same tick instead of settling.
     let refreshScheduled = false;
     function scheduleRefresh() {
       if (refreshScheduled) return;
@@ -723,11 +662,21 @@
     window.addEventListener('resize', scheduleRefresh);
 
     if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => scheduleRefresh());
+      const lastWidths = new WeakMap();
+      const ro = new ResizeObserver((entries) => {
+        let widthChanged = false;
+        entries.forEach((entry) => {
+          const w = Math.round(entry.contentRect.width);
+          if (lastWidths.get(entry.target) !== w) {
+            lastWidths.set(entry.target, w);
+            widthChanged = true;
+          }
+        });
+        if (widthChanged) scheduleRefresh();
+      });
       document.querySelectorAll('.bundle-builder').forEach((section) => ro.observe(section));
     }
 
-    /* ---------- Delegated clicks (tabs, add, remove, checkout) ---------- */
     document.addEventListener('click', function (e) {
       const tabBtn = e.target.closest('.bundle-tab');
       if (tabBtn) {
@@ -735,8 +684,6 @@
         tabBtn.classList.add('active');
         const target = document.querySelector(`[data-content="${tabBtn.dataset.tab}"]`);
         if (target) target.classList.add('active');
-        // Newly-visible tab's grid had 0 dimensions while hidden — remeasure now
-        // Newly-visible tab's grid had 0 dimensions while hidden — remeasure now
         scheduleRefresh();
         return;
       }
