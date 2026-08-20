@@ -540,7 +540,7 @@
         const n = parseFloat(raw);
         return n > 0 ? n : fallback;
       }
-      
+
       function currentRows() {
         return readVar(direction === 'vertical' ? '--v-rows' : '--h-rows', direction === 'vertical' ? 2 : 1);
       }
@@ -634,7 +634,7 @@
 
       if (prevBtn) prevBtn.addEventListener('click', () => scrollOneCard(-1));
       if (nextBtn) nextBtn.addEventListener('click', () => scrollOneCard(1));
-      grid.addEventListener('scroll', refresh);
+      grid.addEventListener('scroll', updateScrollUI);
 
       gridRefreshers.push(refresh);
       refresh();
