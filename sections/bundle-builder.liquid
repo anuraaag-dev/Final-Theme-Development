@@ -253,12 +253,15 @@
     overflow-x: hidden !important;
   }
 
-   /* Mobile overrides — set directly on .bundle-grid now, not the wrapper.
-     These used to sit on .bundle-grid-wrapper and rely on CSS inheritance
-     to reach .bundle-grid, which is the exact indirection that was
-     unreliable. Declaring them on the element that actually consumes them
-     removes that step completely. */
-  @media (max-width: 1024px) {
+    /* Mobile column-count overrides, at the ACTUAL mobile breakpoint (749px) —
+     deliberately separate from the 1024px breakpoint below, where the
+     summary stacks underneath the grid. Merging these two was the real bug:
+     at 1024px the product area suddenly gets much wider, and if that same
+     moment also drops to Mobile's column count (as low as 1.2), you get the
+     widest possible container divided by the smallest possible number at
+     once. Keeping this at 749px means 750–1024px stays stacked but still
+     uses Desktop's column count — a far saner combination. */
+  @media (max-width: 749px) {
     .bundle-grid {
       --h-cols: {{ section.settings.h_cols_mobile }} !important;
       --h-rows: {{ section.settings.h_rows_mobile }} !important;
@@ -345,10 +348,11 @@
     overflow: hidden !important;
     display: block !important;
   }
-    .bundle-product-card img {
+  .bundle-product-card img {
     width: 100% !important;
     max-width: 100% !important;
     aspect-ratio: 1 / 1 !important;
+    max-height: 280px !important; /* independent ceiling: even if a card ends up wide for any reason, the photo stops growing here instead of becoming a giant square */
     object-fit: cover !important;
     mix-blend-mode: multiply !important;
     background: #ececec !important;
@@ -356,6 +360,9 @@
     border: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
+  }
+  @media (max-width: 749px) {
+    .bundle-product-card img { max-height: 220px !important; }
   }
   .bundle-product-card h4 {
     margin: 10px 0 0 !important;
