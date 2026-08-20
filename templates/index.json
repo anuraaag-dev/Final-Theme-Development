@@ -964,10 +964,10 @@
           "type": "step",
           "settings": {
             "tier1_head": "Step 1",
-            "step_title": "Prep Your Skin",
+            "step_title": "Men's Clothing",
             "collection": "mens-clothing",
             "required_qty": 1,
-            "step_icon": "sun"
+            "step_icon": "none"
           }
         },
         "step_f4KK3T": {
@@ -1026,6 +1026,48 @@
         "question_FibDHj": {
           "type": "question",
           "settings": {
+            "title": "What's your style vibe?",
+            "subtitle": "Pick what feels most like you",
+            "tag_prefix": "style",
+            "weight": 25,
+            "option_1_label": "Casual",
+            "option_1_value": "casual",
+            "option_2_label": "Athletic",
+            "option_2_value": "athletic",
+            "option_3_label": "Elegant",
+            "option_3_value": "elegant",
+            "option_4_label": "Streetwear",
+            "option_4_value": "streetwear",
+            "option_5_label": "Minimal",
+            "option_5_value": "minimal",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_6Hy6EB": {
+          "type": "question",
+          "settings": {
+            "title": "What's the occasion?",
+            "subtitle": "",
+            "tag_prefix": "occasion",
+            "weight": 25,
+            "option_1_label": "",
+            "option_1_value": "",
+            "option_2_label": "",
+            "option_2_value": "",
+            "option_3_label": "",
+            "option_3_value": "",
+            "option_4_label": "",
+            "option_4_value": "",
+            "option_5_label": "",
+            "option_5_value": "",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_eAkcar": {
+          "type": "question",
+          "settings": {
             "title": "What's your skin type?",
             "subtitle": "",
             "tag_prefix": "skin",
@@ -1069,6 +1111,8 @@
       "block_order": [
         "question_pjdbwt",
         "question_FibDHj",
+        "question_6Hy6EB",
+        "question_eAkcar",
         "question_rFNWna"
       ],
       "name": "AI Product Quiz",
