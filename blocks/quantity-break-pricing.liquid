@@ -79,15 +79,15 @@
   <table class="qbp__table">
     <thead>
       <tr>
-        <th scope="col">{{ 'products.product.quantity_break.setting' | default: 'Setting' }}</th>
-        <th scope="col">{{ 'products.product.quantity_break.quantity' | default: 'Quantity' }}</th>
-        <th scope="col">{{ 'products.product.quantity_break.unit_price' | default: 'Unit price' }}</th>
+        <th scope="col">Setting</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Unit price</th>
         <th scope="col"><span class="visually-hidden">{{ block.settings.button_label | default: 'Add to cart' }}</span></th>
       </tr>
     </thead>
     <tbody>
       <tr class="qbp__row" data-min="1" data-max="0" data-pct="0">
-        <td>{{ 'products.product.quantity_break.minimum' | default: 'Minimum' }}</td>
+        <td>Minimum</td>
         <td>1</td>
         <td class="qbp__row-price">{{ variant.price | money }}</td>
         <td>
@@ -114,7 +114,7 @@
           {% assign discount_multiplier = 100 | minus: t_pct %}
           {% assign unit_price = variant.price | times: discount_multiplier | divided_by: 100 %}
           <tr class="qbp__row" data-min="{{ t_min }}" data-max="{{ t_max }}" data-pct="{{ t_pct }}">
-            <td>{{ 'products.product.quantity_break.price_break' | default: 'Price break' }} {{ break_count }}</td>
+            <td>Price break {{ break_count }}</td>
             <td>
               {%- if t_max > 0 -%}
                 {{ t_min }}–{{ t_max }}
@@ -215,11 +215,11 @@
         this.moneyFormat = this.dataset.moneyFormat || '${{amount}}';
 
         // The quantity input + submit button live in the theme's own
-        // product form, which may be a sibling block rather than a
-        // descendant of this element.
-        this.form =
-          this.closest('form') ||
-          (this.closest('.shopify-section') || document).querySelector('form[action*="/cart/add"]');
+        // product form. Horizon often wraps the real <form> inside a
+        // <product-form> (or similar) custom element, and this block
+        // may sit in a different part of the DOM tree than the form
+        // itself — so try several fallbacks before giving up.
+        this.form = this.findProductForm();
 
         this._onVariantUpdate = this._onVariantUpdate.bind(this);
         const sectionRoot = this.closest('.shopify-section') || this.form || document;
@@ -235,6 +235,35 @@
       disconnectedCallback() {
         const sectionRoot = this.closest('.shopify-section') || this.form || document;
         sectionRoot.removeEventListener('variant:update', this._onVariantUpdate);
+      }
+
+      findProductForm() {
+        const selector = 'form[action*="/cart/add"]';
+
+        // 1. A direct ancestor form (block placed inside the form).
+        const ancestorForm = this.closest(selector);
+        if (ancestorForm) return ancestorForm;
+
+        // 2. Within the same section (block placed alongside the form,
+        // e.g. as a sibling block in the price/buy-box group).
+        const section = this.closest('.shopify-section');
+        if (section) {
+          const sectionForm = section.querySelector(selector);
+          if (sectionForm) return sectionForm;
+        }
+
+        // 3. Within the nearest <product-form> (or similarly named)
+        // custom element wrapping the real <form>, wherever it is.
+        const productFormEl = this.closest('product-form, product-form-component')
+          || document.querySelector('product-form, product-form-component');
+        if (productFormEl) {
+          const wrappedForm = productFormEl.querySelector(selector);
+          if (wrappedForm) return wrappedForm;
+        }
+
+        // 4. Last resort: the first add-to-cart form anywhere on the
+        // page (product pages normally only have one).
+        return document.querySelector(selector);
       }
 
       _onVariantUpdate(event) {
@@ -269,6 +298,10 @@
       }
 
       addToCart(row) {
+        // Re-check in case the form wasn't in the DOM yet when this
+        // element first connected.
+        if (!this.form) this.form = this.findProductForm();
+
         if (!this.form) {
           this.setStatus('Could not find the product form on this page.');
           return;
