@@ -339,12 +339,9 @@
     display: block !important;
   }
   .bundle-product-card img {
-    width: 100px!important;
-    height: 10px !important;
+    width: 100% !important;
     max-width: 100% !important;
-    max-height: none !important;
-    min-height: 0 !important;
-    aspect-ratio: 1 / 1 !important;
+    aspect-ratio: 1 / 1; /* fallback only, for the instant before JS runs — not !important, so JS can set the real height */
     object-fit: cover !important;
     mix-blend-mode: multiply !important;
     background: #ececec !important;
@@ -543,16 +540,9 @@
         const n = parseFloat(raw);
         return n > 0 ? n : fallback;
       }
-
+      
       function currentRows() {
         return readVar(direction === 'vertical' ? '--v-rows' : '--h-rows', direction === 'vertical' ? 2 : 1);
-      }
-
-      function applyVerticalCap() {
-        if (direction !== 'vertical') return;
-        const { size, gap } = measureCard();
-        const rows = currentRows();
-        if (size > 0) grid.style.maxHeight = (size * rows + gap * (rows - 1)) + 'px';
       }
 
       function applyHorizontalWidth() {
@@ -563,17 +553,30 @@
         if (containerWidth > 0 && Number.isFinite(cols) && cols > 0) {
           let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
           if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
-          // Never let a single card exceed the visible container — this is the
-          // hard stop that prevents any runaway/"auto" collapse from filling the screen.
           cardWidth = Math.min(Math.max(cardWidth, 100), containerWidth);
           grid.style.setProperty('--card-w', cardWidth + 'px');
         }
       }
 
-      function refresh() {
-        applyVerticalCap();
-        applyHorizontalWidth();
+      // Same logic, both directions: whatever width a card ends up with —
+      // from --card-w in horizontal mode, or from the N-column track in
+      // vertical mode — force its image to a real, explicit square in px.
+      // Never "auto". That's the actual fix.
+      function applyImageSquares() {
+        grid.querySelectorAll('.bundle-product-card img').forEach((img) => {
+          const w = img.clientWidth;
+          if (w > 0) img.style.height = w + 'px';
+        });
+      }
 
+      function applyVerticalCap() {
+        if (direction !== 'vertical') return;
+        const { size, gap } = measureCard();
+        const rows = currentRows();
+        if (size > 0) grid.style.maxHeight = (size * rows + gap * (rows - 1)) + 'px';
+      }
+
+      function updateScrollUI() {
         const pos = direction === 'vertical' ? grid.scrollTop : grid.scrollLeft;
         const viewSize = direction === 'vertical' ? grid.clientHeight : grid.clientWidth;
         const fullSize = direction === 'vertical' ? grid.scrollHeight : grid.scrollWidth;
@@ -609,6 +612,16 @@
               : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
           }
         }
+      }
+
+      // Order matters: get the card's width settled first (horizontal), then
+      // square the images to match, then (vertical only) measure the resulting
+      // card height to set the 2-row cap.
+      function refresh() {
+        applyHorizontalWidth();
+        applyImageSquares();
+        applyVerticalCap();
+        updateScrollUI();
       }
 
       function scrollOneCard(dir) {
