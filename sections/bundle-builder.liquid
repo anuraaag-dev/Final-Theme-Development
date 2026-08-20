@@ -208,10 +208,13 @@
   .bundle-grid { scrollbar-width: none; -ms-overflow-style: none; }
 
   /* Horizontal mode: N rows x M columns per "page", scrolls sideways for more columns */
+  /* Horizontal mode: column width is set in JS as a plain px value (--card-w),
+     not a percentage — percentages inside grid-auto-columns don't reliably
+     resolve on a scrolling grid, so this guarantees exact counts. */
   .bundle-grid[data-scroll-dir="horizontal"] {
     grid-auto-flow: column;
     grid-template-rows: repeat(var(--h-rows, 1), 1fr);
-    grid-auto-columns: minmax(140px, calc((100% - (var(--h-cols, 4) - 1) * 15px) / var(--h-cols, 4)));
+    grid-auto-columns: var(--card-w, 200px);
     overflow-x: auto;
     overflow-y: hidden;
   }
@@ -450,10 +453,14 @@
         return { size, gap };
       }
 
-      function currentRows() {
-        const raw = getComputedStyle(wrapper).getPropertyValue(direction === 'vertical' ? '--v-rows' : '--h-rows');
+      function readVar(name, fallback) {
+        const raw = getComputedStyle(wrapper).getPropertyValue(name);
         const n = parseFloat(raw);
-        return n > 0 ? n : (direction === 'vertical' ? 2 : 1);
+        return n > 0 ? n : fallback;
+      }
+
+      function currentRows() {
+        return readVar(direction === 'vertical' ? '--v-rows' : '--h-rows', direction === 'vertical' ? 2 : 1);
       }
 
       function applyVerticalCap() {
@@ -463,8 +470,20 @@
         if (size > 0) grid.style.maxHeight = (size * rows + gap * (rows - 1)) + 'px';
       }
 
+      function applyHorizontalWidth() {
+        if (direction !== 'horizontal') return;
+        const cols = readVar('--h-cols', 4);
+        const gap = parseFloat(getComputedStyle(grid).gap) || 15;
+        const containerWidth = grid.clientWidth;
+        if (containerWidth > 0) {
+          const cardWidth = (containerWidth - gap * (cols - 1)) / cols;
+          grid.style.setProperty('--card-w', Math.max(cardWidth, 100) + 'px');
+        }
+      }
+
       function refresh() {
         applyVerticalCap();
+        applyHorizontalWidth();
 
         const pos = direction === 'vertical' ? grid.scrollTop : grid.scrollLeft;
         const viewSize = direction === 'vertical' ? grid.clientHeight : grid.clientWidth;
