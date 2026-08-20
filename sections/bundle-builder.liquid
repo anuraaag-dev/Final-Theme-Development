@@ -30,7 +30,7 @@
         <div class="bundle-tab-content {% if forloop.first %}active{% endif %}" data-content="{{ forloop.index }}">
 
           <div
-            class="bundle-grid"
+            class="bundle-grid-wrapper"
             data-scroll-dir="{{ section.settings.grid_scroll_direction }}"
             style="
               --h-cols: {{ section.settings.h_cols_desktop }};
@@ -251,7 +251,7 @@
   }
 
   /* Mobile overrides — values come from the block's own settings */
-  @media (max-width: 749px) {
+  @media (max-width: 1024px) {
     .bundle-grid-wrapper {
       --h-cols: {{ section.settings.h_cols_mobile }} !important;
       --h-rows: {{ section.settings.h_rows_mobile }} !important;
@@ -664,7 +664,7 @@
       refresh();
     }
 
-    document.querySelectorAll('.bundle-grid').forEach(setupGridScroller);
+    document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
 
     // Coalesce every refresh request (load, resize, tab switch, ResizeObserver)
     // into a single call per animation frame. Sizing this section also changes
