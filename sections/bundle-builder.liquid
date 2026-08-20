@@ -538,12 +538,19 @@
       refresh();
     }
 
-    document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
+       document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
 
     // Re-measure once images have had a chance to load/settle, and on resize
     // (resize also covers crossing the 749px desktop/mobile breakpoint)
     setTimeout(() => gridRefreshers.forEach((fn) => fn()), 150);
     window.addEventListener('resize', () => gridRefreshers.forEach((fn) => fn()));
+
+    // The Theme Editor's mobile/desktop preview toggle resizes the iframe without
+    // always firing a window 'resize' event — ResizeObserver catches it either way.
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => gridRefreshers.forEach((fn) => fn()));
+      document.querySelectorAll('.bundle-builder').forEach((section) => ro.observe(section));
+    }
 
     /* ---------- Delegated clicks (tabs, add, remove, checkout) ---------- */
     document.addEventListener('click', function (e) {
