@@ -547,12 +547,20 @@
 
       function applyHorizontalWidth() {
         if (direction !== 'horizontal') return;
-        const cols = readVar('--h-cols', 4);
+        let cols = readVar('--h-cols', 4);
+        // Hard sanity clamp: no measurement glitch, mid-resize timing issue, or
+        // unexpected value can ever push cols to near-zero (which is what causes
+        // a divide-by-almost-nothing → millions-of-pixels card width).
+        if (!Number.isFinite(cols)) cols = 4;
+        cols = Math.min(Math.max(cols, 0.5), 10);
+
         const gap = parseFloat(getComputedStyle(grid).gap) || 15;
         const containerWidth = grid.clientWidth;
-        if (containerWidth > 0 && Number.isFinite(cols) && cols > 0) {
+        if (containerWidth > 0) {
           let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
           if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
+          // Absolute ceiling as a second, independent safety net — a card can
+          // never be wider than its own container, full stop.
           cardWidth = Math.min(Math.max(cardWidth, 100), containerWidth);
           grid.style.setProperty('--card-w', cardWidth + 'px');
         }
@@ -561,11 +569,11 @@
       // Same logic, both directions: whatever width a card ends up with —
       // from --card-w in horizontal mode, or from the N-column track in
       // vertical mode — force its image to a real, explicit square in px.
-      // Never "auto". That's the actual fix.
+      // Clamped for the same reason as applyHorizontalWidth.
       function applyImageSquares() {
         grid.querySelectorAll('.bundle-product-card img').forEach((img) => {
           const w = img.clientWidth;
-          if (w > 0) img.style.height = w + 'px';
+          if (w > 0) img.style.height = Math.min(w, 2000) + 'px';
         });
       }
 
@@ -573,7 +581,7 @@
         if (direction !== 'vertical') return;
         const { size, gap } = measureCard();
         const rows = currentRows();
-        if (size > 0) grid.style.maxHeight = (size * rows + gap * (rows - 1)) + 'px';
+        if (size > 0) grid.style.maxHeight = (Math.min(size, 2000) * rows + gap * (rows - 1)) + 'px';
       }
 
       function updateScrollUI() {
