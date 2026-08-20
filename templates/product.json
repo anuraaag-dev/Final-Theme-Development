@@ -354,6 +354,27 @@
               },
               "block_order": []
             },
+            "quantity_break_pricing_ypCXEL": {
+              "type": "quantity-break-pricing",
+              "name": "Quantity break pricing",
+              "settings": {
+                "heading": "Buy more, save more",
+                "button_label": "Add to cart",
+                "tier1_min": 20,
+                "tier1_max": 0,
+                "tier1_discount": 8,
+                "tier2_min": 50,
+                "tier2_max": 0,
+                "tier2_discount": 12,
+                "tier3_min": 100,
+                "tier3_max": 0,
+                "tier3_discount": 20,
+                "tier4_min": 0,
+                "tier4_max": 0,
+                "tier4_discount": 0
+              },
+              "blocks": {}
+            },
             "text_aEtTtq": {
               "type": "text",
               "name": "t:names.product_description",
@@ -387,6 +408,7 @@
             "variant_picker_R3rGDr",
             "size_guide_EJFGV7",
             "buy_buttons_eYQEYi",
+            "quantity_break_pricing_ypCXEL",
             "text_aEtTtq"
           ]
         }
