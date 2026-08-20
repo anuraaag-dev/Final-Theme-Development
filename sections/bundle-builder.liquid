@@ -29,13 +29,22 @@
       {% for block in section.blocks %}
         <div class="bundle-tab-content {% if forloop.first %}active{% endif %}" data-content="{{ forloop.index }}">
 
-          <div class="bundle-grid-wrapper" data-scroll-dir="{{ section.settings.grid_scroll_direction }}">
+          <div
+            class="bundle-grid-wrapper"
+            data-scroll-dir="{{ section.settings.grid_scroll_direction }}"
+            style="
+              --h-cols: {{ section.settings.h_cols_desktop }};
+              --h-rows: {{ section.settings.h_rows_desktop }};
+              --v-cols: {{ section.settings.v_cols_desktop }};
+              --v-rows: {{ section.settings.v_rows_desktop }};
+            "
+          >
 
             <button class="bundle-scroll-arrow prev" type="button" aria-label="Previous products">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
 
-            <div class="bundle-grid" data-scroll-dir="{{ section.settings.grid_scroll_direction }}" style="--cards-per-view: {{ section.settings.cards_per_view }};">
+            <div class="bundle-grid" data-scroll-dir="{{ section.settings.grid_scroll_direction }}">
               {% for product in block.settings.collection.products limit: 12 %}
                 <div class="bundle-product-card" style="padding-top:40px;">
                   <img
@@ -198,39 +207,30 @@
   .bundle-grid::-webkit-scrollbar { display: none; }
   .bundle-grid { scrollbar-width: none; -ms-overflow-style: none; }
 
-  /* Horizontal mode: exactly one row, scrolls sideways */
+  /* Horizontal mode: N rows x M columns per "page", scrolls sideways for more columns */
   .bundle-grid[data-scroll-dir="horizontal"] {
     grid-auto-flow: column;
-    grid-template-rows: 1fr;
-    grid-auto-columns: minmax(140px, calc((100% - (var(--cards-per-view, 4) - 1) * 15px) / var(--cards-per-view, 4)));
+    grid-template-rows: repeat(var(--h-rows, 1), 1fr);
+    grid-auto-columns: minmax(140px, calc((100% - (var(--h-cols, 4) - 1) * 15px) / var(--h-cols, 4)));
     overflow-x: auto;
     overflow-y: hidden;
   }
 
-  /* Vertical mode: 3 columns, height locked to ~2 rows, scrolls down */
+  /* Vertical mode: M columns, height locked to N rows worth, scrolls down for more */
   .bundle-grid[data-scroll-dir="vertical"] {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(var(--v-cols, 3), 1fr);
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  /* Responsive step-down: horizontal cards-per-view */
-  @media (max-width: 900px) {
-    .bundle-grid[data-scroll-dir="horizontal"] { --cards-per-view: 3 !important; }
-  }
-  @media (max-width: 640px) {
-    .bundle-grid[data-scroll-dir="horizontal"] { --cards-per-view: 2 !important; }
-  }
-  @media (max-width: 420px) {
-    .bundle-grid[data-scroll-dir="horizontal"] { --cards-per-view: 1.15 !important; }
-  }
-
-  /* Responsive step-down: vertical column count */
-  @media (max-width: 640px) {
-    .bundle-grid[data-scroll-dir="vertical"] { grid-template-columns: repeat(2, 1fr) !important; }
-  }
-  @media (max-width: 380px) {
-    .bundle-grid[data-scroll-dir="vertical"] { grid-template-columns: 1fr !important; }
+  /* Mobile overrides — values come from the block's own settings */
+  @media (max-width: 749px) {
+    .bundle-grid-wrapper {
+      --h-cols: {{ section.settings.h_cols_mobile }} !important;
+      --h-rows: {{ section.settings.h_rows_mobile }} !important;
+      --v-cols: {{ section.settings.v_cols_mobile }} !important;
+      --v-rows: {{ section.settings.v_rows_mobile }} !important;
+    }
   }
 
   .bundle-scroll-arrow {
@@ -450,10 +450,17 @@
         return { size, gap };
       }
 
+      function currentRows() {
+        const raw = getComputedStyle(wrapper).getPropertyValue(direction === 'vertical' ? '--v-rows' : '--h-rows');
+        const n = parseFloat(raw);
+        return n > 0 ? n : (direction === 'vertical' ? 2 : 1);
+      }
+
       function applyVerticalCap() {
         if (direction !== 'vertical') return;
         const { size, gap } = measureCard();
-        if (size > 0) grid.style.maxHeight = (size * 2 + gap) + 'px';
+        const rows = currentRows();
+        if (size > 0) grid.style.maxHeight = (size * rows + gap * (rows - 1)) + 'px';
       }
 
       function refresh() {
@@ -515,6 +522,7 @@
     document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
 
     // Re-measure once images have had a chance to load/settle, and on resize
+    // (resize also covers crossing the 749px desktop/mobile breakpoint)
     setTimeout(() => gridRefreshers.forEach((fn) => fn()), 150);
     window.addEventListener('resize', () => gridRefreshers.forEach((fn) => fn()));
 
@@ -618,20 +626,35 @@
       "id": "grid_scroll_direction",
       "label": "Layout",
       "options": [
-        { "value": "horizontal", "label": "Horizontal (1 row, scroll sideways)" },
-        { "value": "vertical", "label": "Vertical (2 rows visible, scroll down)" }
+        { "value": "horizontal", "label": "Horizontal (scrolls sideways)" },
+        { "value": "vertical", "label": "Vertical (scrolls down)" }
       ],
       "default": "horizontal"
     },
     {
-      "type": "range",
-      "id": "cards_per_view",
-      "min": 2,
-      "max": 6,
-      "step": 1,
-      "default": 4,
-      "label": "Cards visible at once (horizontal mode)"
+      "type": "header",
+      "content": "Horizontal Layout — Desktop"
     },
+    { "type": "range", "id": "h_cols_desktop", "min": 1, "max": 6, "step": 1, "default": 4, "label": "Columns visible" },
+    { "type": "range", "id": "h_rows_desktop", "min": 1, "max": 3, "step": 1, "default": 1, "label": "Rows" },
+    {
+      "type": "header",
+      "content": "Horizontal Layout — Mobile"
+    },
+    { "type": "range", "id": "h_cols_mobile", "min": 1, "max": 4, "step": 0.1, "default": 1.2, "label": "Columns visible" },
+    { "type": "range", "id": "h_rows_mobile", "min": 1, "max": 3, "step": 1, "default": 1, "label": "Rows" },
+    {
+      "type": "header",
+      "content": "Vertical Layout — Desktop"
+    },
+    { "type": "range", "id": "v_cols_desktop", "min": 1, "max": 5, "step": 1, "default": 3, "label": "Columns" },
+    { "type": "range", "id": "v_rows_desktop", "min": 1, "max": 4, "step": 1, "default": 2, "label": "Rows visible" },
+    {
+      "type": "header",
+      "content": "Vertical Layout — Mobile"
+    },
+    { "type": "range", "id": "v_cols_mobile", "min": 1, "max": 3, "step": 1, "default": 2, "label": "Columns" },
+    { "type": "range", "id": "v_rows_mobile", "min": 1, "max": 4, "step": 1, "default": 2, "label": "Rows visible" },
     {
       "type": "header",
       "content": "Bundle Summery Heading"
