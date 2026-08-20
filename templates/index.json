@@ -989,7 +989,7 @@
       "settings": {
         "heading": "Unbeatable prices with bundle.",
         "subtext": "Create your personalized skincare ritual.",
-        "grid_scroll_direction": "vertical",
+        "grid_scroll_direction": "horizontal",
         "bundle_h": "Bundle Content",
         "tier1_qty": 3,
         "tier1_discount": 5,
