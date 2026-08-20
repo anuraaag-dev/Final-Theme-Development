@@ -168,7 +168,7 @@
 
   .bundle-builder { padding: 40px 0; background: #fff; position: relative; }
   .bundle-container { display: flex; gap: 30px; max-width: 1300px; margin: 0 auto; padding: 0 20px; align-items: start; }
-  .bundle-products-area { flex: 1; }
+  .bundle-products-area { flex: 1; min-width: 0; }
   .bundle-summary { width: 360px; position: sticky; top: 20px; background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 20px; box-sizing: border-box; }
 
   .progress-line { height: 5px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 8px; position: relative; width: 100%; }
@@ -202,20 +202,35 @@
   .bundle-grid[data-scroll-dir="horizontal"] {
     grid-auto-flow: column;
     grid-template-rows: 1fr;
-    grid-auto-columns: calc((100% - (var(--cards-per-view, 4) - 1) * 15px) / var(--cards-per-view, 4));
+    grid-auto-columns: minmax(140px, calc((100% - (var(--cards-per-view, 4) - 1) * 15px) / var(--cards-per-view, 4)));
     overflow-x: auto;
     overflow-y: hidden;
   }
 
-  /* Vertical mode: single column, height locked to ~2 cards, scrolls down */
+  /* Vertical mode: 3 columns, height locked to ~2 rows, scrolls down */
   .bundle-grid[data-scroll-dir="vertical"] {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
     overflow-y: auto;
     overflow-x: hidden;
   }
 
+  /* Responsive step-down: horizontal cards-per-view */
+  @media (max-width: 900px) {
+    .bundle-grid[data-scroll-dir="horizontal"] { --cards-per-view: 3 !important; }
+  }
   @media (max-width: 640px) {
     .bundle-grid[data-scroll-dir="horizontal"] { --cards-per-view: 2 !important; }
+  }
+  @media (max-width: 420px) {
+    .bundle-grid[data-scroll-dir="horizontal"] { --cards-per-view: 1.15 !important; }
+  }
+
+  /* Responsive step-down: vertical column count */
+  @media (max-width: 640px) {
+    .bundle-grid[data-scroll-dir="vertical"] { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+  @media (max-width: 380px) {
+    .bundle-grid[data-scroll-dir="vertical"] { grid-template-columns: 1fr !important; }
   }
 
   .bundle-scroll-arrow {
