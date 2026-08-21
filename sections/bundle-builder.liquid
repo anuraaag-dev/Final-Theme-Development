@@ -637,53 +637,42 @@
           Math.min(pos / maxScroll, 1)
         );
 
-        // Detect direction (only used to flip which side looks dark)
+        // Detect direction — only used to flip which side looks dark
         const goingForward = pos >= lastPos;
         lastPos = pos;
 
         /*
-        * Size of the moving comet — 22% of the track.
+        * Size of the moving comet, as a PERCENTAGE of the track — not
+        * pixels. This is the key fix: percentages resolve live against
+        * the parent's actual current width/height every time the browser
+        * paints, so there's no stale clientWidth measurement to get stuck
+        * on. offsetPct slides linearly from 0 to (100 - indicatorPct) as
+        * progress goes 0 -> 1, in EITHER direction — same formula both
+        * ways, no clamping-to-zero trap.
         */
-        const indicatorRatio = 0.22;
+        const indicatorPct = 22;
+        const offsetPct = progress * (100 - indicatorPct);
 
         if (direction === 'vertical') {
-
-          const trackSize = fill.parentElement.clientHeight;
-          const indicatorSize = trackSize * indicatorRatio;
-
-          /*
-          * SAME formula in both directions: the thumb slides smoothly
-          * from 0 to (trackSize - indicatorSize) as progress goes 0 -> 1.
-          * This is what makes it track your actual position continuously —
-          * no clamping to 0 at low progress like before.
-          */
-          const indicatorPosition = progress * (trackSize - indicatorSize);
-
-          fill.style.left = '0px';
-          fill.style.top = indicatorPosition + 'px';
+          fill.style.left = '0';
           fill.style.width = '100%';
-          fill.style.height = indicatorSize + 'px';
+          fill.style.top = offsetPct + '%';
+          fill.style.height = indicatorPct + '%';
 
           fill.style.background = goingForward
             ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
             : 'linear-gradient(to bottom, var(--bundle-scroll-color, #000), transparent)';
-
         } else {
-
-          const trackSize = fill.parentElement.clientWidth;
-          const indicatorSize = trackSize * indicatorRatio;
-
-          const indicatorPosition = progress * (trackSize - indicatorSize);
-
-          fill.style.top = '0px';
-          fill.style.left = indicatorPosition + 'px';
+          fill.style.top = '0';
           fill.style.height = '100%';
-          fill.style.width = indicatorSize + 'px';
+          fill.style.left = offsetPct + '%';
+          fill.style.width = indicatorPct + '%';
 
           fill.style.background = goingForward
             ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
             : 'linear-gradient(to right, var(--bundle-scroll-color, #000), transparent)';
-        }      }
+        }     
+       }
 
       function refresh() {
         applyHorizontalWidth();
