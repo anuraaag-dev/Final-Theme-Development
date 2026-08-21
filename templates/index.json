@@ -1127,7 +1127,7 @@
       "name": "AI Product Quiz",
       "settings": {
         "enable_quiz": true,
-        "launch_mode": "inline",
+        "launch_mode": "popup",
         "floating_position": "bottom-right",
         "button_text": "✨ Find My Perfect Match",
         "popup_delay": 8,
