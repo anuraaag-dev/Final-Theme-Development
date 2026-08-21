@@ -602,40 +602,30 @@
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
           const pctStr = (pct * 100) + '%';
 
-          // Same grow/shrink box as before, but the gradient direction now
-          // flips with travel direction: forward -> dark tip on the
-          // right/bottom, fading toward the pinned start. Backward -> dark
-          // tip on the left/top (the side you're moving toward), fading
-          // toward the far end.
+          // Box is ALWAYS pinned at the start (left/top = 0) — never
+          // switches anchor. Its width/height literally equals pct, i.e.
+          // your true current position, so it grows/shrinks with zero
+          // jump in either direction. Only the gradient direction flips,
+          // to put the dark "tip" on whichever side you're heading toward.
           const goingForward = pos >= lastPos;
           lastPos = pos;
 
           if (direction === 'vertical') {
+            fill.style.top = '0';
+            fill.style.left = '0';
             fill.style.width = '100%';
             fill.style.height = pctStr;
-            if (goingForward) {
-              fill.style.top = '0';
-              fill.style.left = '0';
-              fill.style.background = 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))';
-            } else {
-              fill.style.top = 'auto';
-              fill.style.bottom = '0';
-              fill.style.left = '0';
-              fill.style.background = 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
-            }
+            fill.style.background = goingForward
+              ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
+              : 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
           } else {
+            fill.style.top = '0';
+            fill.style.left = '0';
             fill.style.height = '100%';
             fill.style.width = pctStr;
-            if (goingForward) {
-              fill.style.top = '0';
-              fill.style.left = '0';
-              fill.style.background = 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))';
-            } else {
-              fill.style.left = 'auto';
-              fill.style.right = '0';
-              fill.style.top = '0';
-              fill.style.background = 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
-            }
+            fill.style.background = goingForward
+              ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
+              : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
           }
         }
       }
