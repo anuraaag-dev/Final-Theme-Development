@@ -536,6 +536,7 @@
       const prevBtn = wrapper.querySelector('.bundle-scroll-arrow.prev');
       const nextBtn = wrapper.querySelector('.bundle-scroll-arrow.next');
       const fill = wrapper.querySelector('.bundle-scroll-fill');
+      let lastPos = 0;
 
       function measureCard() {
         const card = grid.querySelector('.bundle-product-card');
@@ -599,23 +600,31 @@
 
         if (fill) {
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
-          const posPct = pct * 100;
+          const pctStr = (pct * 100) + '%';
 
-          // The dark tip sits exactly at your current scroll position, with
-          // a short fade trailing behind it. Ahead of the tip is empty —
-          // that's track you haven't scrolled to yet. The fill element
-          // always spans the full track; only the gradient stops move.
-          const trailPct = 18;
-          const startPct = Math.max(posPct - trailPct, 0);
+          // Dark tip follows whichever direction you most recently moved:
+          // right arrow -> dark on the right, fading left. Left arrow ->
+          // dark on the left, fading right.
+          const goingForward = pos >= lastPos;
+          lastPos = pos;
 
-          fill.style.top = '0';
-          fill.style.left = '0';
-          fill.style.width = '100%';
-          fill.style.height = '100%';
-
-          fill.style.background = direction === 'vertical'
-            ? `linear-gradient(to bottom, transparent ${startPct}%, var(--bundle-scroll-color, #000) ${posPct}%, transparent ${posPct}%)`
-            : `linear-gradient(to right, transparent ${startPct}%, var(--bundle-scroll-color, #000) ${posPct}%, transparent ${posPct}%)`;
+          if (direction === 'vertical') {
+            fill.style.top = '0';
+            fill.style.left = '0';
+            fill.style.width = '100%';
+            fill.style.height = pctStr;
+            fill.style.background = goingForward
+              ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
+              : 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
+          } else {
+            fill.style.top = '0';
+            fill.style.left = '0';
+            fill.style.height = '100%';
+            fill.style.width = pctStr;
+            fill.style.background = goingForward
+              ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
+              : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
+          }
         }
       }
 
