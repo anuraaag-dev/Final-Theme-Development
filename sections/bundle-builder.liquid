@@ -545,12 +545,18 @@
       let lastPos = 0;
 
       function measureCard() {
-        const card = grid.querySelector('.bundle-product-card');
-        if (!card) return { size: 0, gap: 15 };
-        const gap = parseFloat(getComputedStyle(grid).gap) || 15;
-        const size = direction === 'vertical'
-          ? card.getBoundingClientRect().height
-          : card.getBoundingClientRect().width;
+        const gap = parseFloat(getComputedStyle(grid).columnGap || getComputedStyle(grid).gap) || 15;
+
+        // Compute the card size using the EXACT same formula as the CSS
+        // grid-auto-columns calc() — not getBoundingClientRect(). This
+        // guarantees the scroll step always matches the real rendered
+        // card width exactly, even right after a column-count change,
+        // with no rounding/timing mismatch between CSS and JS.
+        const trackSize = direction === 'vertical' ? grid.clientHeight : grid.clientWidth;
+        const cols = readVar(direction === 'vertical' ? '--v-cols' : '--h-cols', direction === 'vertical' ? 3 : 4);
+        const safeCols = Math.min(Math.max(cols, 0.5), 10);
+
+        const size = (trackSize - gap * (safeCols - 1)) / safeCols;
         return { size, gap };
       }
 
