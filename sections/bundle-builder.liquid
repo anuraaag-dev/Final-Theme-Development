@@ -545,18 +545,28 @@
       let lastPos = 0;
 
       function measureCard() {
-        const gap = parseFloat(getComputedStyle(grid).columnGap || getComputedStyle(grid).gap) || 15;
+        const cards = grid.querySelectorAll('.bundle-product-card');
+        if (cards.length === 0) return { size: 0, gap: 15 };
 
-        // Compute the card size using the EXACT same formula as the CSS
-        // grid-auto-columns calc() — not getBoundingClientRect(). This
-        // guarantees the scroll step always matches the real rendered
-        // card width exactly, even right after a column-count change,
-        // with no rounding/timing mismatch between CSS and JS.
-        const trackSize = direction === 'vertical' ? grid.clientHeight : grid.clientWidth;
-        const cols = readVar(direction === 'vertical' ? '--v-cols' : '--h-cols', direction === 'vertical' ? 3 : 4);
-        const safeCols = Math.min(Math.max(cols, 0.5), 10);
+        const gap = parseFloat(getComputedStyle(grid).columnGap) ||
+                    parseFloat(getComputedStyle(grid).gap) || 15;
 
-        const size = (trackSize - gap * (safeCols - 1)) / safeCols;
+        // Read the TRUE step size directly from the DOM: the distance
+        // between two consecutive cards' actual rendered positions. This
+        // is immune to any --h-cols / --v-cols custom-property read
+        // timing issue, because it doesn't recompute anything from CSS
+        // variables — it just asks the browser "where are these two
+        // cards right now" and takes the gap between them.
+        if (cards.length >= 2) {
+          const pos1 = direction === 'vertical' ? cards[0].offsetTop : cards[0].offsetLeft;
+          const pos2 = direction === 'vertical' ? cards[1].offsetTop : cards[1].offsetLeft;
+          const step = Math.abs(pos2 - pos1);
+          if (step > 0) return { size: step - gap, gap };
+        }
+
+        // Fallback for a single-card grid: measure it directly.
+        const rect = cards[0].getBoundingClientRect();
+        const size = direction === 'vertical' ? rect.height : rect.width;
         return { size, gap };
       }
 
