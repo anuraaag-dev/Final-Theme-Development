@@ -316,16 +316,21 @@
     width: 3px !important;
     height: auto !important;
   }
-  .bundle-scroll-fill {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    height: 100% !important;
-    width: 0%;
-    border-radius: 10px !important;
-    transition: width 0.3s ease, height 0.3s ease, left 0.3s ease, top 0.3s ease, background 0.3s ease !important;
-  }
-
+.bundle-scroll-fill {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 0%;
+  border-radius: 10px !important;
+  will-change: left, top, width, height !important;
+  transition:
+    left 0.3s ease,
+    top 0.3s ease,
+    width 0.3s ease,
+    height 0.3s ease,
+    background 0.15s linear !important;
+}
   .bundle-product-card {
     background: #f8fbf8 !important;
     border-radius: 12px !important;
