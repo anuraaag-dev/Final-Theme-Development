@@ -323,7 +323,7 @@
     height: 100% !important;
     width: 0%;
     border-radius: 10px !important;
-    transition: width 0.3s ease, height 0.3s ease, background 0.3s ease !important;
+    transition: width 0.3s ease, height 0.3s ease, left 0.3s ease, top 0.3s ease, background 0.3s ease !important;
   }
 
   .bundle-product-card {
@@ -599,33 +599,33 @@
         if (nextBtn) nextBtn.classList.toggle('disabled', pos >= maxScroll - 2 || maxScroll <= 0);
 
         if (fill) {
-          const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
-          const pctStr = (pct * 100) + '%';
-
-          // Box is ALWAYS pinned at the start (left/top = 0) — never
-          // switches anchor. Its width/height literally equals pct, i.e.
-          // your true current position, so it grows/shrinks with zero
-          // jump in either direction. Only the gradient direction flips,
-          // to put the dark "tip" on whichever side you're heading toward.
+          const progress = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 0;
           const goingForward = pos >= lastPos;
           lastPos = pos;
 
+          // The fill is now a fixed-size indicator that SLIDES along the
+          // track (like a scrollbar thumb), not a bar that grows from an
+          // edge. Its own position IS your current scroll location, in
+          // both directions — so the dark tip always sits where you are,
+          // and flips to lead whichever direction you're moving.
+          const indicatorPct = 22; // size of the sliding indicator, % of track
+          const offsetPct = progress * (100 - indicatorPct);
+
+          const gradientFwd = 'transparent, var(--bundle-scroll-color, #000)';
+          const gradientBack = 'var(--bundle-scroll-color, #000), transparent';
+
           if (direction === 'vertical') {
-            fill.style.top = '0';
             fill.style.left = '0';
             fill.style.width = '100%';
-            fill.style.height = pctStr;
-            fill.style.background = goingForward
-              ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
-              : 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
+            fill.style.top = offsetPct + '%';
+            fill.style.height = indicatorPct + '%';
+            fill.style.background = `linear-gradient(to bottom, ${goingForward ? gradientFwd : gradientBack})`;
           } else {
             fill.style.top = '0';
-            fill.style.left = '0';
             fill.style.height = '100%';
-            fill.style.width = pctStr;
-            fill.style.background = goingForward
-              ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
-              : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
+            fill.style.left = offsetPct + '%';
+            fill.style.width = indicatorPct + '%';
+            fill.style.background = `linear-gradient(to right, ${goingForward ? gradientFwd : gradientBack})`;
           }
         }
       }
