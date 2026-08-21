@@ -573,11 +573,11 @@
         let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
         if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
 
-        let maxCard = 360;
-        if (window.innerWidth <= 749) maxCard = 280;
-        else if (window.innerWidth <= 1024) maxCard = 320;
-
-        return Math.min(Math.max(cardWidth, 80), containerWidth, maxCard);
+        // No max-width cap here: whatever column count is set, cards must
+        // fill the container exactly so N full cards are visible with
+        // nothing peeking at the edges. A cap would leave leftover space
+        // that shows up as a sliver of the next/prev card.
+        return Math.min(Math.max(cardWidth, 80), containerWidth);
       }
 
       function applyHorizontalWidth() {
