@@ -536,6 +536,7 @@
       const prevBtn = wrapper.querySelector('.bundle-scroll-arrow.prev');
       const nextBtn = wrapper.querySelector('.bundle-scroll-arrow.next');
       const fill = wrapper.querySelector('.bundle-scroll-fill');
+      let lastPos = 0;
 
       function measureCard() {
         const card = grid.querySelector('.bundle-product-card');
@@ -601,23 +602,40 @@
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
           const pctStr = (pct * 100) + '%';
 
-          // Fill is pinned at the start (left/top) and its size IS the
-          // scroll position: scroll forward -> it grows in that direction,
-          // scroll backward -> it shrinks from the same growing tip,
-          // turning back into transparent track. Gradient direction never
-          // flips, so behavior is identical both ways — just grow/shrink.
+          // Same grow/shrink box as before, but the gradient direction now
+          // flips with travel direction: forward -> dark tip on the
+          // right/bottom, fading toward the pinned start. Backward -> dark
+          // tip on the left/top (the side you're moving toward), fading
+          // toward the far end.
+          const goingForward = pos >= lastPos;
+          lastPos = pos;
+
           if (direction === 'vertical') {
-            fill.style.top = '0';
-            fill.style.left = '0';
             fill.style.width = '100%';
             fill.style.height = pctStr;
-            fill.style.background = 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))';
+            if (goingForward) {
+              fill.style.top = '0';
+              fill.style.left = '0';
+              fill.style.background = 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))';
+            } else {
+              fill.style.top = 'auto';
+              fill.style.bottom = '0';
+              fill.style.left = '0';
+              fill.style.background = 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
+            }
           } else {
-            fill.style.top = '0';
-            fill.style.left = '0';
             fill.style.height = '100%';
             fill.style.width = pctStr;
-            fill.style.background = 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))';
+            if (goingForward) {
+              fill.style.top = '0';
+              fill.style.left = '0';
+              fill.style.background = 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))';
+            } else {
+              fill.style.left = 'auto';
+              fill.style.right = '0';
+              fill.style.top = '0';
+              fill.style.background = 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
+            }
           }
         }
       }
