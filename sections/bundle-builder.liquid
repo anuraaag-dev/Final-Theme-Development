@@ -232,7 +232,10 @@
   .bundle-grid[data-scroll-dir="horizontal"] {
     grid-auto-flow: column !important;
     grid-template-rows: repeat(var(--h-rows, 1), 1fr) !important;
-    grid-auto-columns: var(--card-w, 200px) !important;
+    /* Pure CSS width: no JS measurement, no timing/resize lag possible.
+       Always resolves live against the container's true current width,
+       so N columns = exactly N full cards, no peeking, ever. */
+    grid-auto-columns: calc((100% - (var(--h-cols, 4) - 1) * 15px) / var(--h-cols, 4)) !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     scroll-snap-type: x mandatory !important;
@@ -561,7 +564,7 @@
         return readVar(direction === 'vertical' ? '--v-rows' : '--h-rows', direction === 'vertical' ? 2 : 1);
       }
 
-      function getCardWidthPx() {
+      {% comment %} function getCardWidthPx() {
         const gap = parseFloat(getComputedStyle(grid).gap) || 15;
         const containerWidth = grid.clientWidth;
         if (containerWidth <= 0) return 200;
@@ -583,7 +586,7 @@
       function applyHorizontalWidth() {
         if (direction !== 'horizontal') return;
         grid.style.setProperty('--card-w', getCardWidthPx() + 'px');
-      }
+      } {% endcomment %}
 
       function applyVerticalCap() {
         if (direction !== 'vertical') return;
@@ -673,7 +676,7 @@
        }
 
       function refresh() {
-        applyHorizontalWidth();
+        {% comment %} applyHorizontalWidth(); {% endcomment %}
         applyVerticalCap();
         updateScrollUI();
       }
