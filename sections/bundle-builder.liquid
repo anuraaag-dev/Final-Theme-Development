@@ -536,6 +536,7 @@
       const prevBtn = wrapper.querySelector('.bundle-scroll-arrow.prev');
       const nextBtn = wrapper.querySelector('.bundle-scroll-arrow.next');
       const fill = wrapper.querySelector('.bundle-scroll-fill');
+      let lastPos = 0;
 
       function measureCard() {
         const card = grid.querySelector('.bundle-product-card');
