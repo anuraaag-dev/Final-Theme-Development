@@ -637,52 +637,27 @@
           Math.min(pos / maxScroll, 1)
         );
 
-        // Detect direction
+        // Detect direction (only used to flip which side looks dark)
         const goingForward = pos >= lastPos;
         lastPos = pos;
 
         /*
-        * Size of the moving comet.
-        *
-        * 22% of the track.
+        * Size of the moving comet — 22% of the track.
         */
         const indicatorRatio = 0.22;
 
         if (direction === 'vertical') {
 
           const trackSize = fill.parentElement.clientHeight;
-
           const indicatorSize = trackSize * indicatorRatio;
 
           /*
-          * The DARK TIP itself follows the current position.
-          *
-          * Forward/down:
-          * transparent -> DARK
-          *
-          * Backward/up:
-          * DARK -> transparent
+          * SAME formula in both directions: the thumb slides smoothly
+          * from 0 to (trackSize - indicatorSize) as progress goes 0 -> 1.
+          * This is what makes it track your actual position continuously —
+          * no clamping to 0 at low progress like before.
           */
-          let indicatorPosition;
-
-          if (goingForward) {
-            // Dark tip is at the BOTTOM
-            indicatorPosition =
-              (progress * trackSize) - indicatorSize;
-          } else {
-            // Dark tip is at the TOP
-            indicatorPosition =
-              progress * trackSize;
-          }
-
-          // Keep indicator inside track
-          indicatorPosition = Math.max(
-            0,
-            Math.min(
-              trackSize - indicatorSize,
-              indicatorPosition
-            )
-          );
+          const indicatorPosition = progress * (trackSize - indicatorSize);
 
           fill.style.left = '0px';
           fill.style.top = indicatorPosition + 'px';
@@ -696,42 +671,9 @@
         } else {
 
           const trackSize = fill.parentElement.clientWidth;
-
           const indicatorSize = trackSize * indicatorRatio;
 
-          /*
-          * Forward/right:
-          *
-          * transparent -------> DARK
-          *                         ^
-          *                    current position
-          *
-          * Backward/left:
-          *
-          * DARK <------- transparent
-          * ^
-          * current position
-          */
-          let indicatorPosition;
-
-          if (goingForward) {
-            // Dark tip is at the RIGHT edge
-            indicatorPosition =
-              (progress * trackSize) - indicatorSize;
-          } else {
-            // Dark tip is at the LEFT edge
-            indicatorPosition =
-              progress * trackSize;
-          }
-
-          // Keep indicator inside the track
-          indicatorPosition = Math.max(
-            0,
-            Math.min(
-              trackSize - indicatorSize,
-              indicatorPosition
-            )
-          );
+          const indicatorPosition = progress * (trackSize - indicatorSize);
 
           fill.style.top = '0px';
           fill.style.left = indicatorPosition + 'px';
@@ -741,8 +683,7 @@
           fill.style.background = goingForward
             ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
             : 'linear-gradient(to right, var(--bundle-scroll-color, #000), transparent)';
-        }
-      }
+        }      }
 
       function refresh() {
         applyHorizontalWidth();
