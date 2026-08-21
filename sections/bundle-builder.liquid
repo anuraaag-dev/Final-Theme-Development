@@ -600,31 +600,36 @@
 
         if (fill) {
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
-          const pctStr = (pct * 100) + '%';
+          const posPct = pct * 100;
+          const trail = 18; // how long the fading tail behind the tip looks
 
-          // Dark tip follows whichever direction you most recently moved:
-          // right arrow -> dark on the right, fading left. Left arrow ->
-          // dark on the left, fading right.
           const goingForward = pos >= lastPos;
           lastPos = pos;
 
-          if (direction === 'vertical') {
-            fill.style.top = '0';
-            fill.style.left = '0';
-            fill.style.width = '100%';
-            fill.style.height = pctStr;
-            fill.style.background = goingForward
-              ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
-              : 'linear-gradient(to top, transparent, var(--bundle-scroll-color, #000))';
+          // The fill always spans the full track — only the gradient stops
+          // move. The tip sits exactly at posPct (your real position), and
+          // the fade trails behind whichever direction you're moving:
+          // forward -> tip on the right, fade to the left; backward -> tip
+          // on the left, fade to the right. Nothing is drawn ahead of the
+          // tip in either case.
+          let startPct, endPct, cssStops;
+          if (goingForward) {
+            startPct = Math.max(posPct - trail, 0);
+            endPct = posPct;
+            cssStops = `transparent ${startPct}%, var(--bundle-scroll-color, #000) ${endPct}%, transparent ${endPct}%`;
           } else {
-            fill.style.top = '0';
-            fill.style.left = '0';
-            fill.style.height = '100%';
-            fill.style.width = pctStr;
-            fill.style.background = goingForward
-              ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
-              : 'linear-gradient(to left, transparent, var(--bundle-scroll-color, #000))';
+            startPct = posPct;
+            endPct = Math.min(posPct + trail, 100);
+            cssStops = `transparent ${startPct}%, var(--bundle-scroll-color, #000) ${startPct}%, transparent ${endPct}%`;
           }
+
+          fill.style.top = '0';
+          fill.style.left = '0';
+          fill.style.width = '100%';
+          fill.style.height = '100%';
+          fill.style.background = direction === 'vertical'
+            ? `linear-gradient(to bottom, ${cssStops})`
+            : `linear-gradient(to right, ${cssStops})`;
         }
       }
 
