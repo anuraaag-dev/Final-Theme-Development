@@ -536,7 +536,6 @@
       const prevBtn = wrapper.querySelector('.bundle-scroll-arrow.prev');
       const nextBtn = wrapper.querySelector('.bundle-scroll-arrow.next');
       const fill = wrapper.querySelector('.bundle-scroll-fill');
-      let lastPos = 0;
 
       function measureCard() {
         const card = grid.querySelector('.bundle-product-card');
@@ -600,36 +599,26 @@
 
         if (fill) {
           const pct = maxScroll > 0 ? Math.min(pos / maxScroll, 1) : 1;
-          const posPct = pct * 100;
-          const trail = 18; // how long the fading tail behind the tip looks
+          const pctStr = (pct * 100) + '%';
 
-          const goingForward = pos >= lastPos;
-          lastPos = pos;
-
-          // The fill always spans the full track — only the gradient stops
-          // move. The tip sits exactly at posPct (your real position), and
-          // the fade trails behind whichever direction you're moving:
-          // forward -> tip on the right, fade to the left; backward -> tip
-          // on the left, fade to the right. Nothing is drawn ahead of the
-          // tip in either case.
-          let startPct, endPct, cssStops;
-          if (goingForward) {
-            startPct = Math.max(posPct - trail, 0);
-            endPct = posPct;
-            cssStops = `transparent ${startPct}%, var(--bundle-scroll-color, #000) ${endPct}%, transparent ${endPct}%`;
+          // Fill is pinned at the start (left/top) and its size IS the
+          // scroll position: scroll forward -> it grows in that direction,
+          // scroll backward -> it shrinks from the same growing tip,
+          // turning back into transparent track. Gradient direction never
+          // flips, so behavior is identical both ways — just grow/shrink.
+          if (direction === 'vertical') {
+            fill.style.top = '0';
+            fill.style.left = '0';
+            fill.style.width = '100%';
+            fill.style.height = pctStr;
+            fill.style.background = 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))';
           } else {
-            startPct = posPct;
-            endPct = Math.min(posPct + trail, 100);
-            cssStops = `transparent ${startPct}%, var(--bundle-scroll-color, #000) ${startPct}%, transparent ${endPct}%`;
+            fill.style.top = '0';
+            fill.style.left = '0';
+            fill.style.height = '100%';
+            fill.style.width = pctStr;
+            fill.style.background = 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))';
           }
-
-          fill.style.top = '0';
-          fill.style.left = '0';
-          fill.style.width = '100%';
-          fill.style.height = '100%';
-          fill.style.background = direction === 'vertical'
-            ? `linear-gradient(to bottom, ${cssStops})`
-            : `linear-gradient(to right, ${cssStops})`;
         }
       }
 
