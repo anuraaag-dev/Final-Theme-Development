@@ -595,154 +595,154 @@
       }
 
       function updateScrollUI() {
-  const pos = direction === 'vertical' ? grid.scrollTop : grid.scrollLeft;
-  const viewSize = direction === 'vertical' ? grid.clientHeight : grid.clientWidth;
-  const fullSize = direction === 'vertical' ? grid.scrollHeight : grid.scrollWidth;
-  const maxScroll = Math.max(fullSize - viewSize, 0);
+        const pos = direction === 'vertical'
+          ? grid.scrollTop
+          : grid.scrollLeft;
 
-  if (prevBtn) {
-    prevBtn.classList.toggle('disabled', pos <= 2);
-  }
+        const viewSize = direction === 'vertical'
+          ? grid.clientHeight
+          : grid.clientWidth;
 
-  if (nextBtn) {
-    nextBtn.classList.toggle(
-      'disabled',
-      pos >= maxScroll - 2 || maxScroll <= 0
-    );
-  }
+        const fullSize = direction === 'vertical'
+          ? grid.scrollHeight
+          : grid.scrollWidth;
 
-  if (!fill) return;
+        const maxScroll = Math.max(fullSize - viewSize, 0);
 
-  const progress = maxScroll > 0
-    ? Math.min(Math.max(pos / maxScroll, 0), 1)
-    : 0;
+        // Arrow states
+        if (prevBtn) {
+          prevBtn.classList.toggle('disabled', pos <= 2);
+        }
 
-  /*
-   * Detect actual movement direction.
-   *
-   * Forward:
-   * Horizontal = moving right
-   * Vertical   = moving down
-   *
-   * Backward:
-   * Horizontal = moving left
-   * Vertical   = moving up
-   */
-  const goingForward = pos >= lastPos;
-  lastPos = pos;
+        if (nextBtn) {
+          nextBtn.classList.toggle(
+            'disabled',
+            pos >= maxScroll - 2 || maxScroll <= 0
+          );
+        }
 
-  /*
-   * Size of the comet/indicator.
-   *
-   * This is intentionally fixed. The entire indicator moves along
-   * the track, and its DARK TIP is positioned at the current
-   * scroll location.
-   */
-  const indicatorPct = 22;
+        if (!fill) return;
 
-  /*
-   * Current scroll position expressed as a percentage of the track.
-   */
-  const currentPct = progress * 100;
+        // If there is nothing to scroll, hide the indicator
+        if (maxScroll <= 0) {
+          fill.style.display = 'none';
+          return;
+        }
 
-  /*
-   * FORWARD:
-   *
-   * transparent ─────► DARK TIP
-   *
-   * The dark tip is at the RIGHT/BOTTOM edge of the indicator.
-   *
-   * BACKWARD:
-   *
-   * DARK TIP ◄───── transparent
-   *
-   * The dark tip is at the LEFT/TOP edge of the indicator.
-   */
+        fill.style.display = 'block';
 
-  if (direction === 'vertical') {
-    fill.style.left = '0';
-    fill.style.width = '100%';
-    fill.style.height = indicatorPct + '%';
+        // Current scroll progress: 0 -> 1
+        const progress = Math.max(
+          0,
+          Math.min(pos / maxScroll, 1)
+        );
 
-    if (goingForward) {
-      /*
-       * Moving DOWN
-       *
-       * transparent at top
-       * DARK at bottom
-       *
-       * Bottom dark tip tracks current position.
-       */
-      const topPct = Math.max(
-        0,
-        Math.min(100 - indicatorPct, currentPct - indicatorPct)
-      );
+        // Detect direction
+        const goingForward = pos >= lastPos;
+        lastPos = pos;
 
-      fill.style.top = topPct + '%';
-      fill.style.background =
-        'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))';
+        /*
+        * Size of the moving comet.
+        *
+        * 22% of the track.
+        */
+        const indicatorRatio = 0.22;
 
-    } else {
-      /*
-       * Moving UP
-       *
-       * DARK at top
-       * transparent at bottom
-       *
-       * Top dark tip tracks current position.
-       */
-      const topPct = Math.max(
-        0,
-        Math.min(100 - indicatorPct, currentPct)
-      );
+        if (direction === 'vertical') {
 
-      fill.style.top = topPct + '%';
-      fill.style.background =
-        'linear-gradient(to bottom, var(--bundle-scroll-color, #000), transparent)';
-    }
+          const trackSize = fill.parentElement.clientHeight;
 
-  } else {
+          const indicatorSize = trackSize * indicatorRatio;
 
-    fill.style.top = '0';
-    fill.style.height = '100%';
-    fill.style.width = indicatorPct + '%';
+          /*
+          * The DARK TIP itself follows the current position.
+          *
+          * Forward/down:
+          * transparent -> DARK
+          *
+          * Backward/up:
+          * DARK -> transparent
+          */
+          let indicatorPosition;
 
-    if (goingForward) {
-      /*
-       * Moving RIGHT
-       *
-       * transparent ─────► DARK
-       *
-       * Right dark tip tracks current position.
-       */
-      const leftPct = Math.max(
-        0,
-        Math.min(100 - indicatorPct, currentPct - indicatorPct)
-      );
+          if (goingForward) {
+            // Dark tip is at the BOTTOM
+            indicatorPosition =
+              (progress * trackSize) - indicatorSize;
+          } else {
+            // Dark tip is at the TOP
+            indicatorPosition =
+              progress * trackSize;
+          }
 
-      fill.style.left = leftPct + '%';
-      fill.style.background =
-        'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))';
+          // Keep indicator inside track
+          indicatorPosition = Math.max(
+            0,
+            Math.min(
+              trackSize - indicatorSize,
+              indicatorPosition
+            )
+          );
 
-    } else {
-      /*
-       * Moving LEFT
-       *
-       * DARK ◄───── transparent
-       *
-       * Left dark tip tracks current position.
-       */
-      const leftPct = Math.max(
-        0,
-        Math.min(100 - indicatorPct, currentPct)
-      );
+          fill.style.left = '0px';
+          fill.style.top = indicatorPosition + 'px';
+          fill.style.width = '100%';
+          fill.style.height = indicatorSize + 'px';
 
-      fill.style.left = leftPct + '%';
-      fill.style.background =
-        'linear-gradient(to right, var(--bundle-scroll-color, #000), transparent)';
-    }
-  }
-}
+          fill.style.background = goingForward
+            ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
+            : 'linear-gradient(to bottom, var(--bundle-scroll-color, #000), transparent)';
+
+        } else {
+
+          const trackSize = fill.parentElement.clientWidth;
+
+          const indicatorSize = trackSize * indicatorRatio;
+
+          /*
+          * Forward/right:
+          *
+          * transparent -------> DARK
+          *                         ^
+          *                    current position
+          *
+          * Backward/left:
+          *
+          * DARK <------- transparent
+          * ^
+          * current position
+          */
+          let indicatorPosition;
+
+          if (goingForward) {
+            // Dark tip is at the RIGHT edge
+            indicatorPosition =
+              (progress * trackSize) - indicatorSize;
+          } else {
+            // Dark tip is at the LEFT edge
+            indicatorPosition =
+              progress * trackSize;
+          }
+
+          // Keep indicator inside the track
+          indicatorPosition = Math.max(
+            0,
+            Math.min(
+              trackSize - indicatorSize,
+              indicatorPosition
+            )
+          );
+
+          fill.style.top = '0px';
+          fill.style.left = indicatorPosition + 'px';
+          fill.style.height = '100%';
+          fill.style.width = indicatorSize + 'px';
+
+          fill.style.background = goingForward
+            ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
+            : 'linear-gradient(to right, var(--bundle-scroll-color, #000), transparent)';
+        }
+      }
 
       function refresh() {
         applyHorizontalWidth();
