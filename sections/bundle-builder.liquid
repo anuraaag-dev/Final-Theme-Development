@@ -1,279 +1,435 @@
-<section class="bundle-builder" id="BundleBuilder-{{ section.id }}">
-<div class="bundle-container">
-<div class="bundle-products-area">
-<div class="bundle-header">
-<h2 class="bundle-main-title">{{ section.settings.heading }}</h2>
-<p class="bundle-subtitle">{{ section.settings.subtext }}</p>
-</div>
-<div class="toggle-sidebar-wrapper">
-<span>Show Items</span>
-<label class="switch">
-<input type="checkbox" id="toggle-sidebar-view" checked>
-<span class="slider round"></span>
-</label>
-</div>
-<div class="bundle-tabs-wrapper">
-<div class="bundle-tabs">
-{% for block in section.blocks %}
-<button class="bundle-tab {% if forloop.first %}active{% endif %}" data-tab="{{ forloop.index }}">
-{% render 'icon-step', icon: block.settings.step_icon, custom_icon: block.settings.custom_icon %}
-{{ block.settings.step_title }}
-</button>
-{% endfor %}
-</div>
-</div>
-{% for block in section.blocks %}
-<div class="bundle-tab-content {% if forloop.first %}active{% endif %}" data-content="{{ forloop.index }}">
-<div class="bundle-grid">
-{% for product in block.settings.collection.products limit: 12 %}
-<div class="bundle-product-card" style="padding-top:40px;">
-{% comment %} <div class="badge-row"><span>Cruelty-free</span></div> {% endcomment %}
-<img
-src="{{ product.featured_image | image_url: width: 300 }}"
-alt="{{ product.title }}"
-loading="lazy"
-width="300"
-height="300"
->
-<h4>{{ product.title }}</h4>
-<div class="price-container">
-{% if product.compare_at_price > product.price %}
-<span class="compare-price-strike">{{ product.compare_at_price | money }}</span>
-{% endif %}
-<span class="price-actual">{{ product.price | money }}</span>
-</div>
-<button
-class="bundle-add"
-data-id="{{ product.variants.first.id }}"
-data-title="{{ product.title }}"
-data-price="{{ product.price }}"
-data-image="{{ product.featured_image | image_url: width: 100 }}"
-data-step="{{ forloop.parentloop.index }}"
->
-ADD TO BUNDLE
-</button>
-</div>
-{% endfor %}
-</div>
-</div>
-{% endfor %}
-</div>
-<div class="bundle-summary">
-<h3 class="summary-title">{{ section.settings.bundle_h }}</h3>
-<p class="summary-promo" id="promo-text">Add items to unlock discounts.</p>
-<div class="bundle-progress-container">
-<div class="progress-line">
-<div id="progress-bar-fill"></div>
-</div>
-<div class="progress-labels">
-<span class="tier-label">{{ section.settings.tier1_discount }}% off</span>
-<span class="tier-label">{{ section.settings.tier2_discount }}% off</span>
-<span class="tier-label">{{ section.settings.tier3_discount }}% off</span>
-</div>
-</div>
-<div class="steps-tracker">
-{% for block in section.blocks %}
-<div class="step-group">
-<div class="step-row" id="step-row-{{ forloop.index }}">
-<div class="step-info">
-<div class="step-titles-box">
-<span class="step-label"> {{ block.settings.tier1_head }} Bundle</span>
-<span class="step-requirement">{{ block.settings.required_qty }} required</span>
-</div>
-<span class="step-status"><span class="count">0</span> added</span>
-</div>
-</div>
-<div class="selected-items-sidebar" id="selected-list-{{ forloop.index }}"></div>
-</div>
-{% endfor %}
-</div>
-<div class="bundle-footer">
-<div class="total-row">
-<span>Total</span>
-<div class="price-stack">
-<span id="bundle-total-strike" class="total-strike"></span>
-<span id="bundle-total">$0.00</span>
-</div>
-</div>
-<button id="bundle-add-cart" disabled>Add all to cart</button>
-</div>
-</div>
-</div>
-<div id="bundle-toast">Item added!</div>
+<section class="bundle-builder" id="BundleBuilder-{{ section.id }}" style="--bundle-scroll-color: {{ section.settings.p_color }};">
+  <div class="bundle-container">
+    <div class="bundle-products-area">
+
+      <div class="bundle-header">
+        <h2 class="bundle-main-title">{{ section.settings.heading }}</h2>
+        <p class="bundle-subtitle">{{ section.settings.subtext }}</p>
+      </div>
+
+      <div class="toggle-sidebar-wrapper">
+        <span>Show Items</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-sidebar-view" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="bundle-tabs-wrapper">
+        <div class="bundle-tabs">
+          {% for block in section.blocks %}
+            <button class="bundle-tab {% if forloop.first %}active{% endif %}" data-tab="{{ forloop.index }}">
+              {% render 'icon-step', icon: block.settings.step_icon, custom_icon: block.settings.custom_icon %}
+              {{ block.settings.step_title }}
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% for block in section.blocks %}
+        <div class="bundle-tab-content {% if forloop.first %}active{% endif %}" data-content="{{ forloop.index }}">
+
+          <div
+            class="bundle-grid-wrapper"
+            data-scroll-dir="{{ section.settings.grid_scroll_direction }}"
+          >
+
+            <button class="bundle-scroll-arrow prev" type="button" aria-label="Previous products">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+
+            <div
+              class="bundle-grid"
+              data-scroll-dir="{{ section.settings.grid_scroll_direction }}"
+              style="
+                --h-cols: {{ section.settings.h_cols_desktop }};
+                --h-rows: {{ section.settings.h_rows_desktop }};
+                --v-cols: {{ section.settings.v_cols_desktop }};
+                --v-rows: {{ section.settings.v_rows_desktop }};
+              "
+            >
+              {% for product in block.settings.collection.products limit: 12 %}
+                <div class="bundle-product-card" style="padding-top:40px;">
+                  <img
+                    src="{{ product.featured_image | image_url: width: 300 }}"
+                    alt="{{ product.title }}"
+                    loading="lazy"
+                    width="300"
+                    height="300"
+                  >
+                  <h4>{{ product.title }}</h4>
+                  <div class="price-container">
+                    {% if product.compare_at_price > product.price %}
+                      <span class="compare-price-strike">{{ product.compare_at_price | money }}</span>
+                    {% endif %}
+                    <span class="price-actual">{{ product.price | money }}</span>
+                  </div>
+                  <button
+                    class="bundle-add"
+                    data-id="{{ product.variants.first.id }}"
+                    data-title="{{ product.title }}"
+                    data-price="{{ product.price }}"
+                    data-image="{{ product.featured_image | image_url: width: 100 }}"
+                    data-step="{{ forloop.parentloop.index }}"
+                  >
+                    ADD TO BUNDLE
+                  </button>
+                </div>
+              {% endfor %}
+            </div>
+
+            <button class="bundle-scroll-arrow next" type="button" aria-label="Next products">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+
+            <div class="bundle-scroll-track">
+              <div class="bundle-scroll-fill"></div>
+            </div>
+
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div>
+
+    <div class="bundle-summary">
+      <h3 class="summary-title">{{ section.settings.bundle_h }}</h3>
+      <p class="summary-promo" id="promo-text">Add items to unlock discounts.</p>
+
+      <div class="bundle-progress-container">
+        <div class="progress-line">
+          <div id="progress-bar-fill"></div>
+        </div>
+        <div class="progress-labels">
+          <span class="tier-label">{{ section.settings.tier1_discount }}% off</span>
+          <span class="tier-label">{{ section.settings.tier2_discount }}% off</span>
+          <span class="tier-label">{{ section.settings.tier3_discount }}% off</span>
+        </div>
+      </div>
+
+      <div class="steps-tracker">
+        {% for block in section.blocks %}
+          <div class="step-group">
+            <div class="step-row" id="step-row-{{ forloop.index }}">
+              <div class="step-info">
+                <div class="step-titles-box">
+                  <span class="step-label"> {{ block.settings.tier1_head }} Bundle</span>
+                  <span class="step-requirement">{{ block.settings.required_qty }} required</span>
+                </div>
+                <span class="step-status"><span class="count">0</span> added</span>
+              </div>
+            </div>
+            <div class="selected-items-sidebar" id="selected-list-{{ forloop.index }}"></div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="bundle-footer">
+        <div class="total-row">
+          <span>Total</span>
+          <div class="price-stack">
+            <span id="bundle-total-strike" class="total-strike"></span>
+            <span id="bundle-total">$0.00</span>
+          </div>
+        </div>
+        <button id="bundle-add-cart" disabled>Add all to cart</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="bundle-toast">Item added!</div>
 </section>
+
 <style>
-.selected-items-sidebar {
-display: flex; /* Keep as flex */
-flex-wrap: nowrap; /* Force items to stay on one line */
-overflow-x: auto; /* Allow horizontal scrolling */
-overflow-y: hidden; /* Hide vertical overflow */
-gap: 10px; /* Space between items */
-padding: 10px 0; /* Optional: spacing for scrollbar */
-/* Optional: Smooth scrolling for touch devices */
--webkit-overflow-scrolling: touch;
+  .bundle-builder, .bundle-builder * { box-sizing: border-box !important; }
+
+  .selected-items-sidebar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 10px !important;
+    padding: 10px 0 !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .selected-items-sidebar::-webkit-scrollbar { height: 4px !important; }
+  .selected-items-sidebar::-webkit-scrollbar-thumb { background: #ccc !important; border-radius: 10px !important; }
+
+  .sidebar-item {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .toggle-sidebar-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+
+  .switch { position: relative !important; display: inline-block !important; width: 40px !important; height: 22px !important; }
+  .switch input { opacity: 0 !important; width: 0 !important; height: 0 !important; }
+  .slider { position: absolute !important; cursor: pointer !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; background-color: #ccc !important; transition: .4s !important; border-radius: 34px !important; }
+  .slider:before { position: absolute !important; content: "" !important; height: 16px !important; width: 16px !important; left: 3px !important; bottom: 3px !important; background-color: white !important; transition: .4s !important; border-radius: 50% !important; }
+  input:checked + .slider { background-color: #000 !important; }
+  input:checked + .slider:before { transform: translateX(18px) !important; }
+  .hide-sidebar-list { display: none !important; }
+
+  .bundle-builder { padding: 40px 0 !important; background: #fff !important; position: relative !important; }
+  .bundle-container { display: flex !important; gap: 30px !important; max-width: 1300px !important; margin: 0 auto !important; padding: 0 20px !important; align-items: start !important; }
+  .bundle-products-area { flex: 1 !important; min-width: 0 !important; }
+  .bundle-summary { width: 360px !important; position: sticky !important; top: 20px !important; background: #fff !important; border: 1px solid #eee !important; border-radius: 16px !important; padding: 20px !important; }
+
+  .progress-line { height: 5px !important; background: #e0e0e0 !important; border-radius: 10px !important; overflow: hidden !important; margin-bottom: 8px !important; position: relative !important; width: 100% !important; }
+  #progress-bar-fill { height: 100% !important; width: 0%; transition: width 0.4s ease !important; display: block !important; background-color: {{ section.settings.p_color }} !important; }
+  .progress-labels { display: flex !important; justify-content: space-between !important; font-size: 11px !important; color: #999 !important; margin-bottom: 20px !important; }
+  .tier-label.active { color: {{ section.settings.p_color }} !important; font-weight: 700 !important; text-decoration: underline !important; }
+
+  .bundle-tabs { display: flex !important; gap: 8px !important; background: #f4f4f4 !important; padding: 6px !important; border-radius: 100px !important; width: 100% !important; margin: 0 auto 30px !important; }
+  .bundle-tab {
+    flex: 1 !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 10px 18px !important;
+    border-radius: 100px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-weight: 500 !important;
+    height: auto !important;
+    line-height: normal !important;
+    box-shadow: none !important;
+  }
+  .bundle-tab.active { background: #fff !important; box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important; }
+
+  .bundle-tab-content { display: none !important; }
+  .bundle-tab-content.active { display: block !important; }
+
+  .bundle-grid-wrapper {
+    position: relative !important;
+    padding: 0 6px 22px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .bundle-grid {
+    display: grid !important;
+    gap: 15px !important;
+    scroll-behavior: smooth !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+  }
+  .bundle-grid::-webkit-scrollbar { display: none !important; }
+  .bundle-grid { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+
+  .bundle-grid[data-scroll-dir="horizontal"] {
+    grid-auto-flow: column !important;
+    grid-template-rows: repeat(var(--h-rows, 1), 1fr) !important;
+    /* Pure CSS width: no JS measurement, no timing/resize lag possible.
+       Always resolves live against the container's true current width,
+       so N columns = exactly N full cards, no peeking, ever. */
+    grid-auto-columns: calc((100% - (var(--h-cols, 4) - 1) * 15px) / var(--h-cols, 4)) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+  }
+
+  .bundle-grid[data-scroll-dir="vertical"] {
+    grid-auto-flow: row !important;
+    grid-template-columns: repeat(var(--v-cols, 3), 1fr) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scroll-snap-type: y mandatory !important;
+  }
+
+  /* Mobile column-count overrides, at the ACTUAL mobile breakpoint (749px) —
+     deliberately separate from the 1024px breakpoint below where the summary
+     stacks underneath the grid, so the two never combine into "widest
+     container ÷ smallest column count" at the same moment. */
+  @media (max-width: 749px) {
+    .bundle-grid {
+      --h-cols: {{ section.settings.h_cols_mobile }} !important;
+      --h-rows: {{ section.settings.h_rows_mobile }} !important;
+      --v-cols: {{ section.settings.v_cols_mobile }} !important;
+      --v-rows: {{ section.settings.v_rows_mobile }} !important;
+    }
+  }
+
+  .bundle-scroll-arrow {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    border: 1px solid #eee !important;
+    background: #fff !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    transition: opacity 0.2s, transform 0.2s !important;
+    color: #333 !important;
+    padding: 0 !important;
+  }
+  .bundle-scroll-arrow.prev { left: -6px !important; }
+  .bundle-scroll-arrow.next { right: -6px !important; }
+  .bundle-scroll-arrow:hover { transform: translateY(-50%) scale(1.06) !important; }
+  .bundle-scroll-arrow.disabled { opacity: 0.25 !important; pointer-events: none !important; }
+
+  .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.prev {
+    top: -6px !important; left: 50% !important; transform: translateX(-50%) rotate(90deg) !important;
+  }
+  .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.next {
+    top: auto !important; bottom: -6px !important; left: 50% !important; right: auto !important; transform: translateX(-50%) rotate(90deg) !important;
+  }
+  .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.prev:hover,
+  .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-arrow.next:hover {
+    transform: translateX(-50%) rotate(90deg) scale(1.06) !important;
+  }
+  .bundle-grid-wrapper[data-scroll-dir="vertical"] { padding: 22px 6px 0 !important; }
+
+  /* Growing/fading "comet" progress fill: the bar's own size IS the scroll
+     fraction (so it visibly grows), and the gradient fades transparent at
+     the origin (back) while staying solid at the growing tip (front). */
+  .bundle-scroll-track {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 3px !important;
+    background: rgba(0,0,0,0.08) !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+  }
+  .bundle-grid-wrapper[data-scroll-dir="vertical"] .bundle-scroll-track {
+    top: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    right: 0 !important;
+    width: 3px !important;
+    height: auto !important;
+  }
+.bundle-scroll-fill {
+  position: absolute !important;
+  height: 100% !important;
+  width: 22%;
+  border-radius: 10px !important;
+  will-change: left, top, width, height !important;
+  transition:
+    left 0.3s ease,
+    top 0.3s ease,
+    width 0.3s ease,
+    height 0.3s ease,
+    background 0.15s linear !important;
 }
-/* Optional: Hide the scrollbar visual (Chrome/Safari/Edge)
-if you want it to look "cleaner" while still being scrollable */
-.selected-items-sidebar::-webkit-scrollbar {
-height: 4px; /* Very thin scrollbar */
-}
-.selected-items-sidebar::-webkit-scrollbar-thumb {
-background: #ccc; /* Subtle grey handle */
-border-radius: 10px;
-}
-.sidebar-item {
-flex: 0 0 auto; /* Do not grow, do not shrink, use auto width */
-{% comment %} width: 200px; /* Set a specific width for the scrollable cards */ {% endcomment %}
-display: flex;
-align-items: center;
-/* rest of your existing styles... */
-}
-/* Container for the toggle */
-.toggle-sidebar-wrapper {
-display: flex;
-align-items: center;
-gap: 10px;
-margin-bottom: 20px;
-font-size: 14px;
-font-weight: 600;
-}
-/* The switch - the box around the slider */
-.switch {
-position: relative;
-display: inline-block;
-width: 40px;
-height: 22px;
-}
-/* Hide default HTML checkbox */
-.switch input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-/* The slider */
-.slider {
-position: absolute;
-cursor: pointer;
-top: 0; left: 0; right: 0; bottom: 0;
-background-color: #ccc;
-transition: .4s;
-border-radius: 34px;
-}
-.slider:before {
-position: absolute;
-content: "";
-height: 16px;
-width: 16px;
-left: 3px;
-bottom: 3px;
-background-color: white;
-transition: .4s;
-border-radius: 50%;
-}
-input:checked + .slider {
-background-color: #000; /* Color when ON */
-}
-input:checked + .slider:before {
-transform: translateX(18px);
-}
-/* Helper class to hide the sidebar lists */
-.hide-sidebar-list {
-display: none !important;
-}
-.bundle-builder { padding: 40px 0; background: #fff; position: relative; }
-.bundle-container { display: flex; gap: 30px; max-width: 1300px; margin: 0 auto; padding: 0 20px; align-items: start; }
-.bundle-products-area { flex: 1; }
-.bundle-summary { width: 360px; position: sticky; top: 20px; background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 20px; box-sizing: border-box; }
-/* PROGRESS BAR STYLING */
-.progress-line {
-height: 5px;
-background: #e0e0e0;
-border-radius: 10px;
-overflow: hidden;
-margin-bottom: 8px;
-position: relative;
-width: 100%;
-}
-#progress-bar-fill {
-height: 100%;
-width: 0%;
-transition: width 0.4s ease;
-display: block;
-background-color: {{ section.settings.p_color }} !important;
-}
-.progress-labels {
-display: flex;
-justify-content: space-between;
-font-size: 11px;
-color: #999;
-margin-bottom: 20px;
-}
-/* Highlight color when tier is reached */
-.tier-label.active {
-color: {{ section.settings.p_color }};
-font-weight: 700;
-text-decoration: underline;
-}
-.bundle-tabs {
-display: flex;
-gap: 8px;
-background: #f4f4f4;
-padding: 6px;
-border-radius: 100px;
-width: 100%;
-margin: 0 auto 30px;
-}
-.bundle-tab {
-flex: 1; /* makes buttons equal width */
-border: none;
-background: transparent;
-padding: 10px 18px;
-border-radius: 100px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center; /* center text/icon */
-gap: 6px;
-font-weight: 500;
-}
-.bundle-tab.active {
-background: #fff;
-box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-.bundle-grid {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 15px;
-}
-@media (max-width: 1024px) {
-.bundle-container { flex-direction: column; }
-.bundle-summary { width: 100%; position: static; margin-top: 30px; }
-.bundle-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.bundle-product-card { background: #f8fbf8; border-radius: 12px; padding: 15px; text-align: center; }
-.bundle-product-card img { width: 100%; height: auto; mix-blend-mode: multiply; }
-.price-container { margin: 10px 0; display: flex; justify-content: center; gap: 8px; }
-.compare-price-strike { text-decoration: line-through; color: #999; font-size: 13px; }
-.bundle-add { width: 100%; padding: 10px; border-radius: 100px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-weight: 600; font-size: 12px; }
-.sidebar-item { display: flex; align-items: center; gap: 10px; background: #fafafa; padding: 8px; border-radius: 8px; border: 1px solid #f0f0f0; margin-bottom: 8px; }
-.sidebar-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
-.sidebar-item span { flex: 1; font-size: 12px; font-weight: 500; text-align: left; }
-.remove-item { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; }
-.total-strike { text-decoration: line-through; color: #999; font-size: 15px; display: none; }
-#bundle-total { font-size: 24px; font-weight: 700; color: #000; }
-#bundle-add-cart { width: 100%; margin-top: 15px; padding: 15px; border-radius: 100px; border: none; background: #ccc; color: #fff; font-weight: 700; cursor: not-allowed; transition: 0.3s; }
-#bundle-add-cart.ready { background: #000; cursor: pointer; }
-.bundle-tab-content { display: none; }
-.bundle-tab-content.active { display: block; }
-#bundle-toast { position: fixed; bottom: 20px; right: 20px; background: #000; color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 12px; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 999; }
-#bundle-toast.show { opacity: 1; visibility: visible; }
+  .bundle-product-card {
+    background: #f8fbf8 !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    text-align: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    display: block !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
+  }
+  .bundle-product-card img {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    max-height: 280px !important;
+    object-fit: cover !important;
+    mix-blend-mode: multiply !important;
+    background: #ececec !important;
+    display: block !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  @media (max-width: 749px) {
+    .bundle-product-card { scroll-snap-align: center !important; }
+    .bundle-product-card img { max-height: 220px !important; }
+  }
+  .bundle-product-card h4 {
+    margin: 10px 0 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+  @media (min-width: 750px) and (max-width: 1024px) {
+    .bundle-product-card img { max-height: 260px !important; }
+  }
+  .price-container { margin: 10px 0 !important; display: flex !important; justify-content: center !important; gap: 8px !important; }
+  .compare-price-strike { text-decoration: line-through !important; color: #999 !important; font-size: 13px !important; }
+  .bundle-add {
+    width: 100% !important;
+    padding: 10px !important;
+    border-radius: 100px !important;
+    border: 1px solid #ddd !important;
+    background: #fff !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    height: auto !important;
+    line-height: normal !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+  }
+
+  .sidebar-item { display: flex !important; align-items: center !important; gap: 10px !important; background: #fafafa !important; padding: 8px !important; border-radius: 8px !important; border: 1px solid #f0f0f0 !important; margin-bottom: 8px !important; }
+  .sidebar-item img { width: 40px !important; height: 40px !important; max-width: none !important; object-fit: cover !important; border-radius: 4px !important; }
+  .sidebar-item span { flex: 1 !important; font-size: 12px !important; font-weight: 500 !important; text-align: left !important; }
+  .remove-item { background: none !important; border: none !important; color: #ccc !important; cursor: pointer !important; font-size: 18px !important; padding: 0 !important; }
+
+  .total-strike { text-decoration: line-through !important; color: #999 !important; font-size: 15px !important; display: none !important; }
+  #bundle-total { font-size: 24px !important; font-weight: 700 !important; color: #000 !important; }
+  #bundle-add-cart {
+    width: 100% !important;
+    margin-top: 15px !important;
+    padding: 15px !important;
+    border-radius: 100px !important;
+    border: none !important;
+    background: #ccc !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    cursor: not-allowed !important;
+    transition: 0.3s !important;
+    height: auto !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+  }
+  #bundle-add-cart.ready { background: #000 !important; cursor: pointer !important; }
+
+  #bundle-toast { position: fixed !important; bottom: 20px !important; right: 20px !important; background: #000 !important; color: #fff !important; padding: 10px 20px !important; border-radius: 50px !important; font-size: 12px !important; opacity: 0 !important; visibility: hidden !important; transition: 0.3s !important; z-index: 999 !important; }
+  #bundle-toast.show { opacity: 1 !important; visibility: visible !important; }
+
+  @media (max-width: 1024px) {
+    .bundle-container { flex-direction: column !important; }
+    .bundle-products-area { width: 100% !important; }
+    .bundle-summary { width: 100% !important; position: static !important; margin-top: 30px !important; }
+  }
 </style>
+
 <script>
 (function () {
   function initBundleBuilder() {
     const sidebarToggle = document.getElementById('toggle-sidebar-view');
     const sidebarLists = document.querySelectorAll('.selected-items-sidebar');
-
 
     if (sidebarToggle) {
       sidebarToggle.addEventListener('change', function () {
@@ -286,7 +442,6 @@ gap: 15px;
       }
     }
 
-
     let bundle = [];
     const settings = {
       t1: parseInt('{{ section.settings.tier1_qty }}') || 3,
@@ -297,12 +452,10 @@ gap: 15px;
       d3: parseInt('{{ section.settings.tier3_discount }}') || 15,
     };
 
-
     function updateUI() {
       const counts = { 1: 0, 2: 0, 3: 0 };
       let rawTotal = 0;
       document.querySelectorAll('.selected-items-sidebar').forEach((list) => (list.innerHTML = ''));
-
 
       bundle.forEach((item) => {
         counts[item.step]++;
@@ -316,19 +469,16 @@ gap: 15px;
         }
       });
 
-
       Object.keys(counts).forEach((step) => {
         const el = document.querySelector(`#step-row-${step} .count`);
         if (el) el.innerText = counts[step];
       });
-
 
       let discountPercent = 0;
       let appliedCode = '';
       const labels = document.querySelectorAll('.tier-label');
       labels.forEach((l) => l.classList.remove('active'));
       let promoMsg = '';
-
 
       if (bundle.length >= settings.t3) {
         discountPercent = settings.d3;
@@ -349,10 +499,8 @@ gap: 15px;
         promoMsg = `Add ${settings.t1 - bundle.length} more to get ${settings.d1}% off.`;
       }
 
-
       const promoEl = document.getElementById('promo-text');
       if (promoEl) promoEl.innerText = promoMsg;
-
 
       const progressBar = document.getElementById('progress-bar-fill');
       if (progressBar) {
@@ -360,12 +508,10 @@ gap: 15px;
         progressBar.style.width = percentage + '%';
       }
 
-
       const finalTotal = rawTotal * (1 - discountPercent / 100);
       const strikeEl = document.getElementById('bundle-total-strike');
       const totalEl = document.getElementById('bundle-total');
       const format = (v) => '$' + (v / 100).toFixed(2);
-
 
       if (strikeEl) {
         if (discountPercent > 0) {
@@ -377,7 +523,6 @@ gap: 15px;
       }
       if (totalEl) totalEl.innerText = format(finalTotal);
 
-
       const cartBtn = document.getElementById('bundle-add-cart');
       if (cartBtn) {
         cartBtn.disabled = bundle.length === 0;
@@ -386,9 +531,219 @@ gap: 15px;
       }
     }
 
+    /* ---------- Scrollable grid: arrows + comet progress track ---------- */
+    const gridRefreshers = [];
 
-    // Delegated clicks — keep working even if this section's HTML
-    // gets swapped/re-rendered later (Theme Editor, etc.)
+    function setupGridScroller(wrapper) {
+      const grid = wrapper.querySelector('.bundle-grid');
+      if (!grid) return;
+
+      const direction = grid.dataset.scrollDir === 'vertical' ? 'vertical' : 'horizontal';
+      const prevBtn = wrapper.querySelector('.bundle-scroll-arrow.prev');
+      const nextBtn = wrapper.querySelector('.bundle-scroll-arrow.next');
+      const fill = wrapper.querySelector('.bundle-scroll-fill');
+      let lastPos = 0;
+
+      function measureCard() {
+        const cards = grid.querySelectorAll('.bundle-product-card');
+        if (cards.length === 0) return { size: 0, gap: 15 };
+
+        const gap = parseFloat(getComputedStyle(grid).columnGap) ||
+                    parseFloat(getComputedStyle(grid).gap) || 15;
+
+        // Read the TRUE step size directly from the DOM: the distance
+        // between two consecutive cards' actual rendered positions. This
+        // is immune to any --h-cols / --v-cols custom-property read
+        // timing issue, because it doesn't recompute anything from CSS
+        // variables — it just asks the browser "where are these two
+        // cards right now" and takes the gap between them.
+        if (cards.length >= 2) {
+          const pos1 = direction === 'vertical' ? cards[0].offsetTop : cards[0].offsetLeft;
+          const pos2 = direction === 'vertical' ? cards[1].offsetTop : cards[1].offsetLeft;
+          const step = Math.abs(pos2 - pos1);
+          if (step > 0) return { size: step - gap, gap };
+        }
+
+        // Fallback for a single-card grid: measure it directly.
+        const rect = cards[0].getBoundingClientRect();
+        const size = direction === 'vertical' ? rect.height : rect.width;
+        return { size, gap };
+      }
+
+      function readVar(name, fallback) {
+        const raw = getComputedStyle(grid).getPropertyValue(name);
+        const n = parseFloat(raw);
+        return n > 0 ? n : fallback;
+      }
+
+      function currentRows() {
+        return readVar(direction === 'vertical' ? '--v-rows' : '--h-rows', direction === 'vertical' ? 2 : 1);
+      }
+
+      {% comment %} function getCardWidthPx() {
+        const gap = parseFloat(getComputedStyle(grid).gap) || 15;
+        const containerWidth = grid.clientWidth;
+        if (containerWidth <= 0) return 200;
+
+        let cols = readVar(direction === 'vertical' ? '--v-cols' : '--h-cols', direction === 'vertical' ? 3 : 4);
+        if (!Number.isFinite(cols)) cols = direction === 'vertical' ? 3 : 4;
+        cols = Math.min(Math.max(cols, 0.5), 10);
+
+        let cardWidth = (containerWidth - gap * (cols - 1)) / cols;
+        if (!Number.isFinite(cardWidth) || cardWidth <= 0) cardWidth = 200;
+
+        // No max-width cap here: whatever column count is set, cards must
+        // fill the container exactly so N full cards are visible with
+        // nothing peeking at the edges. A cap would leave leftover space
+        // that shows up as a sliver of the next/prev card.
+        return Math.min(Math.max(cardWidth, 80), containerWidth);
+      }
+
+      function applyHorizontalWidth() {
+        if (direction !== 'horizontal') return;
+        grid.style.setProperty('--card-w', getCardWidthPx() + 'px');
+      } {% endcomment %}
+
+      function applyVerticalCap() {
+        if (direction !== 'vertical') return;
+        const { size, gap } = measureCard();
+        const rows = currentRows();
+        if (size > 0) grid.style.maxHeight = (Math.min(size, 2000) * rows + gap * (rows - 1)) + 'px';
+      }
+
+      function updateScrollUI() {
+        const pos = direction === 'vertical'
+          ? grid.scrollTop
+          : grid.scrollLeft;
+
+        const viewSize = direction === 'vertical'
+          ? grid.clientHeight
+          : grid.clientWidth;
+
+        const fullSize = direction === 'vertical'
+          ? grid.scrollHeight
+          : grid.scrollWidth;
+
+        const maxScroll = Math.max(fullSize - viewSize, 0);
+
+        // Arrow states
+        if (prevBtn) {
+          prevBtn.classList.toggle('disabled', pos <= 2);
+        }
+
+        if (nextBtn) {
+          nextBtn.classList.toggle(
+            'disabled',
+            pos >= maxScroll - 2 || maxScroll <= 0
+          );
+        }
+
+        if (!fill) return;
+
+        // If there is nothing to scroll, hide the indicator
+        if (maxScroll <= 0) {
+          fill.style.display = 'none';
+          return;
+        }
+
+        fill.style.display = 'block';
+
+        // Current scroll progress: 0 -> 1
+        const progress = Math.max(
+          0,
+          Math.min(pos / maxScroll, 1)
+        );
+
+        // Detect direction — only used to flip which side looks dark
+        const goingForward = pos >= lastPos;
+        lastPos = pos;
+
+        /*
+        * Size of the moving comet, as a PERCENTAGE of the track — not
+        * pixels. This is the key fix: percentages resolve live against
+        * the parent's actual current width/height every time the browser
+        * paints, so there's no stale clientWidth measurement to get stuck
+        * on. offsetPct slides linearly from 0 to (100 - indicatorPct) as
+        * progress goes 0 -> 1, in EITHER direction — same formula both
+        * ways, no clamping-to-zero trap.
+        */
+        const indicatorPct = 22;
+        const offsetPct = progress * (100 - indicatorPct);
+
+        if (direction === 'vertical') {
+          fill.style.left = '0';
+          fill.style.width = '100%';
+          fill.style.top = offsetPct + '%';
+          fill.style.height = indicatorPct + '%';
+
+          fill.style.background = goingForward
+            ? 'linear-gradient(to bottom, transparent, var(--bundle-scroll-color, #000))'
+            : 'linear-gradient(to bottom, var(--bundle-scroll-color, #000), transparent)';
+        } else {
+          fill.style.top = '0';
+          fill.style.height = '100%';
+          fill.style.left = offsetPct + '%';
+          fill.style.width = indicatorPct + '%';
+
+          fill.style.background = goingForward
+            ? 'linear-gradient(to right, transparent, var(--bundle-scroll-color, #000))'
+            : 'linear-gradient(to right, var(--bundle-scroll-color, #000), transparent)';
+        }     
+       }
+
+      function refresh() {
+        {% comment %} applyHorizontalWidth(); {% endcomment %}
+        applyVerticalCap();
+        updateScrollUI();
+      }
+
+      function scrollOneCard(dir) {
+        const { size, gap } = measureCard();
+        const amount = (size + gap) * dir;
+        grid.scrollBy(
+          direction === 'vertical' ? { top: amount, behavior: 'smooth' } : { left: amount, behavior: 'smooth' }
+        );
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', () => scrollOneCard(-1));
+      if (nextBtn) nextBtn.addEventListener('click', () => scrollOneCard(1));
+      grid.addEventListener('scroll', updateScrollUI);
+
+      gridRefreshers.push(refresh);
+      refresh();
+    }
+
+    document.querySelectorAll('.bundle-grid-wrapper').forEach(setupGridScroller);
+
+    let refreshScheduled = false;
+    function scheduleRefresh() {
+      if (refreshScheduled) return;
+      refreshScheduled = true;
+      requestAnimationFrame(() => {
+        refreshScheduled = false;
+        gridRefreshers.forEach((fn) => fn());
+      });
+    }
+
+    setTimeout(scheduleRefresh, 150);
+    window.addEventListener('resize', scheduleRefresh);
+
+    if (window.ResizeObserver) {
+      const lastWidths = new WeakMap();
+      const ro = new ResizeObserver((entries) => {
+        let widthChanged = false;
+        entries.forEach((entry) => {
+          const w = Math.round(entry.contentRect.width);
+          if (lastWidths.get(entry.target) !== w) {
+            lastWidths.set(entry.target, w);
+            widthChanged = true;
+          }
+        });
+        if (widthChanged) scheduleRefresh();
+      });
+      document.querySelectorAll('.bundle-builder').forEach((section) => ro.observe(section));
+    }
+
     document.addEventListener('click', function (e) {
       const tabBtn = e.target.closest('.bundle-tab');
       if (tabBtn) {
@@ -396,9 +751,9 @@ gap: 15px;
         tabBtn.classList.add('active');
         const target = document.querySelector(`[data-content="${tabBtn.dataset.tab}"]`);
         if (target) target.classList.add('active');
+        scheduleRefresh();
         return;
       }
-
 
       const addBtn = e.target.closest('.bundle-add');
       if (addBtn) {
@@ -420,7 +775,6 @@ gap: 15px;
         return;
       }
 
-
       const removeBtn = e.target.closest('.remove-item');
       if (removeBtn) {
         const uid = parseFloat(removeBtn.dataset.uid);
@@ -429,14 +783,12 @@ gap: 15px;
         return;
       }
 
-
       const cartBtnClick = e.target.closest('#bundle-add-cart');
       if (cartBtnClick && !cartBtnClick.disabled) {
         const discountCode = cartBtnClick.dataset.discountCode;
         const originalText = cartBtnClick.innerText;
         cartBtnClick.innerText = 'Adding to cart...';
         cartBtnClick.disabled = true;
-
 
         (async function () {
           try {
@@ -462,7 +814,6 @@ gap: 15px;
     });
   }
 
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initBundleBuilder);
   } else {
@@ -470,51 +821,90 @@ gap: 15px;
   }
 })();
 </script>
+
 {% schema %}
 {
-"name": "Bundle Builder",
-"settings": [
-{ "type": "text", "id": "heading", "label": "Heading", "default": "Unbeatable prices with bundle." },
-{
-"type": "inline_richtext",
-"id": "subtext",
-"label": "Subheading",
-"default": "Create your personalized skincare ritual."
-},
-{
-"type": "header",
-"content": "Bundle Summery Heading"
-},
-{ "type": "text", "id": "bundle_h", "label": "Bundle Summery Heading", "default": "Bundle Content" },
-{
-"type": "header",
-"content": "Bundle 1"
-},
-{ "type": "number", "id": "tier1_qty", "label": "Tier 1 Qty", "default": 3 },
-{ "type": "number", "id": "tier1_discount", "label": "Tier 1 %", "default": 5 },
-{
-"type": "header",
-"content": "Bundle 2"
-},
-{ "type": "number", "id": "tier2_qty", "label": "Tier 2 Qty", "default": 5 },
-{ "type": "number", "id": "tier2_discount", "label": "Tier 2 %", "default": 10 },
-{
-"type": "header",
-"content": "Bundle 3"
-},
-{ "type": "number", "id": "tier3_qty", "label": "Tier 3 Qty", "default": 8 },
-{ "type": "number", "id": "tier3_discount", "label": "Tier 3 %", "default": 15 },
-{
-"type": "header",
-"content": "Progress Bar Color"
-},
-{ "type": "color", "id": "p_color", "label": "Color", "default": "#000000" }
-],
-"blocks": [
-{
-"type": "step",
-"name": "Step",
-"settings": [
+  "name": "Bundle Builder",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Unbeatable prices with bundle." },
+    {
+      "type": "inline_richtext",
+      "id": "subtext",
+      "label": "Subheading",
+      "default": "Create your personalized skincare ritual."
+    },
+    {
+      "type": "header",
+      "content": "Product List Layout"
+    },
+    {
+      "type": "select",
+      "id": "grid_scroll_direction",
+      "label": "Layout",
+      "options": [
+        { "value": "horizontal", "label": "Horizontal (scrolls sideways)" },
+        { "value": "vertical", "label": "Vertical (scrolls down)" }
+      ],
+      "default": "horizontal"
+    },
+    {
+      "type": "header",
+      "content": "Horizontal Layout — Desktop"
+    },
+    { "type": "range", "id": "h_cols_desktop", "min": 1, "max": 6, "step": 1, "default": 4, "label": "Columns visible" },
+    { "type": "range", "id": "h_rows_desktop", "min": 1, "max": 3, "step": 1, "default": 1, "label": "Rows" },
+    {
+      "type": "header",
+      "content": "Horizontal Layout — Mobile"
+    },
+    { "type": "range", "id": "h_cols_mobile", "min": 1, "max": 4, "step": 0.1, "default": 1.0, "label": "Columns visible" },
+    { "type": "range", "id": "h_rows_mobile", "min": 1, "max": 3, "step": 1, "default": 1, "label": "Rows" },
+    {
+      "type": "header",
+      "content": "Vertical Layout — Desktop"
+    },
+    { "type": "range", "id": "v_cols_desktop", "min": 1, "max": 5, "step": 1, "default": 3, "label": "Columns" },
+    { "type": "range", "id": "v_rows_desktop", "min": 1, "max": 4, "step": 1, "default": 2, "label": "Rows visible" },
+    {
+      "type": "header",
+      "content": "Vertical Layout — Mobile"
+    },
+    { "type": "range", "id": "v_cols_mobile", "min": 1, "max": 3, "step": 1, "default": 2, "label": "Columns" },
+    { "type": "range", "id": "v_rows_mobile", "min": 1, "max": 4, "step": 1, "default": 2, "label": "Rows visible" },
+    {
+      "type": "header",
+      "content": "Bundle Summery Heading"
+    },
+    { "type": "text", "id": "bundle_h", "label": "Bundle Summery Heading", "default": "Bundle Content" },
+    {
+      "type": "header",
+      "content": "Bundle 1"
+    },
+    { "type": "number", "id": "tier1_qty", "label": "Tier 1 Qty", "default": 3 },
+    { "type": "number", "id": "tier1_discount", "label": "Tier 1 %", "default": 5 },
+    {
+      "type": "header",
+      "content": "Bundle 2"
+    },
+    { "type": "number", "id": "tier2_qty", "label": "Tier 2 Qty", "default": 5 },
+    { "type": "number", "id": "tier2_discount", "label": "Tier 2 %", "default": 10 },
+    {
+      "type": "header",
+      "content": "Bundle 3"
+    },
+    { "type": "number", "id": "tier3_qty", "label": "Tier 3 Qty", "default": 8 },
+    { "type": "number", "id": "tier3_discount", "label": "Tier 3 %", "default": 15 },
+    {
+      "type": "header",
+      "content": "Progress Bar Color"
+    },
+    { "type": "color", "id": "p_color", "label": "Color", "default": "#000000" }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
         { "type": "text", "id": "tier1_head", "label": "Tier 1 Heading", "default": "Step 1" },
         { "type": "text", "id": "step_title", "label": "Step Title", "default": "Prep Your Skin" },
         { "type": "collection", "id": "collection", "label": "Collection" },
@@ -551,5 +941,3 @@ gap: 15px;
   ]
 }
 {% endschema %}
-
-

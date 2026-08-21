@@ -964,20 +964,20 @@
           "type": "step",
           "settings": {
             "tier1_head": "Step 1",
-            "step_title": "Prep Your Skin",
-            "collection": "mens-clothing",
+            "step_title": "Foundations",
+            "collection": "foundations",
             "required_qty": 1,
-            "step_icon": "sun"
+            "step_icon": "none"
           }
         },
         "step_f4KK3T": {
           "type": "step",
           "settings": {
             "tier1_head": "Step 1",
-            "step_title": "Prep Your Skin",
-            "collection": "new-arrivals",
+            "step_title": "Statements",
+            "collection": "statements",
             "required_qty": 1,
-            "step_icon": "moon"
+            "step_icon": "none"
           }
         }
       },
@@ -989,6 +989,15 @@
       "settings": {
         "heading": "Unbeatable prices with bundle.",
         "subtext": "Create your personalized skincare ritual.",
+        "grid_scroll_direction": "horizontal",
+        "h_cols_desktop": 3,
+        "h_rows_desktop": 1,
+        "h_cols_mobile": 1,
+        "h_rows_mobile": 1,
+        "v_cols_desktop": 2,
+        "v_rows_desktop": 1,
+        "v_cols_mobile": 1,
+        "v_rows_mobile": 1,
         "bundle_h": "Bundle Content",
         "tier1_qty": 3,
         "tier1_discount": 5,
@@ -997,6 +1006,140 @@
         "tier3_qty": 8,
         "tier3_discount": 15,
         "p_color": "#000000"
+      }
+    },
+    "ai_product_quiz_HUkkGE": {
+      "type": "ai-product-quiz",
+      "blocks": {
+        "question_pjdbwt": {
+          "type": "question",
+          "settings": {
+            "title": "What are you shopping for?",
+            "subtitle": "Let's narrow it down first",
+            "tag_prefix": "category",
+            "weight": 30,
+            "option_1_label": "Outerwear",
+            "option_1_value": "outerwear",
+            "option_2_label": "Tops",
+            "option_2_value": "tops",
+            "option_3_label": "Bottoms",
+            "option_3_value": "bottoms",
+            "option_4_label": "Dresses",
+            "option_4_value": "dresses",
+            "option_5_label": "Activewear",
+            "option_5_value": "activewear",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_FibDHj": {
+          "type": "question",
+          "settings": {
+            "title": "What's your style vibe?",
+            "subtitle": "Pick what feels most like you",
+            "tag_prefix": "style",
+            "weight": 25,
+            "option_1_label": "Casual",
+            "option_1_value": "casual",
+            "option_2_label": "Athletic",
+            "option_2_value": "athletic",
+            "option_3_label": "Elegant",
+            "option_3_value": "elegant",
+            "option_4_label": "Streetwear",
+            "option_4_value": "streetwear",
+            "option_5_label": "Minimal",
+            "option_5_value": "minimal",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_6Hy6EB": {
+          "type": "question",
+          "settings": {
+            "title": "What's the occasion?",
+            "subtitle": "",
+            "tag_prefix": "occasion",
+            "weight": 20,
+            "option_1_label": "Everyday",
+            "option_1_value": "everyday",
+            "option_2_label": "Workout",
+            "option_2_value": "workout",
+            "option_3_label": "Weekend",
+            "option_3_value": "weekend",
+            "option_4_label": "Work",
+            "option_4_value": "work",
+            "option_5_label": "Night Out",
+            "option_5_value": "night",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_eAkcar": {
+          "type": "question",
+          "settings": {
+            "title": "What fit do you prefer?",
+            "subtitle": "",
+            "tag_prefix": "fit",
+            "weight": 15,
+            "option_1_label": "Relaxed",
+            "option_1_value": "relaxed",
+            "option_2_label": "Fitted",
+            "option_2_value": "fitted",
+            "option_3_label": "Oversized",
+            "option_3_value": "oversized",
+            "option_4_label": "Regular",
+            "option_4_value": "regular",
+            "option_5_label": "",
+            "option_5_value": "",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_rFNWna": {
+          "type": "question",
+          "settings": {
+            "title": "What are you dressing for?",
+            "subtitle": "Weather and layering needs",
+            "tag_prefix": "season",
+            "weight": 10,
+            "option_1_label": "Summer",
+            "option_1_value": "summer",
+            "option_2_label": "Winter",
+            "option_2_value": "winter",
+            "option_3_label": "All-Season",
+            "option_3_value": "all-season",
+            "option_4_label": "Layering",
+            "option_4_value": "layering",
+            "option_5_label": "",
+            "option_5_value": "",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        }
+      },
+      "block_order": [
+        "question_pjdbwt",
+        "question_FibDHj",
+        "question_6Hy6EB",
+        "question_eAkcar",
+        "question_rFNWna"
+      ],
+      "name": "AI Product Quiz",
+      "settings": {
+        "enable_quiz": true,
+        "launch_mode": "floating",
+        "floating_position": "bottom-right",
+        "button_text": "✨ Find My Perfect Match",
+        "popup_delay": 8,
+        "popup_frequency": "session",
+        "product_collection": "new-arrivals",
+        "fallback_collection": "activewear",
+        "min_match_score": 10,
+        "max_results": 3,
+        "color_primary": "#1a1a1a",
+        "color_text": "#1a1a1a",
+        "color_background": "#ffffff",
+        "border_radius": 12
       }
     }
   },
@@ -1015,6 +1158,7 @@
     "brand_story_slider_Knke4L",
     "shopable_video_X6CF9T",
     "recently_viewed_products_mzP4rX",
-    "bundle_builder_cUQG9G"
+    "bundle_builder_cUQG9G",
+    "ai_product_quiz_HUkkGE"
   ]
 }
