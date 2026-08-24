@@ -1709,7 +1709,7 @@
         "label": "Show AI Product Quiz on every page",
         "default": false
       }
-    ]
+    ] 
   },
   {
     "name": "t:names.drawers",
