@@ -330,7 +330,13 @@
         const response = await fetch('/cart/add.js', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: [{ id: parseInt(variantId, 10), quantity: 1 }] }),
+          body: JSON.stringify({
+            items: [{ id: parseInt(variantId, 10), quantity: 1 }],
+            // Ask Shopify to render this section fresh in the same response,
+            // so the drawer shows correct items with no extra round trip.
+            sections: 'cart-drawer',
+            sections_url: window.location.pathname,
+          }),
         });
 
         if (!response.ok) {
@@ -338,9 +344,15 @@
           throw new Error(errData.description || 'Could not add to cart.');
         }
 
+        const data = await response.json();
+
         statusEl.textContent = `${product ? product.title : 'Item'} added to your cart.`;
         btn.textContent = 'Added ✓';
-        this.refreshCartUI();
+
+        if (data.sections && data.sections['cart-drawer']) {
+          this.injectFreshCartDrawer(data.sections['cart-drawer']);
+        }
+        this.openCartDrawer();
       } catch (err) {
         console.error('AIQuiz add to cart failed:', err);
         statusEl.textContent = err.message || 'Something went wrong. Please try again.';
@@ -357,17 +369,32 @@
       }
     }
 
-    refreshCartUI() {
-      fetch('/cart.js')
-        .then((r) => r.json())
-        .then((cart) => {
-          document.querySelectorAll('[data-cart-count]').forEach((el) => {
-            el.textContent = cart.item_count;
-          });
-          document.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
-          this.refreshCartDrawerContents().finally(() => this.openThemeCartDrawer());
-        })
-        .catch(() => {});
+    // Replaces the live <theme-drawer id="cart-drawer"> with the freshly
+    // server-rendered version Shopify just sent back, so the drawer's
+    // Liquid-generated item list is correct without a page reload.
+    injectFreshCartDrawer(html) {
+      try {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const freshDrawer = doc.getElementById('cart-drawer');
+        const currentDrawer = document.getElementById('cart-drawer');
+
+        if (freshDrawer && currentDrawer && currentDrawer.parentNode) {
+          currentDrawer.replaceWith(freshDrawer);
+        }
+      } catch (e) {
+        console.error('AIQuiz: failed to refresh cart drawer markup', e);
+      }
+    }
+
+    // Calls the theme's own drawer open method directly — the same call
+    // CartDrawerComponent makes internally — instead of simulating clicks.
+    openCartDrawer() {
+      const drawer = document.getElementById('cart-drawer');
+      if (drawer && typeof drawer.open === 'function') {
+        drawer.open();
+      } else {
+        console.warn('AIQuiz: could not find cart-drawer element with an open() method.');
+      }
     }
 
     // Best-effort attempt to re-fetch the cart drawer's own HTML via
@@ -426,7 +453,7 @@
         }
       }
     }
-    
+
     escape(str) {
       if (str == null) return '';
       const div = document.createElement('div');
