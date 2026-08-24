@@ -1145,6 +1145,100 @@
         "color_background": "#ffffff",
         "border_radius": 12
       }
+    },
+    "ai_product_quiz_bTAc7h": {
+      "type": "ai-product-quiz",
+      "blocks": {
+        "question_MgjnEz": {
+          "type": "question",
+          "settings": {
+            "title": "What's your skin type?",
+            "subtitle": "",
+            "tag_prefix": "skin",
+            "weight": 25,
+            "option_1_label": "",
+            "option_1_value": "",
+            "option_2_label": "",
+            "option_2_value": "",
+            "option_3_label": "",
+            "option_3_value": "",
+            "option_4_label": "",
+            "option_4_value": "",
+            "option_5_label": "",
+            "option_5_value": "",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_yxymEd": {
+          "type": "question",
+          "settings": {
+            "title": "What's your skin type?",
+            "subtitle": "",
+            "tag_prefix": "skin",
+            "weight": 25,
+            "option_1_label": "",
+            "option_1_value": "",
+            "option_2_label": "",
+            "option_2_value": "",
+            "option_3_label": "",
+            "option_3_value": "",
+            "option_4_label": "",
+            "option_4_value": "",
+            "option_5_label": "",
+            "option_5_value": "",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        },
+        "question_iw3zbz": {
+          "type": "question",
+          "settings": {
+            "title": "What's your skin type?",
+            "subtitle": "",
+            "tag_prefix": "skin",
+            "weight": 25,
+            "option_1_label": "",
+            "option_1_value": "",
+            "option_2_label": "",
+            "option_2_value": "",
+            "option_3_label": "",
+            "option_3_value": "",
+            "option_4_label": "",
+            "option_4_value": "",
+            "option_5_label": "",
+            "option_5_value": "",
+            "option_6_label": "",
+            "option_6_value": ""
+          }
+        }
+      },
+      "block_order": [
+        "question_MgjnEz",
+        "question_yxymEd",
+        "question_iw3zbz"
+      ],
+      "name": "AI Product Quiz",
+      "settings": {
+        "enable_quiz": true,
+        "launch_mode": "embedded",
+        "embedded_heading": "Find Your Perfect Match",
+        "floating_position": "bottom-right",
+        "floating_widget_shape": "pill",
+        "floating_icon": "✨",
+        "floating_caption": "Style Quiz",
+        "button_text": "✨ Find My Perfect Match",
+        "popup_delay": 8,
+        "popup_frequency": "session",
+        "product_collection": "",
+        "fallback_collection": "",
+        "min_match_score": 10,
+        "max_results": 3,
+        "color_primary": "#1a1a1a",
+        "color_text": "#1a1a1a",
+        "color_background": "#ffffff",
+        "border_radius": 12
+      }
     }
   },
   "order": [
@@ -1163,6 +1257,7 @@
     "shopable_video_X6CF9T",
     "recently_viewed_products_mzP4rX",
     "bundle_builder_cUQG9G",
-    "ai_product_quiz_HUkkGE"
+    "ai_product_quiz_HUkkGE",
+    "ai_product_quiz_bTAc7h"
   ]
 }
