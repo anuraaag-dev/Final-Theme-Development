@@ -365,8 +365,32 @@
             el.textContent = cart.item_count;
           });
           document.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
+          this.openThemeCartDrawer();
         })
         .catch(() => {});
+    }
+
+    openThemeCartDrawer() {
+      // Best-effort: trigger the theme's own cart icon so its existing
+      // drawer-open logic runs (avoids guessing Horizon's internal API).
+      const candidates = [
+        '[data-cart-drawer-toggle]',
+        '#cart-icon-bubble',
+        'a[href="/cart"]',
+        'a[href*="/cart"]',
+        '[data-cart-icon]',
+        'cart-icon-bubble',
+      ];
+
+      for (const selector of candidates) {
+        const el = document.querySelector(selector);
+        if (el) {
+          el.click();
+          return;
+        }
+      }
+      // If nothing matched, the item is still safely in the cart —
+      // the customer just needs to click the cart icon manually.
     }
 
     escape(str) {
