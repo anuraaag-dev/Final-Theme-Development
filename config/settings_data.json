@@ -129,7 +129,8 @@
         "button_label": "#ffffff",
         "secondary_button_label": "#000000",
         "shadow": "#000000",
-        "link": "#000000"
+        "link": "#000000",
+        "icons": "#000000"
       }
     },
     "custom-drawer": {
@@ -141,7 +142,8 @@
         "button_label": "#ffffff",
         "secondary_button_label": "#000000",
         "shadow": "#000000",
-        "link": "#000000"
+        "link": "#000000",
+        "icons": "#000000"
       }
     }
   },
