@@ -112,6 +112,9 @@
         {%- if section.settings.floating_widget_shape == 'circle' -%}
           <span aria-hidden="true">{{ section.settings.floating_icon | default: '✨' }}</span>
           <span class="visually-hidden">{{ section.settings.button_text | default: 'Find My Match' }}</span>
+        {%- elsif section.settings.floating_widget_shape == 'circle-label' -%}
+          <span class="ai-quiz-launch-icon" aria-hidden="true">{{ section.settings.floating_icon | default: '✨' }}</span>
+          <span class="ai-quiz-launch-caption">{{ section.settings.floating_caption | default: 'Style Quiz' }}</span>
         {%- else -%}
           {{ section.settings.button_text | default: '✨ Find My Match' }}
         {%- endif -%}
