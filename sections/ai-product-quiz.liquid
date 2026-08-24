@@ -177,16 +177,24 @@
       "options": [
         { "value": "pill", "label": "Pill (rounded, with text)" },
         { "value": "rectangle", "label": "Rectangle (sharp corners, with text)" },
-        { "value": "circle", "label": "Circle (icon only)" }
+        { "value": "circle", "label": "Circle (icon only)" },
+        { "value": "circle-label", "label": "Circle with icon + short caption" }
       ],
       "default": "pill"
     },
     {
       "type": "text",
       "id": "floating_icon",
-      "label": "Icon for circle shape",
-      "info": "A single emoji shown when shape is Circle, e.g. ✨ 🎯 💬",
+      "label": "Icon (for circle shapes)",
+      "info": "A single emoji, e.g. ✨ 🎯 👗",
       "default": "✨"
+    },
+    {
+      "type": "text",
+      "id": "floating_caption",
+      "label": "Caption (for circle + caption shape)",
+      "info": "Keep it very short — 1 to 2 words work best, e.g. 'Style Quiz' or 'Find Fit'",
+      "default": "Style Quiz"
     },
     { "type": "text", "id": "button_text", "label": "Button text", "default": "✨ Find My Perfect Match" },
     { "type": "range", "id": "popup_delay", "label": "Popup delay (seconds)", "min": 3, "max": 60, "default": 8 },
