@@ -97,48 +97,67 @@
       ]
     </script>
 
-    {%- if section.settings.launch_mode == 'inline' or section.settings.launch_mode == 'both' -%}
-      <button type="button" class="ai-quiz-launch ai-quiz-launch--inline" data-quiz-open>
-        {{ section.settings.button_text | default: '✨ Find My Perfect Match' }}
-      </button>
-    {%- endif -%}
-
-    {%- if section.settings.launch_mode == 'floating' or section.settings.launch_mode == 'both' -%}
-      <button
-        type="button"
-        class="ai-quiz-launch ai-quiz-launch--floating ai-quiz-launch--{{ section.settings.floating_position }} ai-quiz-launch--shape-{{ section.settings.floating_widget_shape }}"
-        data-quiz-open
-      >
-        {%- if section.settings.floating_widget_shape == 'circle' -%}
-          <span aria-hidden="true">{{ section.settings.floating_icon | default: '✨' }}</span>
-          <span class="visually-hidden">{{ section.settings.button_text | default: 'Find My Match' }}</span>
-        {%- elsif section.settings.floating_widget_shape == 'circle-label' -%}
-          <span class="ai-quiz-launch-icon" aria-hidden="true">{{ section.settings.floating_icon | default: '✨' }}</span>
-          <span class="ai-quiz-launch-caption">{{ section.settings.floating_caption | default: 'Style Quiz' }}</span>
-        {%- else -%}
-          {{ section.settings.button_text | default: '✨ Find My Match' }}
+    {%- if section.settings.launch_mode == 'embedded' -%}
+      <div class="ai-quiz-embedded">
+        {%- if section.settings.embedded_heading != blank -%}
+          <h2 class="ai-quiz-embedded-heading">{{ section.settings.embedded_heading }}</h2>
         {%- endif -%}
-      </button>
-    {%- endif -%}
-
-    <div class="ai-quiz-modal" data-quiz-modal role="dialog" aria-modal="true" aria-labelledby="quiz-title-{{ quiz_id }}" hidden>
-      <div class="ai-quiz-backdrop" data-quiz-close></div>
-      <div class="ai-quiz-panel" data-quiz-panel>
-        <div class="ai-quiz-header">
-          <div class="ai-quiz-progress" data-quiz-progress>
-            <div class="ai-quiz-progress-bar" data-quiz-progress-bar></div>
+        <div class="ai-quiz-embedded-panel" data-quiz-panel>
+          <div class="ai-quiz-header">
+            <div class="ai-quiz-progress" data-quiz-progress>
+              <div class="ai-quiz-progress-bar" data-quiz-progress-bar></div>
+            </div>
           </div>
-          <button type="button" class="ai-quiz-close" data-quiz-close aria-label="Close quiz">✕</button>
-        </div>
-        <div class="ai-quiz-body" data-quiz-body></div>
-        <div class="ai-quiz-footer" data-quiz-footer>
-          <button type="button" class="ai-quiz-btn ai-quiz-btn--ghost" data-quiz-back hidden>Back</button>
-          <button type="button" class="ai-quiz-btn ai-quiz-btn--primary" data-quiz-next disabled>Next</button>
+          <div class="ai-quiz-body" data-quiz-body></div>
+          <div class="ai-quiz-footer" data-quiz-footer>
+            <button type="button" class="ai-quiz-btn ai-quiz-btn--ghost" data-quiz-back hidden>Back</button>
+            <button type="button" class="ai-quiz-btn ai-quiz-btn--primary" data-quiz-next disabled>Next</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+    {%- else -%}
+      {%- if section.settings.launch_mode == 'inline' or section.settings.launch_mode == 'both' -%}
+        <button type="button" class="ai-quiz-launch ai-quiz-launch--inline" data-quiz-open>
+          {{ section.settings.button_text | default: '✨ Find My Perfect Match' }}
+        </button>
+      {%- endif -%}
 
+      {%- if section.settings.launch_mode == 'floating' or section.settings.launch_mode == 'both' -%}
+        <button
+          type="button"
+          class="ai-quiz-launch ai-quiz-launch--floating ai-quiz-launch--{{ section.settings.floating_position }} ai-quiz-launch--shape-{{ section.settings.floating_widget_shape }}"
+          data-quiz-open
+        >
+          {%- if section.settings.floating_widget_shape == 'circle' -%}
+            <span aria-hidden="true">{{ section.settings.floating_icon | default: '✨' }}</span>
+            <span class="visually-hidden">{{ section.settings.button_text | default: 'Find My Match' }}</span>
+          {%- elsif section.settings.floating_widget_shape == 'circle-label' -%}
+            <span class="ai-quiz-launch-icon" aria-hidden="true">{{ section.settings.floating_icon | default: '✨' }}</span>
+            <span class="ai-quiz-launch-caption">{{ section.settings.floating_caption | default: 'Style Quiz' }}</span>
+          {%- else -%}
+            {{ section.settings.button_text | default: '✨ Find My Match' }}
+          {%- endif -%}
+        </button>
+      {%- endif -%}
+
+      <div class="ai-quiz-modal" data-quiz-modal role="dialog" aria-modal="true" aria-labelledby="quiz-title-{{ quiz_id }}" hidden>
+        <div class="ai-quiz-backdrop" data-quiz-close></div>
+        <div class="ai-quiz-panel" data-quiz-panel>
+          <div class="ai-quiz-header">
+            <div class="ai-quiz-progress" data-quiz-progress>
+              <div class="ai-quiz-progress-bar" data-quiz-progress-bar></div>
+            </div>
+            <button type="button" class="ai-quiz-close" data-quiz-close aria-label="Close quiz">✕</button>
+          </div>
+          <div class="ai-quiz-body" data-quiz-body></div>
+          <div class="ai-quiz-footer" data-quiz-footer>
+            <button type="button" class="ai-quiz-btn ai-quiz-btn--ghost" data-quiz-back hidden>Back</button>
+            <button type="button" class="ai-quiz-btn ai-quiz-btn--primary" data-quiz-next disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
   <link rel="stylesheet" href="{{ 'ai-product-quiz.css' | asset_url }}" media="print" onload="this.media='all'">
   <script src="{{ 'ai-product-quiz.js' | asset_url }}" defer></script>
 {%- endif -%}
@@ -148,7 +167,7 @@
   "name": "AI Product Quiz",
   "settings": [
     { "type": "checkbox", "id": "enable_quiz", "label": "Enable quiz", "default": true },
-    {
+     {
       "type": "select",
       "id": "launch_mode",
       "label": "Launch method",
@@ -156,9 +175,17 @@
         { "value": "inline", "label": "Inline button" },
         { "value": "floating", "label": "Floating widget" },
         { "value": "both", "label": "Both" },
-        { "value": "popup", "label": "Automatic popup" }
+        { "value": "popup", "label": "Automatic popup" },
+        { "value": "embedded", "label": "Embedded section (always visible, no button/popup)" }
       ],
       "default": "inline"
+    },
+    {
+      "type": "text",
+      "id": "embedded_heading",
+      "label": "Heading (embedded mode only)",
+      "default": "Find Your Perfect Match",
+      "visible_if": "{{ section.settings.launch_mode == 'embedded' }}"
     },
     {
       "type": "select",

@@ -82,7 +82,29 @@
   word-break: break-word;
   hyphens: auto;
 }
+.ai-quiz-embedded {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
 
+.ai-quiz-embedded-heading {
+  text-align: center;
+  font-size: 1.6rem;
+  margin: 0 0 20px;
+}
+
+.ai-quiz-embedded-panel {
+  background: var(--quiz-bg);
+  color: var(--quiz-text);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--quiz-radius);
+  overflow: hidden;
+}
+
+.ai-quiz-embedded-panel .ai-quiz-body {
+  padding: 24px 20px;
+}
 .visually-hidden {
   position: absolute;
   width: 1px;
