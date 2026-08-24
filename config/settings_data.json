@@ -69,6 +69,7 @@
     "cart_price_font": "subheading",
     "show_cart_note": false,
     "show_add_discount_code": true,
+    "enable_global_ai_quiz": false,
     "drawer_background_color": "{{ settings.color_palette.background }}",
     "drawer_text_color": "{{ settings.color_palette.foreground }}",
     "drawer_border_color": "{{ settings.color_palette.color2 }}",
@@ -111,6 +112,30 @@
     "fsb_tier1_discount_code": "10%OFF!",
     "fsb_tier2_discount_code": "FREESHIPPING",
     "fsb_tier3_discount_code": "FREESHIPPING",
+    "sections": {
+      "ai-product-quiz": {
+        "type": "ai-product-quiz",
+        "settings": {
+          "enable_quiz": true,
+          "launch_mode": "inline",
+          "floating_position": "bottom-right",
+          "floating_widget_shape": "pill",
+          "floating_icon": "✨",
+          "floating_caption": "Style Quiz",
+          "button_text": "✨ Find My Perfect Match",
+          "popup_delay": 8,
+          "popup_frequency": "session",
+          "product_collection": "",
+          "fallback_collection": "",
+          "min_match_score": 10,
+          "max_results": 3,
+          "color_primary": "#1a1a1a",
+          "color_text": "#1a1a1a",
+          "color_background": "#ffffff",
+          "border_radius": 12
+        }
+      }
+    },
     "content_for_index": [],
     "color_palette": {
       "background": "#ffffff",
