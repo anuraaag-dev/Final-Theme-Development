@@ -48,12 +48,12 @@
 }
 
 .ai-quiz-launch--shape-circle-label {
-  width: 80px;
-  height: 80px;
-  min-width: 80px;
-  min-height: 80px;
-  max-width: 80px;
-  max-height: 80px;
+  width: 92px;
+  height: 92px;
+  min-width: 92px;
+  min-height: 92px;
+  max-width: 92px;
+  max-height: 92px;
   padding: 0;
   border-radius: 50%;
   overflow: hidden;
@@ -61,23 +61,23 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 6px;
   text-align: center;
   box-sizing: border-box;
 }
 
 .ai-quiz-launch-icon {
-  font-size: 1.1rem;
+  font-size: 1.7rem;
   line-height: 1;
   flex-shrink: 0;
 }
 
 .ai-quiz-launch-caption {
-  font-size: 0.5rem;
+  font-size: 0.56rem;
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: 0;
-  width: 46px;
+  width: 52px;
   overflow-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
