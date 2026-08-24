@@ -332,9 +332,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             items: [{ id: parseInt(variantId, 10), quantity: 1 }],
-            // Ask Shopify to render this section fresh in the same response,
-            // so the drawer shows correct items with no extra round trip.
-            sections: 'cart-drawer',
+            // The wrapper div in cart-drawer.liquid is
+            // id="shopify-section-cart-drawer-section", which means the
+            // real registered section ID is "cart-drawer-section" (Shopify
+            // always prefixes real IDs with "shopify-section-"). The inner
+            // <theme-drawer id="cart-drawer"> is a different, nested ID —
+            // requesting the wrong one silently returns nothing.
+            sections: 'cart-drawer-section',
             sections_url: window.location.pathname,
           }),
         });
@@ -349,8 +353,8 @@
         statusEl.textContent = `${product ? product.title : 'Item'} added to your cart.`;
         btn.textContent = 'Added ✓';
 
-        if (data.sections && data.sections['cart-drawer']) {
-          this.injectFreshCartDrawer(data.sections['cart-drawer']);
+        if (data.sections && data.sections['cart-drawer-section']) {
+          this.injectFreshCartDrawer(data.sections['cart-drawer-section']);
         }
         this.openCartDrawer();
       } catch (err) {
@@ -375,9 +379,20 @@
     injectFreshCartDrawer(html) {
       try {
         const doc = new DOMParser().parseFromString(html, 'text/html');
+
+        // Prefer swapping the whole section wrapper (matches what a real
+        // page load produces); fall back to just the inner drawer element
+        // if the wrapper isn't present in the live DOM for some reason.
+        const freshWrapper = doc.getElementById('shopify-section-cart-drawer-section');
+        const currentWrapper = document.getElementById('shopify-section-cart-drawer-section');
+
+        if (freshWrapper && currentWrapper && currentWrapper.parentNode) {
+          currentWrapper.replaceWith(freshWrapper);
+          return;
+        }
+
         const freshDrawer = doc.getElementById('cart-drawer');
         const currentDrawer = document.getElementById('cart-drawer');
-
         if (freshDrawer && currentDrawer && currentDrawer.parentNode) {
           currentDrawer.replaceWith(freshDrawer);
         }
