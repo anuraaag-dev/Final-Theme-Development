@@ -104,8 +104,17 @@
     {%- endif -%}
 
     {%- if section.settings.launch_mode == 'floating' or section.settings.launch_mode == 'both' -%}
-      <button type="button" class="ai-quiz-launch ai-quiz-launch--floating ai-quiz-launch--{{ section.settings.floating_position }}" data-quiz-open>
-        {{ section.settings.button_text | default: '✨ Find My Match' }}
+      <button
+        type="button"
+        class="ai-quiz-launch ai-quiz-launch--floating ai-quiz-launch--{{ section.settings.floating_position }} ai-quiz-launch--shape-{{ section.settings.floating_widget_shape }}"
+        data-quiz-open
+      >
+        {%- if section.settings.floating_widget_shape == 'circle' -%}
+          <span aria-hidden="true">{{ section.settings.floating_icon | default: '✨' }}</span>
+          <span class="visually-hidden">{{ section.settings.button_text | default: 'Find My Match' }}</span>
+        {%- else -%}
+          {{ section.settings.button_text | default: '✨ Find My Match' }}
+        {%- endif -%}
       </button>
     {%- endif -%}
 
