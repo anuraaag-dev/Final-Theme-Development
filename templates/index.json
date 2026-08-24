@@ -1128,6 +1128,7 @@
       "settings": {
         "enable_quiz": true,
         "launch_mode": "floating",
+        "embedded_heading": "Find Your Perfect Match",
         "floating_position": "bottom-right",
         "floating_widget_shape": "circle-label",
         "floating_icon": "✨",
