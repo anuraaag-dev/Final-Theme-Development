@@ -167,6 +167,24 @@
       ],
       "default": "bottom-right"
     },
+    {
+      "type": "select",
+      "id": "floating_widget_shape",
+      "label": "Floating widget shape",
+      "options": [
+        { "value": "pill", "label": "Pill (rounded, with text)" },
+        { "value": "rectangle", "label": "Rectangle (sharp corners, with text)" },
+        { "value": "circle", "label": "Circle (icon only)" }
+      ],
+      "default": "pill"
+    },
+    {
+      "type": "text",
+      "id": "floating_icon",
+      "label": "Icon for circle shape",
+      "info": "A single emoji shown when shape is Circle, e.g. ✨ 🎯 💬",
+      "default": "✨"
+    },
     { "type": "text", "id": "button_text", "label": "Button text", "default": "✨ Find My Perfect Match" },
     { "type": "range", "id": "popup_delay", "label": "Popup delay (seconds)", "min": 3, "max": 60, "default": 8 },
     {
