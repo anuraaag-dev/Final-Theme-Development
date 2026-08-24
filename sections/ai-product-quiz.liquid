@@ -29,7 +29,7 @@
             "price": {{ product.price | json }},
             "available": {{ product.available | json }},
             "tags": {{ product.tags | json }},
-            "variants": [
+            "variants": [         
               {%- for variant in product.variants -%}
                 {
                   "id": {{ variant.id | json }},
@@ -82,7 +82,16 @@
             "url": {{ product.url | json }},
             "image": {{ product.featured_image | image_url: width: 600 | json }},
             "price": {{ product.price | json }},
-            "available": {{ product.available | json }}
+            "available": {{ product.available | json }},
+            "variants": [
+              {%- for variant in product.variants -%}
+                {
+                  "id": {{ variant.id | json }},
+                  "title": {{ variant.title | json }},
+                  "available": {{ variant.available | json }}
+                }{%- unless forloop.last -%},{%- endunless -%}
+              {%- endfor -%}
+            ]
           }{%- unless forloop.last -%},{%- endunless -%}
         {%- endfor -%}
       ]
