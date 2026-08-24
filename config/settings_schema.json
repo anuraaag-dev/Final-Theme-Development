@@ -1696,6 +1696,21 @@
       }
     ]
   },
+    {
+    "name": "AI Product Quiz (Site-wide)",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Controls whether the AI Product Quiz appears automatically on every page as a floating widget/popup. You can also add the quiz as a normal section to specific pages instead — this toggle is only for the site-wide version."
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_global_ai_quiz",
+        "label": "Show AI Product Quiz on every page",
+        "default": false
+      }
+    ]
+  },
   {
     "name": "t:names.drawers",
     "settings": [
