@@ -173,6 +173,15 @@
       this.nextBtn.textContent = this.currentIndex === this.questions.length - 1 ? 'See My Matches' : 'Next';
 
       const options = Array.isArray(q.options) ? q.options : [];
+
+      if (!options.length) {
+        this.body.innerHTML = `
+          <h2 class="ai-quiz-q-title" id="quiz-title-${this.id}">${this.escape(q.title)}</h2>
+          <p class="ai-quiz-q-subtitle">This question has no answer options configured yet. Open this block's settings and fill in at least Option 1's Label and Value.</p>
+        `;
+        return;
+      }
+
       this.body.innerHTML = `
         <h2 class="ai-quiz-q-title" id="quiz-title-${this.id}">${this.escape(q.title)}</h2>
         ${q.subtitle ? `<p class="ai-quiz-q-subtitle">${this.escape(q.subtitle)}</p>` : ''}
