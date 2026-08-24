@@ -248,14 +248,9 @@
                             {%- if swatch_image_url != blank -%}
                               data-image="{{ swatch_image_url }}"
                             {%- endif -%}
-                            {%- if swatch_image_url != blank -%}
-                              style="background-image: url('{{ swatch_image_url }}');"
-                            {%- else -%}
-                              style="--swatch-color: {{ value | remove: ' ' | escape }};"
-                            {%- endif -%}
                             aria-label="{{ value | escape }}"
                             aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
-                        ></button>
+                          ></button>
                         {% comment %} <button
                           type="button"
                           class="pgs__swatch{% if forloop.first %} is-active{% endif %}"
