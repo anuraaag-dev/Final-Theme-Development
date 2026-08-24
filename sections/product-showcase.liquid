@@ -460,28 +460,23 @@
                           endfor
                         endif
                       -%}
-                      {%- if swatch_variant -%}
-
+                      {%- if swatch_variant -%} 
                         <button
-                            type="button"
-                            class="pgs__swatch{% if forloop.first %} is-active{% endif %}"
-                            data-pgs-swatch
-                            data-color-name="{{ value | escape }}"
-                            data-variant-id="{{ swatch_variant.id }}"
-                            data-price="{{ swatch_variant.price | money }}"
-                            data-compare="{% if swatch_variant.compare_at_price > swatch_variant.price %}{{ swatch_variant.compare_at_price | money }}{% endif %}"
-                            data-available="{{ swatch_variant.available }}"
-                            {%- if swatch_image_url != blank -%}
-                              data-image="{{ swatch_image_url }}"
-                            {%- endif -%}
-                            {%- if swatch_image_url != blank -%}
-                              style="background-image: url('{{ swatch_image_url }}');"
-                            {%- else -%}
-                              style="--swatch-color: {{ value | remove: ' ' | escape }};"
-                            {%- endif -%}
-                            aria-label="{{ value | escape }}"
-                            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+                          type="button"
+                          class="pgs__swatch{% if forloop.first %} is-active{% endif %}"
+                          data-pgs-swatch
+                          data-color-name="{{ value | escape }}"
+                          data-variant-id="{{ swatch_variant.id }}"
+                          data-price="{{ swatch_variant.price | money }}"
+                          data-compare="{% if swatch_variant.compare_at_price > swatch_variant.price %}{{ swatch_variant.compare_at_price | money }}{% endif %}"
+                          data-available="{{ swatch_variant.available }}"
+                          {%- if swatch_image_url != blank -%}
+                            data-image="{{ swatch_image_url }}"
+                          {%- endif -%}
+                          aria-label="{{ value | escape }}"
+                          aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
                         ></button>
+
                         {% comment %} <button
                           type="button"
                           class="pgs__swatch{% if forloop.first %} is-active{% endif %}"
