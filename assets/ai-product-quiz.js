@@ -18,7 +18,11 @@
       this.currentIndex = 0;
       this.lastFocusedEl = null;
       this.submitting = false;
+      this.isEmbedded = this.launchMode === 'embedded';
+      this.hasCompletedThisRun = false;
 
+      // In embedded mode there is no <dialog>/modal wrapper — this.modal
+      // stays null and every modal-only code path below checks isEmbedded first.
       this.modal = root.querySelector('[data-quiz-modal]');
       this.panel = root.querySelector('[data-quiz-panel]');
       this.body = root.querySelector('[data-quiz-body]');
@@ -29,6 +33,10 @@
       this.bindLaunchers();
       this.bindModalControls();
       this.maybeAutoPopup();
+
+      if (this.isEmbedded) {
+        this.startEmbedded();
+      }
     }
 
     readJSON(selector) {
@@ -55,6 +63,7 @@
       this.nextBtn.addEventListener('click', () => this.goNext());
       this.backBtn.addEventListener('click', () => this.goBack());
       document.addEventListener('keydown', (e) => {
+        if (this.isEmbedded) return; // no modal to close/trap in embedded mode
         if (this.modal.hidden) return;
         if (e.key === 'Escape') this.close();
         if (e.key === 'Tab') this.trapFocus(e);
@@ -78,6 +87,7 @@
     }
 
     open() {
+      if (this.isEmbedded) return; // embedded quiz is always visible, nothing to "open"
       this.lastFocusedEl = document.activeElement;
       this.modal.hidden = false;
       document.body.style.overflow = 'hidden';
@@ -93,11 +103,45 @@
     }
 
     close() {
+      if (this.isEmbedded) return;
       this.modal.hidden = true;
       document.body.style.overflow = '';
       if (this.lastFocusedEl) this.lastFocusedEl.focus();
     }
 
+    // Starts (or restarts) the embedded quiz in place — no dialog to open,
+    // just resets state and renders question 1 directly into the page.
+    startEmbedded() {
+      this.answers = {};
+      this.currentIndex = 0;
+      this.nextBtn.hidden = false;
+      if (this.backBtn) this.backBtn.hidden = true;
+      this.renderQuestion();
+      this.setupEmbeddedResetObserver();
+    }
+
+    // "While moving up and down again quiz section shows question number
+    // one": once the shopper has completed a run (added something to cart),
+    // scrolling the embedded section out of view and back in resets it to
+    // question 1 for the next round — the shopper never has to press
+    // anything else.
+    setupEmbeddedResetObserver() {
+      if (this._embeddedObserver || !('IntersectionObserver' in window)) return;
+
+      let wasInView = true;
+      this._embeddedObserver = new IntersectionObserver(
+        (entries) => {
+          const isInView = entries[0].isIntersecting;
+          if (isInView && !wasInView && this.hasCompletedThisRun) {
+            this.hasCompletedThisRun = false;
+            this.startEmbedded();
+          }
+          wasInView = isInView;
+        },
+        { threshold: 0.25 }
+      );
+      this._embeddedObserver.observe(this.root);
+    }
     trapFocus(e) {
       const focusables = Array.from(
         this.panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
@@ -352,6 +396,7 @@
 
         statusEl.textContent = `${product ? product.title : 'Item'} added to your cart.`;
         btn.textContent = 'Added ✓';
+        this.hasCompletedThisRun = true;
 
         if (data.sections && data.sections['cart-drawer-section']) {
           this.injectFreshCartDrawer(data.sections['cart-drawer-section']);
