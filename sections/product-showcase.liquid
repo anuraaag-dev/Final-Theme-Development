@@ -1994,6 +1994,46 @@
     });
   }
 })();
+
+
+//color js
+
+var PGS_COLOR_MAP = {
+  'black': '#000000', 'white': '#ffffff', 'ivory': '#fffff0', 'cream': '#fffdd0',
+  'off white': '#f8f6f0', 'beige': '#f5f5dc', 'tan': '#d2b48c', 'camel': '#c19a6b',
+  'khaki': '#c3b091', 'sand': '#c2b280', 'stone': '#b7a99a', 'taupe': '#8b8589',
+  'gray': '#808080', 'grey': '#808080', 'charcoal': '#36454f', 'graphite': '#3d3d3d',
+  'slate': '#708090', 'silver': '#c0c0c0', 'gunmetal': '#2a3439',
+  'navy': '#000080', 'navy blue': '#000080', 'royal blue': '#4169e1', 'cobalt': '#0047ab',
+  'sky blue': '#87ceeb', 'powder blue': '#b0e0e6', 'baby blue': '#89cff0', 'denim': '#1560bd',
+  'teal': '#008080', 'turquoise': '#40e0d0', 'aqua': '#00ffff', 'mint': '#98ff98',
+  'sage': '#9caf88', 'olive': '#808000', 'forest green': '#228b22', 'hunter green': '#355e3b',
+  'emerald': '#50c878', 'kelly green': '#4cbb17', 'lime': '#32cd32',
+  'mustard': '#ffdb58', 'gold': '#d4af37', 'yellow': '#ffd700', 'amber': '#ffbf00',
+  'orange': '#ffa500', 'rust': '#b7410e', 'terracotta': '#e2725b', 'burnt orange': '#cc5500',
+  'peach': '#ffe5b4', 'apricot': '#fbceb1', 'coral': '#ff7f50', 'salmon': '#fa8072',
+  'red': '#ff0000', 'brick': '#aa4a44', 'burgundy': '#800020', 'maroon': '#800000',
+  'wine': '#722f37', 'merlot': '#732e37', 'brown': '#964b00', 'chocolate': '#7b3f00',
+  'espresso': '#4b3621', 'mocha': '#6b4423', 'cognac': '#834333', 'copper': '#b87333',
+  'bronze': '#cd7f32', 'pink': '#ffc0cb', 'blush': '#de5d83', 'dusty pink': '#d9a6a1',
+  'hot pink': '#ff69b4', 'fuchsia': '#ff00ff', 'magenta': '#ff00ff', 'purple': '#800080',
+  'plum': '#8e4585', 'lavender': '#e6e6fa', 'lilac': '#c8a2c8', 'mauve': '#e0b0ff',
+  'violet': '#8f00ff'
+};
+
+function pgsApplySwatchColors(root) {
+  root.querySelectorAll('[data-pgs-swatch]').forEach(function (swatch) {
+    var raw = (swatch.getAttribute('data-color-name') || '').toLowerCase().trim();
+    var hex = PGS_COLOR_MAP[raw];
+    if (hex) {
+      swatch.style.backgroundColor = hex;
+    }
+    // Unmapped names keep the CSS default (#ccc via --swatch-color fallback)
+    // instead of silently rendering as white/transparent.
+  });
+}
+
+pgsApplySwatchColors(section);
 </script>
 
 {% schema %}
