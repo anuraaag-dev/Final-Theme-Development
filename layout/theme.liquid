@@ -152,6 +152,10 @@
       {% render 'quick-add-modal' %}
     {% endif %}
 
+    {% if settings.enable_global_ai_quiz %}
+      {% section 'ai-product-quiz' %}
+    {% endif %}
+
     <script src="{{ 'free-shipping-bar.js' | asset_url }}" defer></script>
   <script type="module">
     import { hydrate } from '@theme/section-hydration';
