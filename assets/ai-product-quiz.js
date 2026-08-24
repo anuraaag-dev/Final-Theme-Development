@@ -365,21 +365,57 @@
             el.textContent = cart.item_count;
           });
           document.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
-          this.openThemeCartDrawer();
+          this.refreshCartDrawerContents().finally(() => this.openThemeCartDrawer());
         })
         .catch(() => {});
     }
 
+    // Best-effort attempt to re-fetch the cart drawer's own HTML via
+    // Shopify's Section Rendering API, since /cart/add.js only updates
+    // cart data — it never re-renders the drawer's server-side markup.
+    // This guesses common section IDs; a guaranteed fix needs your
+    // theme's real cart-drawer file (ask your developer/AI for it).
+    async refreshCartDrawerContents() {
+      const guessedSectionIds = ['cart-drawer', 'cart-notification', 'CartDrawer'];
+
+      for (const sectionId of guessedSectionIds) {
+        try {
+          const response = await fetch(`/?section_id=${sectionId}`);
+          if (!response.ok) continue;
+          const html = await response.text();
+          if (!html || html.length < 50) continue;
+
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newContent = doc.body.firstElementChild;
+          const existing =
+            document.getElementById(sectionId) ||
+            document.querySelector(`[data-section-id="${sectionId}"]`) ||
+            document.querySelector('cart-drawer') ||
+            document.querySelector('cart-notification');
+
+          if (newContent && existing && existing.parentNode) {
+            existing.replaceWith(newContent);
+            return;
+          }
+        } catch (e) {
+          // Try the next guess silently.
+        }
+      }
+      // None of the guesses matched this theme's structure.
+    }
+
     openThemeCartDrawer() {
-      // Best-effort: trigger the theme's own cart icon so its existing
-      // drawer-open logic runs (avoids guessing Horizon's internal API).
+      document.dispatchEvent(new CustomEvent('cart:refresh'));
+      document.dispatchEvent(new CustomEvent('cart:open'));
+
       const candidates = [
         '[data-cart-drawer-toggle]',
         '#cart-icon-bubble',
+        'cart-icon-bubble',
         'a[href="/cart"]',
         'a[href*="/cart"]',
         '[data-cart-icon]',
-        'cart-icon-bubble',
       ];
 
       for (const selector of candidates) {
@@ -389,10 +425,8 @@
           return;
         }
       }
-      // If nothing matched, the item is still safely in the cart —
-      // the customer just needs to click the cart icon manually.
     }
-
+    
     escape(str) {
       if (str == null) return '';
       const div = document.createElement('div');
