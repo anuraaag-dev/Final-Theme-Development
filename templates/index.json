@@ -1129,6 +1129,8 @@
         "enable_quiz": true,
         "launch_mode": "floating",
         "floating_position": "bottom-right",
+        "floating_widget_shape": "circle",
+        "floating_icon": "✨",
         "button_text": "✨ Find My Perfect Match",
         "popup_delay": 8,
         "popup_frequency": "session",
