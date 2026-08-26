@@ -2489,7 +2489,7 @@
                   assign product_label = block.settings.custom_label
                 endif
                 assign show_wholesale_price = customer_is_wholesale
-                assign wholesale_multiplier = 100 | minus: s.wholesale_discount_percent
+                assign wholesale_multiplier = 100 | minus: settings.wholesale_discount_percent
                 assign wholesale_price = variant.price | times: wholesale_multiplier | divided_by: 100
                 assign show_sale = false
                 if s.show_sale_badge and variant.compare_at_price > variant.price
@@ -2623,7 +2623,7 @@
                   {%- if show_wholesale_price -%}
                     <span class="pgs__price pgs__price--wholesale" data-pgs-price>{{ wholesale_price | money }}</span>
                     <s class="pgs__compare" data-pgs-compare>{{ variant.price | money }}</s>
-                    <span class="pgs__wholesale-badge">Wholesale -{{ s.wholesale_discount_percent }}%</span>
+                    <span class="pgs__wholesale-badge">Wholesale -{{ settings.wholesale_discount_percent }}%</span>
                   {%- else -%}
                     <span class="pgs__price" data-pgs-price>{{ variant.price | money }}</span>
                     {%- if s.show_compare_price and variant.compare_at_price > variant.price -%}
@@ -2708,7 +2708,7 @@
                   endfor
                 endif
                 assign show_wholesale_price = customer_is_wholesale
-                assign wholesale_multiplier = 100 | minus: s.wholesale_discount_percent
+                assign wholesale_multiplier = 100 | minus: settings.wholesale_discount_percent
                 assign wholesale_price = variant.price | times: wholesale_multiplier | divided_by: 100
                 assign show_sale = false
                 if s.show_sale_badge and variant.compare_at_price > variant.price
@@ -2842,7 +2842,7 @@
                   {%- if show_wholesale_price -%}
                     <span class="pgs__price pgs__price--wholesale" data-pgs-price>{{ wholesale_price | money }}</span>
                     <s class="pgs__compare" data-pgs-compare>{{ variant.price | money }}</s>
-                    <span class="pgs__wholesale-badge">Wholesale -{{ s.wholesale_discount_percent }}%</span>
+                    <span class="pgs__wholesale-badge">Wholesale -{{ settings.wholesale_discount_percent }}%</span>
                   {%- else -%}
                     <span class="pgs__price" data-pgs-price>{{ variant.price | money }}</span>
                     {%- if s.show_compare_price and variant.compare_at_price > variant.price -%}
@@ -4681,17 +4681,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Automatically shows a discounted price to any logged-in customer tagged 'wholesale' on their account. This only changes the displayed price — set up a matching Automatic Discount in Shopify Admin (scoped to the 'wholesale' tag) so checkout charges the same amount."
-    },
-    {
-      "type": "range",
-      "id": "wholesale_discount_percent",
-      "label": "Wholesale discount",
-      "min": 0,
-      "max": 90,
-      "step": 1,
-      "unit": "%",
-      "default": 15
+      "content": "Automatically shows a discounted price to any logged-in customer tagged 'wholesale' on their account. The discount percentage is set once, globally, in Theme settings → Wholesale Pricing (so it stays consistent across this section, the default product cards, and every other page). This only changes the displayed price — set up a matching Automatic Discount in Shopify Admin (scoped to the 'wholesale' tag) so checkout charges the same amount."
     },
     {
       "type": "header",
