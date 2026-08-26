@@ -1,4 +1,4 @@
-{%- doc -%}
+{% comment %} {%- doc -%}
   This snippet is used to render a product card.
   It is used in the product block,featured product block, and the product card block.
 
@@ -80,6 +80,215 @@
 {% else %}
 <div ref="priceContainer">
   {% if has_volume_pricing %}
+    {% comment %} Volume pricing display {% endcomment %}
+    {% if show_compare_price %}
+      <span class="price-item__group compare-at-price">
+        <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+        {{- compare_at_price -}}
+      </span>
+    {% endif %}
+    <span class="price-item__group price">
+      <span class="visually-hidden">{{ 'content.price_range' | t }}&nbsp;</span>
+      {{ price_min }} - {{ price_max }}
+    </span>
+  {% else %}
+    {% comment %} Standard pricing display: render only the active branch (regular or sale) {% endcomment %}
+    {% if show_compare_price %}
+      {% if show_sale_price_first %}
+        <span class="price-item__group price">
+          <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+          {{ price | default: '&nbsp;' }}
+        </span>
+        <span class="price-item__group price-item--regular compare-at-price">
+          <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+          {{- compare_at_price -}}
+        </span>
+      {% else %}
+        <span class="price-item__group price-item--regular compare-at-price">
+          <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+          {{- compare_at_price -}}
+        </span>
+        <span class="price-item__group price">
+          <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+          {{ price | default: '&nbsp;' }}
+        </span>
+      {% endif %}
+    {% else %}
+      <span class="price">{{ price | default: '&nbsp;' }}</span>
+    {% endif %}
+  {% endif %}
+  {%- if selected_variant.unit_price and show_unit_price %}
+    {%- liquid
+      if use_currency
+        assign unit_price = selected_variant.unit_price | money_with_currency
+      else
+        assign unit_price = selected_variant.unit_price | money
+      endif
+    -%}
+    {% render 'unit-price', price: unit_price, measurement: selected_variant.unit_price_measurement %}
+  {%- endif -%}
+</div>
+{%- if has_volume_pricing -%}
+  <small
+    ref="volumePricingNote"
+    class="volume-pricing-note"
+  >
+    {{- 'content.volume_pricing_available' | t -}}
+  </small>
+{%- endif -%}
+{% endif %} {% endcomment %}
+
+
+{%- doc -%}
+  This snippet is used to render a product card.
+  It is used in the product block,featured product block, and the product card block.
+
+  @param {product} product_resource - The product to render
+  @param {boolean} [show_unit_price] - Whether to show the unit price
+  @param {boolean} [show_sale_price_first] - Whether to show the sale price first
+{%- enddoc -%}
+
+{% style %}
+  product-price .price--wholesale {
+    color: #0a7d3f;
+  }
+
+  product-price .wholesale-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: #0a7d3f;
+    padding: 2px 7px;
+    border-radius: 3px;
+    line-height: 1.4;
+    white-space: nowrap;
+    margin-inline-start: 6px;
+  }
+{% endstyle %}
+
+{%- liquid
+  assign show_unit_price = show_unit_price | default: false
+  assign show_sale_price_first = show_sale_price_first | default: false
+  assign selected_variant = product_resource.selected_or_first_available_variant
+  assign price = selected_variant.price
+  assign compare_at_price = selected_variant.compare_at_price
+
+  assign show_compare_price = false
+  if compare_at_price > price
+    assign show_compare_price = true
+  endif
+
+  if product_resource == blank
+    assign price = 1999
+  endif
+
+  # ---- Wholesale pricing ----
+  # Logged-in customers tagged 'wholesale' see a flat percentage off,
+  # controlled by the global "Wholesale discount" Theme setting (Theme
+  # settings > Wholesale Pricing) so there is exactly one place to change
+  # the rate for the whole storefront. This overrides the volume-pricing
+  # and sale-price display below for wholesale customers, so the price
+  # line always shows one unambiguous number rather than stacking
+  # multiple pricing logics at once.
+  #
+  # NOTE: this only changes what's DISPLAYED. Making checkout actually
+  # charge this amount requires a matching Shopify Automatic Discount
+  # scoped to a "wholesale"-tagged customer segment — see store setup.
+  assign customer_is_wholesale = false
+  if customer and customer.tags contains 'wholesale'
+    assign customer_is_wholesale = true
+  endif
+
+  assign show_wholesale_price = false
+  assign wholesale_price_raw = null
+  if customer_is_wholesale and settings.wholesale_discount_percent > 0
+    assign show_wholesale_price = true
+    assign wholesale_multiplier = 100 | minus: settings.wholesale_discount_percent
+    assign wholesale_price_raw = selected_variant.price | times: wholesale_multiplier | divided_by: 100
+  endif
+
+  # Check if variant has volume pricing
+  assign has_volume_pricing = null
+  assign price_min = null
+  assign price_max = null
+
+  # For product cards (collection/search pages), calculate min/max across all variants
+  # For product pages, only use the selected variant's pricing
+  assign is_product_card = false
+  if template.name != 'product'
+    assign is_product_card = true
+  endif
+
+  if show_wholesale_price
+    # Wholesale customers see a single flat-discount price; skip volume
+    # pricing display entirely so we never show two conflicting price
+    # ranges on the same card.
+    assign has_volume_pricing = false
+  elsif is_product_card
+    assign price_min = product_resource.price_min
+    assign price_max = product_resource.price_max
+    assign has_volume_pricing = product_resource.quantity_price_breaks_configured? | default: false
+  else
+    # Product page: only use selected variant's pricing
+    if selected_variant.quantity_price_breaks.size > 0
+      assign has_volume_pricing = true
+      assign price_min = selected_variant.quantity_price_breaks.last.price
+      assign price_max = selected_variant.price
+    endif
+  endif
+
+  # Determine if currency code should be shown
+  assign use_currency = false
+  if product.handle == product_resource.handle
+    if settings.currency_code_enabled_product_pages
+      assign use_currency = true
+    endif
+  elsif settings.currency_code_enabled_product_cards
+    assign use_currency = true
+  endif
+
+  # Format all prices
+  if use_currency
+    assign price = price | money_with_currency
+    assign compare_at_price = compare_at_price | money_with_currency
+    assign price_min = price_min | money_with_currency
+    assign price_max = price_max | money_with_currency
+    if show_wholesale_price
+      assign wholesale_price = wholesale_price_raw | money_with_currency
+      assign wholesale_compare_price = selected_variant.price | money_with_currency
+    endif
+  else
+    assign price = price | money
+    assign compare_at_price = compare_at_price | money
+    assign price_min = price_min | money
+    assign price_max = price_max | money
+    if show_wholesale_price
+      assign wholesale_price = wholesale_price_raw | money
+      assign wholesale_compare_price = selected_variant.price | money
+    endif
+  endif
+-%}
+
+
+{% if product_resource.metafields.custom.request_product_info.value %}
+
+    <div>You can request product information</div>
+    
+{% else %}
+<div ref="priceContainer">
+  {% if show_wholesale_price %}
+    {% comment %} Wholesale pricing display {% endcomment %}
+    <span class="price-item__group price-item--regular compare-at-price">
+      <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+      {{- wholesale_compare_price -}}
+    </span>
+    <span class="price-item__group price price--wholesale">
+      <span class="visually-hidden">Wholesale price&nbsp;</span>
+      {{ wholesale_price | default: '&nbsp;' }}
+    </span>
+    <span class="wholesale-badge">Wholesale -{{ settings.wholesale_discount_percent }}%</span>
+  {% elsif has_volume_pricing %}
     {% comment %} Volume pricing display {% endcomment %}
     {% if show_compare_price %}
       <span class="price-item__group compare-at-price">
