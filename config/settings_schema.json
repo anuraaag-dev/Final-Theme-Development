@@ -2118,6 +2118,25 @@
     ]
   },
   {
+  "name": "Wholesale Pricing",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Controls the wholesale discount shown to customers tagged 'wholesale', across the whole site (product cards, collection pages, this section, etc). Remember to also update the matching Automatic Discount percentage in Shopify Admin → Discounts so checkout charges the same amount."
+    },
+    {
+      "type": "range",
+      "id": "wholesale_discount_percent",
+      "label": "Wholesale discount",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "unit": "%",
+      "default": 15
+    }
+  ]
+},
+  {
     "name": "Rewards Progress Bar",
     "settings": [
       { "type": "header", "content": "Milestone Dot Styling" },
