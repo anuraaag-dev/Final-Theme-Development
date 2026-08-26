@@ -354,7 +354,7 @@
         "enable_loop": true,
         "show_arrows": true,
         "show_dots": true,
-        "wholesale_discount_percent": 15,
+        "wholesale_discount_percent": 10,
         "show_vendor": true,
         "show_rating": false,
         "show_compare_price": true,
