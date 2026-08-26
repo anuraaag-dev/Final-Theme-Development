@@ -183,7 +183,7 @@
         "collection": "womens-clothing",
         "product_count": 8,
         "show_all_products": true,
-        "layout_type": "grid",
+        "layout_type": "carousel",
         "columns_desktop": 4,
         "columns_tablet": 3,
         "columns_mobile": 2,
