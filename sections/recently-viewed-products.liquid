@@ -1,4 +1,4 @@
-
+{% comment %} 
 <div class="section section--{{ section.settings.section_width }} recently-viewed-products">
   <div
     class="recently-viewed-products__inner page-width"
@@ -316,6 +316,436 @@
     opacity: 0.6;
     font-weight: 400;
     margin-inline-end: 6px;
+  }
+
+  .recently-viewed-products__empty {
+    text-align: center;
+    opacity: 0.7;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Recently Viewed Products",
+  "tag": "section",
+  "class": "shopify-section--recently-viewed",
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Recently Viewed"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "Number of products to show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty state text",
+      "default": "You haven't viewed any products yet."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Recently Viewed Products"
+    }
+  ]
+}
+{% endschema %} {% endcomment %}
+
+
+
+{%- liquid
+  assign customer_is_wholesale = false
+  if customer and customer.tags contains 'wholesale'
+    assign customer_is_wholesale = true
+  endif
+-%}
+
+<div class="section section--{{ section.settings.section_width }} recently-viewed-products">
+  <div
+    class="recently-viewed-products__inner page-width"
+    data-max-products="{{ section.settings.max_products }}"
+  >
+    {% if section.settings.heading != blank %}
+      <h2 class="recently-viewed-products__heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <ul class="recently-viewed-products__grid" id="recently-viewed-grid-{{ section.id }}" role="list"></ul>
+
+    <p class="recently-viewed-products__empty" id="recently-viewed-empty-{{ section.id }}" hidden>
+      {{ section.settings.empty_text }}
+    </p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'shopify_recently_viewed';
+
+    // ---- Wholesale pricing ----
+    // The /products/{handle}.js endpoint used below has no concept of who's
+    // logged in or what their customer tags are, so that context has to be
+    // computed server-side in Liquid (where `customer` is available) and
+    // handed off to this script as plain values. Same global "Wholesale
+    // discount" Theme setting used everywhere else on the site, so there's
+    // still only one place to change the rate.
+    var CUSTOMER_IS_WHOLESALE = {{ customer_is_wholesale | json }};
+    var WHOLESALE_DISCOUNT_PERCENT = {{ settings.wholesale_discount_percent | json }};
+
+    function getWholesalePrice(regularPriceCents) {
+      if (!CUSTOMER_IS_WHOLESALE || !WHOLESALE_DISCOUNT_PERCENT || WHOLESALE_DISCOUNT_PERCENT <= 0) {
+        return null;
+      }
+      return Math.round(regularPriceCents * (100 - WHOLESALE_DISCOUNT_PERCENT) / 100);
+    }
+
+    function getViewed() {
+      try {
+        var data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatMoney(cents) {
+      if (window.Shopify && typeof Shopify.formatMoney === 'function' && window.Shopify.money_format) {
+        return Shopify.formatMoney(cents, Shopify.money_format);
+      }
+      return '$' + (cents / 100).toFixed(2);
+    }
+
+    function renderCard(product) {
+      var image = product.featured_image || (product.images && product.images[0]) || '';
+      var hasCompare = product.compare_at_price && product.compare_at_price > product.price;
+      var wholesalePrice = getWholesalePrice(product.price);
+
+      var priceHtml;
+      if (wholesalePrice !== null) {
+        // Wholesale customer: show the discounted price, with the regular
+        // price struck through as the reference/compare price, plus a
+        // badge — same visual pattern used on the default product cards
+        // and the Product Showcase section, for consistency site-wide.
+        priceHtml =
+          '<s class="recently-viewed-products__price--compare">' + formatMoney(product.price) + '</s> ' +
+          '<span class="recently-viewed-products__price--wholesale">' + formatMoney(wholesalePrice) + '</span> ' +
+          '<span class="recently-viewed-products__wholesale-badge">Wholesale -' + WHOLESALE_DISCOUNT_PERCENT + '%</span>';
+      } else {
+        priceHtml =
+          (hasCompare
+            ? '<s class="recently-viewed-products__price--compare">' + formatMoney(product.compare_at_price) + '</s> '
+            : '') +
+          '<span>' + formatMoney(product.price) + '</span>';
+      }
+
+      // Quick add always targets the first available variant - there's no
+      // variant-picker UI on this card (matching the "single-variant" quick
+      // add path Horizon itself uses on product cards). Products with
+      // multiple meaningful options still link through to the full PDP via
+      // the card image/title as usual; the quick-add button here is a
+      // shortcut for the common single- or default-variant case.
+      var variants = product.variants || [];
+      var availableVariant = null;
+      for (var i = 0; i < variants.length; i++) {
+        if (variants[i].available) {
+          availableVariant = variants[i];
+          break;
+        }
+      }
+
+      var quickAddButton = availableVariant
+        ? '<button type="button" class="recently-viewed-products__quick-add" data-variant-id="' + availableVariant.id + '">' +
+            '<span data-quick-add-label>Add to cart</span>' +
+          '</button>'
+        : '<button type="button" class="recently-viewed-products__quick-add" disabled>Sold out</button>';
+
+      // Compare checkbox - matches the attribute contract that
+      // snippets/compare-widget.liquid (rendered globally via
+      // snippets/product-card.liquid) already listens for via its own
+      // document-level 'change' delegation, so it plugs straight into the
+      // existing pgs_compare_list storage, floating bar, and 3-item limit
+      // with no separate compare system needed. stopPropagation keeps a
+      // checkbox click from also triggering the surrounding <a> link.
+      var compareCheckbox =
+        '<label class="product-card__compare-toggle recently-viewed-products__compare" title="Add to compare" onclick="event.stopPropagation();">' +
+          '<input type="checkbox" data-compare-checkbox data-product-id="' + product.id + '" data-product-handle="' + escapeHtml(product.handle) + '" data-product-title="' + escapeHtml(product.title) + '" aria-label="Compare ' + escapeHtml(product.title) + '">' +
+          '<span>Compare</span>' +
+        '</label>';
+
+      return (
+        '<li class="recently-viewed-products__item">' +
+          '<a href="' + product.url + '" class="recently-viewed-products__link">' +
+            '<div class="recently-viewed-products__media">' +
+              compareCheckbox +
+              (image
+                ? '<img src="' + image + '" alt="' + escapeHtml(product.title) + '" loading="lazy" width="300" height="300">'
+                : '') +
+            '</div>' +
+            '<div class="recently-viewed-products__content">' +
+              '<p class="recently-viewed-products__title">' + escapeHtml(product.title) + '</p>' +
+              '<p class="recently-viewed-products__price">' +
+                priceHtml +
+              '</p>' +
+            '</div>' +
+          '</a>' +
+          quickAddButton +
+        '</li>'
+      );
+    }
+
+    function handleQuickAdd(button) {
+      var variantId = button.getAttribute('data-variant-id');
+      var label = button.querySelector('[data-quick-add-label]');
+      if (!variantId || button.disabled) return;
+
+      var originalText = label ? label.textContent : '';
+      button.disabled = true;
+      if (label) label.textContent = 'Adding...';
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ id: variantId, quantity: 1 })
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.status) {
+            throw new Error(data.description || 'Could not add to cart');
+          }
+          if (label) label.textContent = 'Added!';
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+          // Open the cart drawer if the theme has one, matching the site's
+          // existing add-to-cart pattern elsewhere.
+          var cartDrawer = document.getElementById('cart-drawer');
+          if (cartDrawer && typeof cartDrawer.open === 'function') {
+            cartDrawer.open();
+          }
+        })
+        .catch(function (err) {
+          console.error('Quick add failed', err);
+          if (label) label.textContent = 'Error';
+        })
+        .finally(function () {
+          setTimeout(function () {
+            button.disabled = false;
+            if (label) label.textContent = originalText;
+          }, 1400);
+        });
+    }
+
+    function render() {
+      var wrapper = document.getElementById('recently-viewed-grid-{{ section.id }}');
+      var inner = wrapper ? wrapper.closest('.recently-viewed-products__inner') : null;
+      var emptyMsg = document.getElementById('recently-viewed-empty-{{ section.id }}');
+      if (!wrapper || !inner) return;
+
+      var maxProducts = parseInt(inner.dataset.maxProducts, 10) || 4;
+      var viewed = getViewed();
+
+      {% if template.name == 'product' %}
+        viewed = viewed.filter(function (h) { return h !== {{ product.handle | json }}; });
+      {% endif %}
+
+      viewed = viewed.slice(0, maxProducts);
+
+      if (viewed.length === 0) {
+        emptyMsg.hidden = false;
+        return;
+      }
+
+      Promise.all(
+        viewed.map(function (handle) {
+          return fetch('/products/' + handle + '.js')
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        })
+      ).then(function (products) {
+        products = products.filter(Boolean);
+        if (products.length === 0) {
+          emptyMsg.hidden = false;
+          return;
+        }
+        wrapper.innerHTML = products.map(renderCard).join('');
+
+        // The freshly-injected checkboxes need their checked/disabled state
+        // synced against the current compare list - compare-widget.liquid's
+        // own sync only runs once on page load, before these cards exist.
+        // window.PGSCompare.sync is exposed for exactly this case.
+        if (window.PGSCompare && typeof window.PGSCompare.sync === 'function') {
+          window.PGSCompare.sync();
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', render);
+    } else {
+      render();
+    }
+
+    document.addEventListener('click', function (e) {
+      var button = e.target.closest('.recently-viewed-products__quick-add');
+      if (button) handleQuickAdd(button);
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  .recently-viewed-products {
+    position: relative;
+    padding-block: var(--spacing-4xl, 48px);
+  }
+
+  .recently-viewed-products__heading {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    color: var(--color-foreground-heading, var(--color-foreground));
+    text-align: center;
+    margin-block-end: 24px;
+  }
+
+  .recently-viewed-products__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--grid-mobile-horizontal-spacing, 12px) var(--grid-mobile-vertical-spacing, 12px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .recently-viewed-products__grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--grid-desktop-horizontal-spacing, 20px) var(--grid-desktop-vertical-spacing, 28px);
+    }
+  }
+
+  .recently-viewed-products__link {
+    display: block;
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-family: var(--font-body--family);
+  }
+
+  .recently-viewed-products__media {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--color-background);
+  }
+
+  .recently-viewed-products__media img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--duration-long, 300ms) ease;
+  }
+
+  .recently-viewed-products__link:hover .recently-viewed-products__media img {
+    transform: scale(1.03);
+  }
+
+  .recently-viewed-products__item {
+    position: relative;
+  }
+
+  .recently-viewed-products__content {
+    padding-block-start: 12px;
+  }
+
+  /* Positioning override only - visual styling (background, radius, font
+     size, etc.) for .product-card__compare-toggle already comes from the
+     global <style> block in snippets/product-card.liquid, so this card
+     matches every other product card on the site automatically. */
+  .recently-viewed-products__compare {
+    z-index: 2;
+  }
+
+  .recently-viewed-products__quick-add {
+    display: block;
+    width: 100%;
+    margin-block-start: 10px;
+    padding: 10px 14px;
+    font-family: var(--font-body--family);
+    font-size: var(--font-size-sm, 13px);
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-background);
+    background: var(--color-foreground);
+    border: 1px solid var(--color-foreground);
+    border-radius: var(--style-border-radius-buttons-secondary, 4px);
+    cursor: pointer;
+    transition: opacity var(--animation-speed, 150ms) var(--animation-easing, ease-in-out);
+  }
+
+  .recently-viewed-products__quick-add:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+
+  .recently-viewed-products__quick-add:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .recently-viewed-products__title {
+    font-size: var(--font-size-base, 14px);
+    margin: 0 0 4px;
+  }
+
+  .recently-viewed-products__price {
+    font-size: var(--font-size-base, 14px);
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-foreground);
+  }
+
+  .recently-viewed-products__price--compare {
+    opacity: 0.6;
+    font-weight: 400;
+    margin-inline-end: 6px;
+  }
+
+  .recently-viewed-products__price--wholesale {
+    color: #0a7d3f;
+  }
+
+  .recently-viewed-products__wholesale-badge {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: #0a7d3f;
+    padding: 2px 6px;
+    border-radius: 3px;
+    line-height: 1.4;
+    white-space: nowrap;
+    margin-inline-start: 4px;
   }
 
   .recently-viewed-products__empty {
