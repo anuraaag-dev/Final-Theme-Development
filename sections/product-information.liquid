@@ -118,6 +118,7 @@
         class="sticky-add-to-cart__price"
         data-testid="sticky-price-display"
       >
+        {% render 'preorder-badge-pdp', product: product %}
         {% render 'price', product_resource: product, show_sale_price_first: true %}
       </div>
 
