@@ -85,42 +85,39 @@
   }
 
   /**
-   * Finds the element that acts as the image "frame" for this card, by
-   * climbing up from the <img> and looking for the first ancestor that is
-   * already clipped (overflow: hidden) or already positioned (relative/
-   * absolute) — this is how virtually every theme builds its own image-crop
-   * wrapper, and it's exactly where native "Sale"/"Sold out" badges live.
-   * Falls back to a height-ratio match, then to the image's direct parent.
+   * Guarantees a badge-safe container sized to exactly the image, regardless
+   * of the surrounding theme markup: if the image's direct parent is already
+   * a tight, clipped/positioned wrapper, reuse it; otherwise wrap the image
+   * itself in a purpose-built span. This replaces markup-guessing with
+   * construction, so it can't misfire on any theme's card layout.
    */
-  function findImageContainer(anchor, img) {
-    var candidates = [];
-    var node = img.parentElement;
-    while (node && node !== anchor && node !== document.body) {
-      candidates.push(node);
-      node = node.parentElement;
+  function getImageFrame(img) {
+    if (img.hasAttribute('data-pob-framed')) {
+      return img.parentElement;
     }
 
-    for (var i = 0; i < candidates.length; i++) {
-      var el = candidates[i];
-      var style = window.getComputedStyle(el);
-      var rect = el.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) continue;
+    var parent = img.parentElement;
+    if (parent) {
+      var style = window.getComputedStyle(parent);
+      var onlyChild = parent.children.length === 1;
       var clipped = style.overflow === 'hidden' || style.overflowX === 'hidden' || style.overflowY === 'hidden';
       var positioned = style.position === 'relative' || style.position === 'absolute' || style.position === 'sticky';
-      if (clipped || positioned) return el;
-    }
-
-    var imgRect = img.getBoundingClientRect();
-    if (imgRect.height > 0) {
-      for (var j = 0; j < candidates.length; j++) {
-        var rect2 = candidates[j].getBoundingClientRect();
-        if (rect2.height > 0 && Math.abs(rect2.height - imgRect.height) <= imgRect.height * 0.15) {
-          return candidates[j];
-        }
+      if (onlyChild && (clipped || positioned)) {
+        img.setAttribute('data-pob-framed', '');
+        if (style.position === 'static') parent.style.position = 'relative';
+        return parent;
       }
     }
 
-    return img.parentElement || anchor;
+    var wrapper = document.createElement('span');
+    wrapper.setAttribute('data-pob-wrap', '');
+    wrapper.style.position = 'relative';
+    wrapper.style.display = 'block';
+    wrapper.style.lineHeight = '0';
+    img.parentNode.insertBefore(wrapper, img);
+    wrapper.appendChild(img);
+    img.setAttribute('data-pob-framed', '');
+    return wrapper;
   }
 
   var cardState = new Map();
@@ -138,11 +135,7 @@
     }
 
     var img = anchor.querySelector('img');
-    var container = img ? findImageContainer(anchor, img) : anchor;
-
-    if (window.getComputedStyle(container).position === 'static') {
-      container.style.position = 'relative';
-    }
+    var container = img ? getImageFrame(img) : anchor;
 
     if (!state || state.container !== container) {
       if (state) {
