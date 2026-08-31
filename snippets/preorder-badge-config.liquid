@@ -8,7 +8,8 @@
     "badgeText": {{ settings.preorder_badge_text | default: 'Pre-order' | json }},
     "restockTagPrefix": {{ settings.preorder_restock_tag_prefix | default: 'restock-' | json }},
     "restockLabel": {{ settings.preorder_restock_label | default: 'Expected restock:' | json }},
-    "refreshSeconds": {{ settings.preorder_refresh_seconds | default: 45 | json }}
+    "refreshSeconds": {{ settings.preorder_refresh_seconds | default: 45 | json }},
+    "badgePosition": {{ settings.preorder_badge_position | default: 'top-left' | json }}
   }
 </script>
 <style>
