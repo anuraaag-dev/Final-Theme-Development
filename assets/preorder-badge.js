@@ -85,23 +85,41 @@
   }
 
   /**
-   * Finds the element that tightly wraps just the product image, by climbing
-   * up from the <img> and comparing rendered heights, so the badge overlays
-   * the image itself rather than the whole card (which often includes the
-   * title/price below the image inside the same <a>).
+   * Finds the element that acts as the image "frame" for this card, by
+   * climbing up from the <img> and looking for the first ancestor that is
+   * already clipped (overflow: hidden) or already positioned (relative/
+   * absolute) — this is how virtually every theme builds its own image-crop
+   * wrapper, and it's exactly where native "Sale"/"Sold out" badges live.
+   * Falls back to a height-ratio match, then to the image's direct parent.
    */
   function findImageContainer(anchor, img) {
-    var imgRect = img.getBoundingClientRect();
-    if (imgRect.height === 0) return anchor;
-
+    var candidates = [];
     var node = img.parentElement;
     while (node && node !== anchor && node !== document.body) {
-      var rect = node.getBoundingClientRect();
-      if (rect.height > 0 && Math.abs(rect.height - imgRect.height) <= imgRect.height * 0.15) {
-        return node;
-      }
+      candidates.push(node);
       node = node.parentElement;
     }
+
+    for (var i = 0; i < candidates.length; i++) {
+      var el = candidates[i];
+      var style = window.getComputedStyle(el);
+      var rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) continue;
+      var clipped = style.overflow === 'hidden' || style.overflowX === 'hidden' || style.overflowY === 'hidden';
+      var positioned = style.position === 'relative' || style.position === 'absolute' || style.position === 'sticky';
+      if (clipped || positioned) return el;
+    }
+
+    var imgRect = img.getBoundingClientRect();
+    if (imgRect.height > 0) {
+      for (var j = 0; j < candidates.length; j++) {
+        var rect2 = candidates[j].getBoundingClientRect();
+        if (rect2.height > 0 && Math.abs(rect2.height - imgRect.height) <= imgRect.height * 0.15) {
+          return candidates[j];
+        }
+      }
+    }
+
     return img.parentElement || anchor;
   }
 
