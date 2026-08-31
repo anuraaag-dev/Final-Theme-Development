@@ -51,6 +51,9 @@
   "
   {{ block.shopify_attributes }}
 >
+  {% if request.page_type == 'product' %}
+    {% render 'preorder-badge-pdp', product: product_resource %}
+  {% endif %}
   {% render 'price',
     show_unit_price: true,
     product_resource: product_resource,
