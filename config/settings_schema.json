@@ -2340,7 +2340,8 @@
       "type": "checkbox",
       "id": "preorder_show_out_of_stock",
       "label": "Show on out-of-stock products",
-      "default": true
+      "default": true,
+      "info": "Checks real inventory count, not just Shopify's sellable status — so this stays accurate even with \"Continue selling when out of stock\" turned on."
     },
     {
       "type": "text",
