@@ -2312,5 +2312,109 @@
           { "value": "bottom", "label": "Below bar" }
         ], "default": "bottom" }
     ]
-  }
+  },
+  {
+  "name": "Pre-order Badge",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "checkbox",
+      "id": "preorder_enabled",
+      "label": "Enable Pre-order badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "preorder_badge_text",
+      "label": "Badge text",
+      "default": "Pre-order"
+    },
+    {
+      "type": "header",
+      "content": "When to show it"
+    },
+    {
+      "type": "checkbox",
+      "id": "preorder_show_out_of_stock",
+      "label": "Show on out-of-stock products",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "preorder_tag",
+      "label": "\"Coming soon\" tag",
+      "default": "coming-soon",
+      "info": "Add this exact tag to any product in Shopify Admin to always show the badge, even if it's in stock."
+    },
+    {
+      "type": "header",
+      "content": "Restock date"
+    },
+    {
+      "type": "text",
+      "id": "preorder_restock_tag_prefix",
+      "label": "Restock date tag prefix",
+      "default": "restock-",
+      "info": "Tag a product like restock-2026-09-15 to show an expected restock date."
+    },
+    {
+      "type": "text",
+      "id": "preorder_restock_label",
+      "label": "Restock date label",
+      "default": "Expected restock:"
+    },
+    {
+      "type": "text",
+      "id": "preorder_date_format",
+      "label": "Date format (strftime)",
+      "default": "%B %d, %Y",
+      "info": "Example: %B %d, %Y shows as September 15, 2026."
+    },
+    {
+      "type": "range",
+      "id": "preorder_refresh_seconds",
+      "label": "Live refresh interval (seconds)",
+      "min": 15,
+      "max": 120,
+      "step": 5,
+      "default": 45,
+      "info": "How often the page re-checks stock/tags while a customer is viewing it."
+    },
+    {
+      "type": "header",
+      "content": "Where to show it"
+    },
+    {
+      "type": "checkbox",
+      "id": "preorder_show_cards",
+      "label": "Show on product cards (collections/search)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "preorder_show_pdp",
+      "label": "Show on product page",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "preorder_badge_bg",
+      "label": "Badge background",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "preorder_badge_text_color",
+      "label": "Badge text color",
+      "default": "#ffffff"
+    }
+  ]
+}
 ]
