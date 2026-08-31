@@ -1,0 +1,20 @@
+{%- if settings.preorder_enabled -%}
+<script id="pob-config" type="application/json">
+  {
+    "enabled": {{ settings.preorder_enabled | json }},
+    "showOnCards": {{ settings.preorder_show_cards | json }},
+    "showOutOfStock": {{ settings.preorder_show_out_of_stock | json }},
+    "tag": {{ settings.preorder_tag | json }},
+    "badgeText": {{ settings.preorder_badge_text | default: 'Pre-order' | json }},
+    "restockTagPrefix": {{ settings.preorder_restock_tag_prefix | default: 'restock-' | json }},
+    "restockLabel": {{ settings.preorder_restock_label | default: 'Expected restock:' | json }},
+    "refreshSeconds": {{ settings.preorder_refresh_seconds | default: 45 | json }}
+  }
+</script>
+<style>
+  :root {
+    --pob-badge-bg: {{ settings.preorder_badge_bg | default: '#111111' }};
+    --pob-badge-color: {{ settings.preorder_badge_text_color | default: '#ffffff' }};
+  }
+</style>
+{%- endif -%}
