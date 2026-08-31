@@ -47,6 +47,10 @@
     {% endif %}
 
     {{ content_for_header }}
+
+    {{ 'preorder-badge.css' | asset_url | stylesheet_tag }}
+    {% render 'preorder-badge-config' %}
+
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
@@ -166,5 +170,6 @@
       return hydrate(sectionId, url);
     };
   </script>
+  <script src="{{ 'preorder-badge.js' | asset_url }}" defer="defer"></script>
   </body>
 </html>
