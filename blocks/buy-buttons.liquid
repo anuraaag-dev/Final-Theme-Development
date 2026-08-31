@@ -18,12 +18,37 @@
   assign can_add_to_cart = false
   assign add_to_cart_text = 'products.product.unavailable' | t
 
+  # Real stock check, independent of "Continue selling when out of stock"
+  assign pob_tag_setting = settings.preorder_tag | strip | downcase
+  assign pob_tagged = false
+  for tag in product.tags
+    assign pob_tag_lower = tag | downcase
+    if pob_tag_setting != blank and pob_tag_lower == pob_tag_setting
+      assign pob_tagged = true
+    endif
+  endfor
+
+  assign pob_real_oos = false
+  if inventory_managed and inventory_quantity <= 0
+    assign pob_real_oos = true
+  endif
+
+  assign pob_is_preorder = false
+  if pob_tagged and pob_real_oos
+    assign pob_is_preorder = true
+  elsif settings.preorder_show_out_of_stock and pob_real_oos
+    assign pob_is_preorder = true
+  endif
+
   if variant
     if variant.quantity_rule.min > variant.inventory_quantity and inventory_managed and inventory_policy == 'deny'
       assign quantity_rule_soldout = true
     endif
 
-    if variant.available
+    if pob_is_preorder and quantity_rule_soldout != true
+      assign can_add_to_cart = true
+      assign add_to_cart_text = settings.preorder_button_text | default: 'Pre-order'
+    elsif variant.available
       assign can_add_to_cart = true
       assign add_to_cart_text = 'products.product.add_to_cart' | t
     elsif inventory_managed and inventory_quantity <= 0 and inventory_policy == 'deny' or quantity_rule_soldout
