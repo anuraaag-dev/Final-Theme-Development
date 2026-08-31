@@ -2426,6 +2426,13 @@
         { "value": "bottom-right", "label": "Bottom right" }
       ],
       "default": "top-left"
+    },
+    {
+      "type": "text",
+      "id": "preorder_button_text",
+      "label": "Pre-order button text",
+      "default": "Pre-order",
+      "info": "Shown on the Add to Cart button itself when a variant is truly out of stock but pre-order is enabled for it."
     }
   ]
 }
