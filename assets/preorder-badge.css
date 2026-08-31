@@ -16,9 +16,27 @@
 
 .pob-badge--card {
   position: absolute;
+  z-index: 2;
+}
+
+.pob-badge--pos-top-left {
   top: 10px;
   left: 10px;
-  z-index: 2;
+}
+
+.pob-badge--pos-top-right {
+  top: 10px;
+  right: 10px;
+}
+
+.pob-badge--pos-bottom-left {
+  bottom: 10px;
+  left: 10px;
+}
+
+.pob-badge--pos-bottom-right {
+  bottom: 10px;
+  right: 10px;
 }
 
 .pob-badge--pdp {
@@ -42,12 +60,31 @@
   margin-top: 4px;
 }
 
-.pob-badge--card + .pob-restock-date {
+.pob-restock-date--card {
   position: absolute;
-  top: 34px;
-  left: 10px;
   z-index: 2;
   background: rgba(255, 255, 255, 0.9);
   padding: 2px 6px;
   border-radius: 3px;
+  white-space: nowrap;
+}
+
+.pob-restock-date--pos-top-left {
+  top: 34px;
+  left: 10px;
+}
+
+.pob-restock-date--pos-top-right {
+  top: 34px;
+  right: 10px;
+}
+
+.pob-restock-date--pos-bottom-left {
+  bottom: 34px;
+  left: 10px;
+}
+
+.pob-restock-date--pos-bottom-right {
+  bottom: 34px;
+  right: 10px;
 }
