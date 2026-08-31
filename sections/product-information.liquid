@@ -30,11 +30,31 @@
 {% if section.settings.enable_sticky_add_to_cart %}
   {% render 'fly-to-cart-styles' %}
 
-  {% liquid
-    assign current_variant = product.selected_or_first_available_variant
-    # Get the initial quantity based on quantity rules
-    assign initial_quantity = current_variant.quantity_rule.min | default: 1
-  %}
+{% liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign initial_quantity = current_variant.quantity_rule.min | default: 1
+
+  assign pob_tag_setting = settings.preorder_tag | strip | downcase
+  assign pob_tagged = false
+  for tag in product.tags
+    assign pob_tag_lower = tag | downcase
+    if pob_tag_setting != blank and pob_tag_lower == pob_tag_setting
+      assign pob_tagged = true
+    endif
+  endfor
+
+  assign pob_real_oos = false
+  if current_variant.inventory_management == 'shopify' and current_variant.inventory_quantity <= 0
+    assign pob_real_oos = true
+  endif
+
+  assign pob_is_preorder = false
+  if pob_tagged and pob_real_oos
+    assign pob_is_preorder = true
+  elsif settings.preorder_show_out_of_stock and pob_real_oos
+    assign pob_is_preorder = true
+  endif
+%}
 
   <sticky-add-to-cart
     class="sticky-add-to-cart"
@@ -140,15 +160,17 @@
             </span>
           {% endif %}
           <span class="add-to-cart-text__content">
-            <span>
-              {%- if current_variant.available -%}
-                {{- 'products.product.add_to_cart' | t -}}
-              {%- elsif current_variant == blank -%}
-                {{- 'products.product.unavailable' | t -}}
-              {%- else -%}
-                {{- 'products.product.sold_out' | t -}}
-              {%- endif -%}
-            </span>
+          <span data-pob-cta-text>
+            {%- if pob_is_preorder -%}
+              {{ settings.preorder_button_text | default: 'Pre-order' }}
+            {%- elsif current_variant.available -%}
+              {{- 'products.product.add_to_cart' | t -}}
+            {%- elsif current_variant == blank -%}
+              {{- 'products.product.unavailable' | t -}}
+            {%- else -%}
+              {{- 'products.product.sold_out' | t -}}
+            {%- endif -%}
+          </span>
             <span
               ref="quantityDisplay"
               {% if current_variant.available and initial_quantity > 1 %}
