@@ -43,6 +43,20 @@
     return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
+  function positionClass() {
+    var pos = config.badgePosition || 'top-left';
+    var valid = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    if (valid.indexOf(pos) === -1) pos = 'top-left';
+    return 'pob-badge--pos-' + pos;
+  }
+
+  function positionClassForDate() {
+    var pos = config.badgePosition || 'top-left';
+    var valid = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    if (valid.indexOf(pos) === -1) pos = 'top-left';
+    return 'pob-restock-date--pos-' + pos;
+  }
+
   /* ---------- Card auto-detection ---------- */
 
   function extractHandle(href) {
@@ -63,15 +77,15 @@
 
   function createBadge() {
     var span = document.createElement('span');
-    span.className = 'pob-badge pob-badge--card';
+    span.className = 'pob-badge pob-badge--card ' + positionClass();
     span.setAttribute('data-pob-badge', '');
     span.textContent = config.badgeText || 'Pre-order';
     return span;
   }
 
-  function createDateEl(dateString) {
+  function createDateEl(dateString, isCard) {
     var span = document.createElement('span');
-    span.className = 'pob-restock-date';
+    span.className = 'pob-restock-date' + (isCard ? ' pob-restock-date--card ' + positionClassForDate() : '');
     span.setAttribute('data-pob-restock-date', '');
     span.textContent = (config.restockLabel || 'Expected restock:') + ' ' + formatDateForDisplay(dateString);
     return span;
@@ -101,12 +115,12 @@
       container.appendChild(badgeEl);
       var dateEl = null;
       if (status.restockDate) {
-        dateEl = createDateEl(status.restockDate);
+        dateEl = createDateEl(status.restockDate, true);
         container.appendChild(dateEl);
       }
       cardState.set(anchor, { badgeEl: badgeEl, dateEl: dateEl });
     } else if (status.restockDate && !state.dateEl) {
-      state.dateEl = createDateEl(status.restockDate);
+      state.dateEl = createDateEl(status.restockDate, true);
       container.appendChild(state.dateEl);
     } else if (!status.restockDate && state.dateEl) {
       state.dateEl.remove();
@@ -197,7 +211,7 @@
         badge.textContent = data.badgeText || 'Pre-order';
         host.appendChild(badge);
         if (restockDate) {
-          host.appendChild(createDateEl(restockDate));
+          host.appendChild(createDateEl(restockDate, false));
         }
       }
 
