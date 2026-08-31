@@ -1,0 +1,55 @@
+{%- comment -%}
+  Usage: {% render 'preorder-badge-pdp', product: product %}
+{%- endcomment -%}
+
+{%- if settings.preorder_enabled and settings.preorder_show_pdp -%}
+  {%- assign pob_variant = product.selected_or_first_available_variant -%}
+  {%- assign pob_out_of_stock = false -%}
+  {%- if settings.preorder_show_out_of_stock and pob_variant.available == false -%}
+    {%- assign pob_out_of_stock = true -%}
+  {%- endif -%}
+
+  {%- assign pob_tagged = false -%}
+  {%- assign pob_tag_setting = settings.preorder_tag | strip | downcase -%}
+  {%- assign pob_restock_prefix = settings.preorder_restock_tag_prefix | default: 'restock-' -%}
+  {%- assign pob_restock_prefix_lower = pob_restock_prefix | downcase -%}
+  {%- assign pob_prefix_length = pob_restock_prefix_lower.size -%}
+  {%- assign pob_restock_date_string = '' -%}
+
+  {%- for tag in product.tags -%}
+    {%- assign pob_tag_lower = tag | downcase -%}
+    {%- if pob_tag_setting != blank and pob_tag_lower == pob_tag_setting -%}
+      {%- assign pob_tagged = true -%}
+    {%- endif -%}
+    {%- assign pob_tag_prefix_slice = pob_tag_lower | slice: 0, pob_prefix_length -%}
+    {%- if pob_tag_prefix_slice == pob_restock_prefix_lower -%}
+      {%- assign pob_restock_date_string = tag | slice: pob_prefix_length, 999 -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  <div data-pob-pdp-anchor>
+    {%- if pob_out_of_stock or pob_tagged -%}
+      <span class="pob-badge pob-badge--pdp" data-pob-badge>{{ settings.preorder_badge_text | default: 'Pre-order' }}</span>
+      {%- if pob_restock_date_string != blank -%}
+        <span class="pob-restock-date" data-pob-restock-date>
+          {{ settings.preorder_restock_label | default: 'Expected restock:' }}
+          {{ pob_restock_date_string | date: settings.preorder_date_format }}
+        </span>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+
+  <script type="application/json" data-pob-variants-json>
+    {
+      "handle": {{ product.handle | json }},
+      "taggedComingSoon": {{ pob_tagged | json }},
+      "showOutOfStock": {{ settings.preorder_show_out_of_stock | json }},
+      "badgeText": {{ settings.preorder_badge_text | default: 'Pre-order' | json }},
+      "variants": [
+        {%- for v in product.variants -%}
+          { "id": {{ v.id | json }}, "available": {{ v.available | json }} }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
