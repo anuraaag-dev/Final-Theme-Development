@@ -14,29 +14,6 @@
   var config = getConfig();
   if (!config || !config.enabled) return;
 
-  /* ---------- Shared status logic ---------- */
-
-  function extractRestockDate(tags) {
-    if (!config.restockTagPrefix) return null;
-    var prefix = config.restockTagPrefix.toLowerCase();
-    var match = (tags || []).find(function (t) {
-      return t.toLowerCase().indexOf(prefix) === 0;
-    });
-    return match ? match.slice(prefix.length) : null;
-  }
-
-  function computeStatus(product) {
-    var tag = (config.tag || '').toLowerCase();
-    var tagged = tag !== '' && (product.tags || []).some(function (t) {
-      return t.toLowerCase() === tag;
-    });
-    var outOfStock = config.showOutOfStock && product.available === false;
-    return {
-      show: tagged || outOfStock,
-      restockDate: extractRestockDate(product.tags)
-    };
-  }
-
   function formatDateForDisplay(dateString) {
     var d = new Date(dateString);
     if (isNaN(d.getTime())) return dateString;
@@ -50,7 +27,34 @@
     return pos;
   }
 
-  /* ---------- Card auto-detection ---------- */
+  /* ---------- Card auto-detection ----------
+     IMPORTANT LIMITATION: Shopify's public /products/{handle}.js endpoint
+     does not expose real inventory counts, only a Shopify-computed
+     "available" flag — which becomes true once "Continue selling when out
+     of stock" is on, same issue we just fixed for the PDP. So on collection/
+     search cards, we rely ONLY on the merchant's "coming-soon" tag (which
+     IS exposed publicly), not on auto-detecting out-of-stock. This is a
+     Shopify platform limitation, not something fixable from a theme. */
+
+  function extractRestockDate(tags) {
+    if (!config.restockTagPrefix) return null;
+    var prefix = config.restockTagPrefix.toLowerCase();
+    var match = (tags || []).find(function (t) {
+      return t.toLowerCase().indexOf(prefix) === 0;
+    });
+    return match ? match.slice(prefix.length) : null;
+  }
+
+  function computeCardStatus(product) {
+    var tag = (config.tag || '').toLowerCase();
+    var tagged = tag !== '' && (product.tags || []).some(function (t) {
+      return t.toLowerCase() === tag;
+    });
+    return {
+      show: tagged,
+      restockDate: extractRestockDate(product.tags)
+    };
+  }
 
   function extractHandle(href) {
     var match = href.match(/\/products\/([a-zA-Z0-9\-_%]+)/);
@@ -84,18 +88,10 @@
     return span;
   }
 
-  /**
-   * Guarantees a badge-safe container sized to exactly the image, regardless
-   * of the surrounding theme markup: if the image's direct parent is already
-   * a tight, clipped/positioned wrapper, reuse it; otherwise wrap the image
-   * itself in a purpose-built span. This replaces markup-guessing with
-   * construction, so it can't misfire on any theme's card layout.
-   */
   function getImageFrame(img) {
     if (img.hasAttribute('data-pob-framed')) {
       return img.parentElement;
     }
-
     var parent = img.parentElement;
     if (parent) {
       var style = window.getComputedStyle(parent);
@@ -108,7 +104,6 @@
         return parent;
       }
     }
-
     var wrapper = document.createElement('span');
     wrapper.setAttribute('data-pob-wrap', '');
     wrapper.style.position = 'relative';
@@ -124,7 +119,6 @@
 
   function updateCard(anchor, status) {
     var state = cardState.get(anchor);
-
     if (!status.show) {
       if (state) {
         if (state.badgeEl) state.badgeEl.remove();
@@ -133,7 +127,6 @@
       }
       return;
     }
-
     var img = anchor.querySelector('img');
     var container = img ? getImageFrame(img) : anchor;
 
@@ -163,16 +156,14 @@
     var handle = extractHandle(anchor.getAttribute('href') || '');
     if (!handle) return;
     fetchProduct(handle, bypassCache).then(function (product) {
-      if (product) updateCard(anchor, computeStatus(product));
+      if (product) updateCard(anchor, computeCardStatus(product));
     });
   }
 
   var seen = new WeakSet();
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        processAnchor(entry.target, false);
-      }
+      if (entry.isIntersecting) processAnchor(entry.target, false);
     });
   }, { rootMargin: '200px' });
 
@@ -206,13 +197,11 @@
     var interval = (config.refreshSeconds || 45) * 1000;
     setInterval(function () {
       if (document.visibilityState !== 'visible') return;
-      cardState.forEach(function (_, anchor) {
-        processAnchor(anchor, true);
-      });
+      cardState.forEach(function (_, anchor) { processAnchor(anchor, true); });
     }, interval);
   }
 
-  /* ---------- PDP: instant variant switch + periodic live refresh ---------- */
+  /* ---------- PDP: instant, accurate variant-switch updates ---------- */
 
   function initPdp() {
     var dataEls = document.querySelectorAll('[data-pob-variants-json]');
@@ -231,9 +220,22 @@
         var parent = dataEl.parentElement;
         host = parent ? parent.querySelector('[data-pob-pdp-anchor]') : null;
       }
-      if (!host) return;
 
-      function render(show, restockDate) {
+      function currentVariantId() {
+        var input = document.querySelector('form[action*="/cart/add"] input[name="id"]');
+        return input ? input.value : null;
+      }
+
+      function isPreorderForVariant(variantId) {
+        var v = data.variants.find(function (v) { return String(v.id) === String(variantId); });
+        var realOos = v ? v.realOutOfStock : false;
+        if (data.tagged && realOos) return true;
+        if (data.showOutOfStockSetting && realOos) return true;
+        return false;
+      }
+
+      function renderBadge(show) {
+        if (!host) return;
         host.innerHTML = '';
         if (!show) return;
         var badge = document.createElement('span');
@@ -241,59 +243,43 @@
         badge.setAttribute('data-pob-badge', '');
         badge.textContent = data.badgeText || 'Pre-order';
         host.appendChild(badge);
-        if (restockDate) {
-          host.appendChild(createDateEl(restockDate, false));
+        if (data.restockDate) {
+          host.appendChild(createDateEl(data.restockDate, false));
         }
       }
 
-      function currentVariantId() {
-        var input = document.querySelector('form[action*="/cart/add"] input[name="id"]');
-        return input ? input.value : null;
+      function renderButtonText(show) {
+        document.querySelectorAll('[data-pob-cta-text]').forEach(function (el) {
+          if (show) {
+            el.textContent = data.buttonText || 'Pre-order';
+          } else if (el.dataset.pobOriginalText) {
+            el.textContent = el.dataset.pobOriginalText;
+          }
+        });
       }
 
-      function shouldShowForVariant(variantId) {
-        if (data.taggedComingSoon) return true;
-        if (!data.showOutOfStock) return false;
-        var v = data.variants.find(function (v) { return String(v.id) === String(variantId); });
-        return v ? v.available === false : false;
-      }
+      document.querySelectorAll('[data-pob-cta-text]').forEach(function (el) {
+        if (!el.dataset.pobOriginalText) {
+          el.dataset.pobOriginalText = el.textContent.trim();
+        }
+      });
 
-      var lastRestockDate = null;
-
-      function updateOnVariantChange() {
-        render(shouldShowForVariant(currentVariantId()), lastRestockDate);
+      function update() {
+        var show = isPreorderForVariant(currentVariantId());
+        renderBadge(show);
+        renderButtonText(show);
       }
 
       document.addEventListener('change', function (e) {
         if (e.target.closest && e.target.closest('form[action*="/cart/add"]')) {
-          setTimeout(updateOnVariantChange, 50);
+          setTimeout(update, 50);
         }
       });
 
       var input = document.querySelector('form[action*="/cart/add"] input[name="id"]');
       if (input) {
-        new MutationObserver(updateOnVariantChange).observe(input, { attributes: true, attributeFilter: ['value'] });
+        new MutationObserver(update).observe(input, { attributes: true, attributeFilter: ['value'] });
       }
-
-      if (!data.handle) return;
-
-      function refreshFromServer() {
-        fetchProduct(data.handle, true).then(function (product) {
-          if (!product) return;
-          data.taggedComingSoon = (config.tag || '').toLowerCase() !== '' &&
-            (product.tags || []).some(function (t) { return t.toLowerCase() === config.tag.toLowerCase(); });
-          data.variants = (product.variants || []).map(function (v) {
-            return { id: v.id, available: v.available };
-          });
-          lastRestockDate = extractRestockDate(product.tags);
-          updateOnVariantChange();
-        });
-      }
-
-      var interval = (config.refreshSeconds || 45) * 1000;
-      setInterval(function () {
-        if (document.visibilityState === 'visible') refreshFromServer();
-      }, interval);
     });
   }
 
