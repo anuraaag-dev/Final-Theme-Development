@@ -43,18 +43,11 @@
     return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  function positionClass() {
+  function positionSuffix() {
     var pos = config.badgePosition || 'top-left';
     var valid = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
     if (valid.indexOf(pos) === -1) pos = 'top-left';
-    return 'pob-badge--pos-' + pos;
-  }
-
-  function positionClassForDate() {
-    var pos = config.badgePosition || 'top-left';
-    var valid = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-    if (valid.indexOf(pos) === -1) pos = 'top-left';
-    return 'pob-restock-date--pos-' + pos;
+    return pos;
   }
 
   /* ---------- Card auto-detection ---------- */
@@ -77,7 +70,7 @@
 
   function createBadge() {
     var span = document.createElement('span');
-    span.className = 'pob-badge pob-badge--card ' + positionClass();
+    span.className = 'pob-badge pob-badge--card pob-badge--pos-' + positionSuffix();
     span.setAttribute('data-pob-badge', '');
     span.textContent = config.badgeText || 'Pre-order';
     return span;
@@ -85,17 +78,37 @@
 
   function createDateEl(dateString, isCard) {
     var span = document.createElement('span');
-    span.className = 'pob-restock-date' + (isCard ? ' pob-restock-date--card ' + positionClassForDate() : '');
+    span.className = 'pob-restock-date' + (isCard ? ' pob-restock-date--card pob-restock-date--pos-' + positionSuffix() : '');
     span.setAttribute('data-pob-restock-date', '');
     span.textContent = (config.restockLabel || 'Expected restock:') + ' ' + formatDateForDisplay(dateString);
     return span;
+  }
+
+  /**
+   * Finds the element that tightly wraps just the product image, by climbing
+   * up from the <img> and comparing rendered heights, so the badge overlays
+   * the image itself rather than the whole card (which often includes the
+   * title/price below the image inside the same <a>).
+   */
+  function findImageContainer(anchor, img) {
+    var imgRect = img.getBoundingClientRect();
+    if (imgRect.height === 0) return anchor;
+
+    var node = img.parentElement;
+    while (node && node !== anchor && node !== document.body) {
+      var rect = node.getBoundingClientRect();
+      if (rect.height > 0 && Math.abs(rect.height - imgRect.height) <= imgRect.height * 0.15) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return img.parentElement || anchor;
   }
 
   var cardState = new Map();
 
   function updateCard(anchor, status) {
     var state = cardState.get(anchor);
-    var container = anchor.querySelector('img') ? anchor : (anchor.closest('[data-pob-card-root]') || anchor);
 
     if (!status.show) {
       if (state) {
@@ -106,11 +119,18 @@
       return;
     }
 
+    var img = anchor.querySelector('img');
+    var container = img ? findImageContainer(anchor, img) : anchor;
+
     if (window.getComputedStyle(container).position === 'static') {
       container.style.position = 'relative';
     }
 
-    if (!state) {
+    if (!state || state.container !== container) {
+      if (state) {
+        if (state.badgeEl) state.badgeEl.remove();
+        if (state.dateEl) state.dateEl.remove();
+      }
       var badgeEl = createBadge();
       container.appendChild(badgeEl);
       var dateEl = null;
@@ -118,7 +138,7 @@
         dateEl = createDateEl(status.restockDate, true);
         container.appendChild(dateEl);
       }
-      cardState.set(anchor, { badgeEl: badgeEl, dateEl: dateEl });
+      cardState.set(anchor, { badgeEl: badgeEl, dateEl: dateEl, container: container });
     } else if (status.restockDate && !state.dateEl) {
       state.dateEl = createDateEl(status.restockDate, true);
       container.appendChild(state.dateEl);
