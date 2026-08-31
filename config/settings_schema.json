@@ -2414,6 +2414,18 @@
       "id": "preorder_badge_text_color",
       "label": "Badge text color",
       "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "preorder_badge_position",
+      "label": "Badge position (product cards)",
+      "options": [
+        { "value": "top-left", "label": "Top left" },
+        { "value": "top-right", "label": "Top right" },
+        { "value": "bottom-left", "label": "Bottom left" },
+        { "value": "bottom-right", "label": "Bottom right" }
+      ],
+      "default": "top-left"
     }
   ]
 }
