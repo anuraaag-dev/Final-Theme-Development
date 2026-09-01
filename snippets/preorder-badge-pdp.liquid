@@ -23,7 +23,6 @@
     {%- endif -%}
   {%- endfor -%}
 
-  {%- comment -%} Real stock check per variant, not Shopify's continue-selling-adjusted "available" flag {%- endcomment -%}
   {%- assign pob_current_real_oos = false -%}
   {%- if pob_variant.inventory_management == 'shopify' and pob_variant.inventory_quantity <= 0 -%}
     {%- assign pob_current_real_oos = true -%}
@@ -48,23 +47,35 @@
     {%- endif -%}
   </div>
 
-  {%- comment -%} Per-variant real stock data, computed server-side, so switching variants updates the button/badge instantly and correctly without needing the public API (which doesn't expose real quantity) {%- endcomment -%}
-  <script type="application/json" data-pob-variants-json>
+  <script type="application/json" data-pob-order-data>
     {
       "handle": {{ product.handle | json }},
+      "title": {{ product.title | json }},
       "tagged": {{ pob_tagged | json }},
       "showOutOfStockSetting": {{ settings.preorder_show_out_of_stock | json }},
       "badgeText": {{ settings.preorder_badge_text | default: 'Pre-order' | json }},
       "buttonText": {{ settings.preorder_button_text | default: 'Pre-order' | json }},
       "restockDate": {{ pob_restock_date_string | json }},
       "restockLabel": {{ settings.preorder_restock_label | default: 'Expected restock:' | json }},
+      "currentVariantId": {{ pob_variant.id | json }},
+      "optionNames": {{ product.options | json }},
+      "currency": {{ cart.currency.iso_code | json }},
+      "moneyFormat": {{ shop.money_format | json }},
       "variants": [
         {%- for v in product.variants -%}
           {%- assign v_real_oos = false -%}
           {%- if v.inventory_management == 'shopify' and v.inventory_quantity <= 0 -%}
             {%- assign v_real_oos = true -%}
           {%- endif -%}
-          { "id": {{ v.id | json }}, "realOutOfStock": {{ v_real_oos | json }} }{%- unless forloop.last -%},{%- endunless -%}
+          {
+            "id": {{ v.id | json }},
+            "title": {{ v.title | json }},
+            "price": {{ v.price | json }},
+            "option1": {{ v.option1 | json }},
+            "option2": {{ v.option2 | json }},
+            "option3": {{ v.option3 | json }},
+            "realOutOfStock": {{ v_real_oos | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
         {%- endfor -%}
       ]
     }
