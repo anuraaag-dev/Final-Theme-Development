@@ -1,0 +1,380 @@
+{%- liquid
+  assign s = section.settings
+  assign sec_id = section.id
+  assign wholesale_variant = s.wholesale_product.selected_or_first_available_variant
+-%}
+
+<div class="wsa wsa--{{ sec_id }}">
+  <div class="wsa__inner page-width">
+    {%- if s.heading != blank -%}<h2 class="wsa__heading">{{ s.heading }}</h2>{%- endif -%}
+    {%- if s.description != blank -%}<div class="wsa__description">{{ s.description }}</div>{%- endif -%}
+
+    {%- if wholesale_variant == blank -%}
+      {%- comment -%} Merchant hasn't picked the application product yet in the theme editor. {%- endcomment -%}
+      <p class="wsa__setup-note">
+        This section needs a product selected in its settings (the hidden $0 "Wholesale Application" product) before the form can work.
+      </p>
+
+    {%- elsif customer == blank -%}
+      {%- comment -%}
+        Require login so the resulting order is reliably tied to the
+        applicant's real customer account (needed for the "wholesale" tag
+        to have anywhere to attach later). Guest checkout can still create
+        a loosely-matched customer record, but a logged-in account avoids
+        ambiguity and lets the applicant see their status by re-visiting
+        while logged in.
+      {%- endcomment -%}
+      <div class="wsa__login-gate">
+        <p>{{ s.login_required_text }}</p>
+        <div class="wsa__login-actions">
+          <a href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}" class="wsa__button wsa__button--primary">Log in</a>
+          <a href="{{ routes.account_register_url }}?return_url={{ request.path | url_encode }}" class="wsa__button wsa__button--secondary">Create an account</a>
+        </div>
+      </div>
+
+    {%- else -%}
+      <form id="wsa-form-{{ sec_id }}" class="wsa__form" data-wsa-form data-variant-id="{{ wholesale_variant.id }}">
+        <div class="wsa__group">
+          <h3 class="wsa__group-heading">Your details</h3>
+
+          <div class="wsa__field">
+            <label for="wsa-full-name-{{ sec_id }}">Full name <span class="wsa__required">*</span></label>
+            <input
+              type="text"
+              id="wsa-full-name-{{ sec_id }}"
+              name="properties[Full Name]"
+              value="{{ customer.name | escape }}"
+              required
+            >
+          </div>
+
+          <div class="wsa__field">
+            <label for="wsa-email-{{ sec_id }}">Email <span class="wsa__required">*</span></label>
+            <input
+              type="email"
+              id="wsa-email-{{ sec_id }}"
+              name="properties[Email]"
+              value="{{ customer.email | escape }}"
+              required
+            >
+          </div>
+
+          <div class="wsa__field">
+            <label for="wsa-phone-{{ sec_id }}">Phone number <span class="wsa__required">*</span></label>
+            <input
+              type="tel"
+              id="wsa-phone-{{ sec_id }}"
+              name="properties[Phone Number]"
+              value="{{ customer.phone | escape }}"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="wsa__group">
+          <h3 class="wsa__group-heading">Business details</h3>
+
+          <div class="wsa__field">
+            <label for="wsa-business-name-{{ sec_id }}">Business name <span class="wsa__required">*</span></label>
+            <input type="text" id="wsa-business-name-{{ sec_id }}" name="properties[Business Name]" required>
+          </div>
+
+          <div class="wsa__field">
+            <label for="wsa-business-type-{{ sec_id }}">Business type</label>
+            <select id="wsa-business-type-{{ sec_id }}" name="properties[Business Type]">
+              <option value="Retailer">Retailer</option>
+              <option value="Distributor">Distributor</option>
+              <option value="Online Reseller">Online Reseller</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="wsa__field">
+            <label for="wsa-tax-id-{{ sec_id }}">Tax ID / Resale certificate number</label>
+            <input type="text" id="wsa-tax-id-{{ sec_id }}" name="properties[Tax ID / Resale Certificate]">
+          </div>
+
+          <div class="wsa__field">
+            <label for="wsa-website-{{ sec_id }}">Business website</label>
+            <input type="url" id="wsa-website-{{ sec_id }}" name="properties[Business Website]" placeholder="https://">
+          </div>
+
+          <div class="wsa__field">
+            <label for="wsa-volume-{{ sec_id }}">Expected monthly order volume</label>
+            <select id="wsa-volume-{{ sec_id }}" name="properties[Expected Monthly Volume]">
+              <option value="Under $500">Under $500</option>
+              <option value="$500 - $2,000">$500 - $2,000</option>
+              <option value="$2,000 - $10,000">$2,000 - $10,000</option>
+              <option value="Over $10,000">Over $10,000</option>
+            </select>
+          </div>
+
+          <div class="wsa__field">
+            <label for="wsa-notes-{{ sec_id }}">Anything else we should know?</label>
+            <textarea id="wsa-notes-{{ sec_id }}" name="properties[Notes]" rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="wsa__field wsa__field--checkbox">
+          <label>
+            <input type="checkbox" required>
+            <span>I confirm the information above is accurate.</span>
+          </label>
+        </div>
+
+        <p class="wsa__error" data-wsa-error hidden></p>
+
+        <button type="submit" class="wsa__button wsa__button--primary wsa__submit" data-wsa-submit>
+          <span data-wsa-submit-label>Submit application</span>
+        </button>
+      </form>
+    {%- endif -%}
+  </div>
+</div>
+
+<script>
+  (function () {
+    var form = document.getElementById('wsa-form-{{ sec_id }}');
+    if (!form) return;
+
+    var errorEl = form.querySelector('[data-wsa-error]');
+    var submitBtn = form.querySelector('[data-wsa-submit]');
+    var submitLabel = form.querySelector('[data-wsa-submit-label]');
+    var variantId = form.getAttribute('data-variant-id');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      errorEl.hidden = true;
+
+      var formData = new FormData(form);
+      var properties = {};
+      formData.forEach(function (value, key) {
+        var match = key.match(/^properties\[(.+)\]$/);
+        if (match) {
+          properties[match[1]] = value;
+        }
+      });
+
+      submitBtn.disabled = true;
+      submitLabel.textContent = 'Submitting...';
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          id: variantId,
+          quantity: 1,
+          properties: properties
+        })
+      })
+        .then(function (res) {
+          if (!res.ok) {
+            return res.json().then(function (err) {
+              throw new Error(err.description || 'Could not submit application');
+            });
+          }
+          return res.json();
+        })
+        .then(function () {
+          // Send them straight to checkout to complete the $0 "order" -
+          // that order is what shows up in Admin with their details
+          // attached, and what the Flow automation watches for.
+          window.location.href = '/checkout';
+        })
+        .catch(function (err) {
+          console.error('Wholesale application submit failed', err);
+          errorEl.textContent = 'Something went wrong submitting your application. Please try again.';
+          errorEl.hidden = false;
+          submitBtn.disabled = false;
+          submitLabel.textContent = 'Submit application';
+        });
+    });
+  })();
+</script>
+
+<style>
+  .wsa--{{ sec_id }} {
+    padding-block: var(--spacing-4xl, 48px);
+  }
+
+  .wsa--{{ sec_id }} .wsa__inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .wsa--{{ sec_id }} .wsa__heading {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    color: var(--color-foreground-heading, var(--color-foreground));
+    margin: 0 0 8px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__description {
+    color: var(--color-foreground);
+    opacity: 0.75;
+    margin-bottom: 28px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__setup-note {
+    padding: 16px;
+    border: 1px dashed currentColor;
+    border-radius: 6px;
+    opacity: 0.7;
+  }
+
+  .wsa--{{ sec_id }} .wsa__login-gate {
+    padding: 24px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__login-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .wsa--{{ sec_id }} .wsa__group {
+    margin-bottom: 28px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__group-heading {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .wsa--{{ sec_id }} .wsa__field {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .wsa--{{ sec_id }} .wsa__required {
+    color: #d92b2b;
+  }
+
+  .wsa--{{ sec_id }} .wsa__field input[type="text"],
+  .wsa--{{ sec_id }} .wsa__field input[type="email"],
+  .wsa--{{ sec_id }} .wsa__field input[type="tel"],
+  .wsa--{{ sec_id }} .wsa__field input[type="url"],
+  .wsa--{{ sec_id }} .wsa__field select,
+  .wsa--{{ sec_id }} .wsa__field textarea {
+    font-family: var(--font-body--family);
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .wsa--{{ sec_id }} .wsa__field--checkbox {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__field--checkbox label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 0.85rem;
+  }
+
+  .wsa--{{ sec_id }} .wsa__field--checkbox input {
+    margin-top: 3px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__error {
+    color: #d92b2b;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+
+  .wsa--{{ sec_id }} .wsa__button {
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--color-foreground);
+    transition: opacity 0.2s ease;
+  }
+
+  .wsa--{{ sec_id }} .wsa__button:hover {
+    opacity: 0.85;
+  }
+
+  .wsa--{{ sec_id }} .wsa__button--primary {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  .wsa--{{ sec_id }} .wsa__button--secondary {
+    background: transparent;
+    color: var(--color-foreground);
+  }
+
+  .wsa--{{ sec_id }} .wsa__submit {
+    width: 100%;
+    border: none;
+  }
+
+  .wsa--{{ sec_id }} .wsa__submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Wholesale Application",
+  "tag": "section",
+  "class": "section section--wholesale-application",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Apply for Wholesale Pricing"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Tell us a bit about your business. We review every application and will email you once you're approved for wholesale pricing.</p>"
+    },
+    {
+      "type": "text",
+      "id": "login_required_text",
+      "label": "Message shown to logged-out visitors",
+      "default": "Please log in or create an account before applying, so we can link your application to your account."
+    },
+    {
+      "type": "product",
+      "id": "wholesale_product",
+      "label": "Wholesale Application product",
+      "info": "Select the hidden $0 'Wholesale Application' product. This section adds it to cart with the applicant's answers attached, then sends them to checkout to complete the (free) application."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Wholesale Application"
+    }
+  ]
+}
+{% endschema %}
