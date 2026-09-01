@@ -255,21 +255,6 @@
                     "padding-inline-end": 0
                   },
                   "blocks": {
-                    "page_RrG83V": {
-                      "type": "page",
-                      "name": "t:names.page",
-                      "settings": {
-                        "page": "wholesale-application",
-                        "max_width": "normal",
-                        "background_color": "",
-                        "text_color": "",
-                        "padding-block-start": 0,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    },
                     "text_8z9WhP": {
                       "type": "text",
                       "name": "t:names.heading",
@@ -345,7 +330,6 @@
                     }
                   },
                   "block_order": [
-                    "page_RrG83V",
                     "text_8z9WhP",
                     "text_F8wKby",
                     "menu_97EnGk"
