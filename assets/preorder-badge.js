@@ -20,6 +20,11 @@
     return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
+  function formatMoney(cents) {
+    var amount = (cents / 100).toFixed(2);
+    return amount;
+  }
+
   function positionSuffix() {
     var pos = config.badgePosition || 'top-left';
     var valid = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
@@ -27,14 +32,7 @@
     return pos;
   }
 
-  /* ---------- Card auto-detection ----------
-     IMPORTANT LIMITATION: Shopify's public /products/{handle}.js endpoint
-     does not expose real inventory counts, only a Shopify-computed
-     "available" flag — which becomes true once "Continue selling when out
-     of stock" is on, same issue we just fixed for the PDP. So on collection/
-     search cards, we rely ONLY on the merchant's "coming-soon" tag (which
-     IS exposed publicly), not on auto-detecting out-of-stock. This is a
-     Shopify platform limitation, not something fixable from a theme. */
+  /* ---------- Card badges (collections/search) ---------- */
 
   function extractRestockDate(tags) {
     if (!config.restockTagPrefix) return null;
@@ -50,10 +48,7 @@
     var tagged = tag !== '' && (product.tags || []).some(function (t) {
       return t.toLowerCase() === tag;
     });
-    return {
-      show: tagged,
-      restockDate: extractRestockDate(product.tags)
-    };
+    return { show: tagged, restockDate: extractRestockDate(product.tags) };
   }
 
   function extractHandle(href) {
@@ -89,9 +84,7 @@
   }
 
   function getImageFrame(img) {
-    if (img.hasAttribute('data-pob-framed')) {
-      return img.parentElement;
-    }
+    if (img.hasAttribute('data-pob-framed')) return img.parentElement;
     var parent = img.parentElement;
     if (parent) {
       var style = window.getComputedStyle(parent);
@@ -201,10 +194,174 @@
     }, interval);
   }
 
-  /* ---------- PDP: instant, accurate variant-switch updates ---------- */
+  /* ---------- Pre-order modal (self-contained, no dependency on theme markup) ---------- */
+
+  var modalOverlay = null;
+
+  function buildModal() {
+    if (modalOverlay) return modalOverlay;
+
+    modalOverlay = document.createElement('div');
+    modalOverlay.className = 'pob-modal-overlay';
+    modalOverlay.setAttribute('data-pob-modal-overlay', '');
+
+    modalOverlay.innerHTML =
+      '<div class="pob-modal" role="dialog" aria-modal="true">' +
+        '<button type="button" class="pob-modal__close" data-pob-modal-close aria-label="Close">\u2715</button>' +
+        '<h3 class="pob-modal__title" data-pob-modal-title></h3>' +
+        '<p class="pob-modal__restock" data-pob-modal-restock></p>' +
+        '<div data-pob-modal-options></div>' +
+        '<div class="pob-modal__field">' +
+          '<label class="pob-modal__label">Quantity</label>' +
+          '<input type="number" class="pob-modal__qty" data-pob-modal-qty min="1" value="1">' +
+        '</div>' +
+        '<p class="pob-modal__price" data-pob-modal-price></p>' +
+        '<p class="pob-modal__error" data-pob-modal-error></p>' +
+        '<button type="button" class="pob-modal__submit" data-pob-modal-submit>Place Pre-order</button>' +
+      '</div>';
+
+    document.body.appendChild(modalOverlay);
+
+    modalOverlay.addEventListener('click', function (e) {
+      if (e.target === modalOverlay) closeModal();
+    });
+    modalOverlay.querySelector('[data-pob-modal-close]').addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modalOverlay.hasAttribute('data-pob-open')) closeModal();
+    });
+
+    return modalOverlay;
+  }
+
+  function closeModal() {
+    if (modalOverlay) modalOverlay.removeAttribute('data-pob-open');
+  }
+
+  function openModal(data) {
+    var overlay = buildModal();
+    overlay.querySelector('[data-pob-modal-title]').textContent = data.title;
+
+    var restockEl = overlay.querySelector('[data-pob-modal-restock]');
+    if (data.restockDate) {
+      restockEl.textContent = (data.restockLabel || 'Expected restock:') + ' ' + formatDateForDisplay(data.restockDate);
+      restockEl.style.display = '';
+    } else {
+      restockEl.style.display = 'none';
+    }
+
+    var optionsHost = overlay.querySelector('[data-pob-modal-options]');
+    optionsHost.innerHTML = '';
+
+    var selections = {};
+    var currentVariant = data.variants.find(function (v) { return String(v.id) === String(data.currentVariantId); }) || data.variants[0];
+    if (currentVariant) {
+      selections.option1 = currentVariant.option1;
+      selections.option2 = currentVariant.option2;
+      selections.option3 = currentVariant.option3;
+    }
+
+    var optionKeys = ['option1', 'option2', 'option3'];
+
+    (data.optionNames || []).forEach(function (name, idx) {
+      var key = optionKeys[idx];
+      var values = Array.from(new Set(data.variants.map(function (v) { return v[key]; }).filter(Boolean)));
+
+      var field = document.createElement('div');
+      field.className = 'pob-modal__field';
+      var label = document.createElement('label');
+      label.className = 'pob-modal__label';
+      label.textContent = name;
+      var select = document.createElement('select');
+      select.className = 'pob-modal__select';
+      select.setAttribute('data-pob-option-select', key);
+
+      values.forEach(function (val) {
+        var opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        if (val === selections[key]) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      select.addEventListener('change', function () {
+        selections[key] = select.value;
+        refreshSelectedVariant();
+      });
+
+      field.appendChild(label);
+      field.appendChild(select);
+      optionsHost.appendChild(field);
+    });
+
+    var priceEl = overlay.querySelector('[data-pob-modal-price]');
+    var errorEl = overlay.querySelector('[data-pob-modal-error]');
+    var submitBtn = overlay.querySelector('[data-pob-modal-submit]');
+    var qtyInput = overlay.querySelector('[data-pob-modal-qty]');
+
+    var matchedVariant = null;
+
+    function refreshSelectedVariant() {
+      matchedVariant = data.variants.find(function (v) {
+        return (!selections.option1 || v.option1 === selections.option1) &&
+               (!selections.option2 || v.option2 === selections.option2) &&
+               (!selections.option3 || v.option3 === selections.option3);
+      });
+
+      errorEl.removeAttribute('data-pob-show');
+
+      if (!matchedVariant) {
+        priceEl.textContent = '';
+        submitBtn.disabled = true;
+        return;
+      }
+
+      priceEl.textContent = formatMoney(matchedVariant.price);
+      submitBtn.disabled = false;
+    }
+
+    refreshSelectedVariant();
+
+    submitBtn.onclick = function () {
+      if (!matchedVariant) return;
+      var qty = parseInt(qtyInput.value, 10) || 1;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Placing order...';
+      errorEl.removeAttribute('data-pob-show');
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: matchedVariant.id, quantity: qty })
+      })
+        .then(function (res) {
+          if (!res.ok) {
+            return res.json().then(function (err) {
+              throw new Error(err.description || 'This item could not be added to your order.');
+            });
+          }
+          return res.json();
+        })
+        .then(function () {
+          window.location.href = '/checkout';
+        })
+        .catch(function (err) {
+          errorEl.textContent = err.message;
+          errorEl.setAttribute('data-pob-show', '');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Place Pre-order';
+        });
+    };
+
+    overlay.setAttribute('data-pob-open', '');
+  }
+
+  /* ---------- PDP: badge, native button replacement, modal trigger ---------- */
 
   function initPdp() {
-    var dataEls = document.querySelectorAll('[data-pob-variants-json]');
+    var dataEls = document.querySelectorAll('[data-pob-order-data]');
     if (!dataEls.length) return;
 
     dataEls.forEach(function (dataEl) {
@@ -223,7 +380,7 @@
 
       function currentVariantId() {
         var input = document.querySelector('form[action*="/cart/add"] input[name="id"]');
-        return input ? input.value : null;
+        return input ? input.value : data.currentVariantId;
       }
 
       function isPreorderForVariant(variantId) {
@@ -243,32 +400,52 @@
         badge.setAttribute('data-pob-badge', '');
         badge.textContent = data.badgeText || 'Pre-order';
         host.appendChild(badge);
-        if (data.restockDate) {
-          host.appendChild(createDateEl(data.restockDate, false));
-        }
+        if (data.restockDate) host.appendChild(createDateEl(data.restockDate, false));
       }
 
-      function renderButtonText(show) {
-        document.querySelectorAll('[data-pob-cta-text]').forEach(function (el) {
-          if (show) {
-            el.textContent = data.buttonText || 'Pre-order';
-          } else if (el.dataset.pobOriginalText) {
-            el.textContent = el.dataset.pobOriginalText;
+      function findCartForm() {
+        return document.querySelector('form[action*="/cart/add"]');
+      }
+
+      function ensurePreorderButton(show) {
+        var form = findCartForm();
+        if (!form) return;
+
+        var nativeSubmit = form.querySelector('button[type="submit"]');
+        var existingBtn = form.parentElement ? form.parentElement.querySelector('[data-pob-cta-button="' + data.handle + '"]') : null;
+
+        if (!show) {
+          if (nativeSubmit) nativeSubmit.style.removeProperty('display');
+          if (existingBtn) existingBtn.remove();
+          return;
+        }
+
+        if (nativeSubmit) nativeSubmit.style.display = 'none';
+
+        if (!existingBtn) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'pob-cta-button';
+          btn.setAttribute('data-pob-cta-button', data.handle);
+          btn.textContent = data.buttonText || 'Pre-order';
+          btn.addEventListener('click', function () {
+            openModal(data);
+          });
+          if (nativeSubmit && nativeSubmit.parentNode) {
+            nativeSubmit.parentNode.insertBefore(btn, nativeSubmit.nextSibling);
+          } else {
+            form.appendChild(btn);
           }
-        });
-      }
-
-      document.querySelectorAll('[data-pob-cta-text]').forEach(function (el) {
-        if (!el.dataset.pobOriginalText) {
-          el.dataset.pobOriginalText = el.textContent.trim();
         }
-      });
+      }
 
       function update() {
         var show = isPreorderForVariant(currentVariantId());
         renderBadge(show);
-        renderButtonText(show);
+        ensurePreorderButton(show);
       }
+
+      update();
 
       document.addEventListener('change', function (e) {
         if (e.target.closest && e.target.closest('form[action*="/cart/add"]')) {
