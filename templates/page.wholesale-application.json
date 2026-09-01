@@ -22,10 +22,12 @@
             "alignment": "left",
             "type_preset": "h2",
             "font": "var(--font-body--family)",
+            "font_size": "1rem",
             "line_height": "normal",
             "letter_spacing": "normal",
             "case": "none",
             "wrap": "pretty",
+            "text_color": "",
             "background": false,
             "background_color": "#00000026",
             "corner_radius": 0,
@@ -38,7 +40,9 @@
         },
         "page-content": {
           "type": "page-content",
-          "settings": {},
+          "settings": {
+            "text_color": ""
+          },
           "blocks": {}
         }
       },
@@ -53,9 +57,20 @@
         "padding-block-start": 40,
         "padding-block-end": 80
       }
+    },
+    "wholesale_appliction_ewMJH7": {
+      "type": "wholesale-appliction",
+      "name": "Wholesale Application",
+      "settings": {
+        "heading": "Apply for Wholesale Pricing",
+        "description": "<p>Tell us a bit about your business. We review every application and will email you once you're approved for wholesale pricing.</p>",
+        "login_required_text": "Please log in or create an account before applying, so we can link your application to your account.",
+        "wholesale_product": "wholesale-application"
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "wholesale_appliction_ewMJH7"
   ]
 }
