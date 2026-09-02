@@ -14,6 +14,11 @@
   var config = getConfig();
   if (!config || !config.enabled) return;
 
+  var hideList = (config.hideNativeBadges || '')
+    .split(',')
+    .map(function (s) { return s.trim().toLowerCase(); })
+    .filter(Boolean);
+
   function formatDateForDisplay(dateString) {
     var d = new Date(dateString);
     if (isNaN(d.getTime())) return dateString;
@@ -21,18 +26,18 @@
   }
 
   function formatMoney(cents) {
-    var amount = (cents / 100).toFixed(2);
-    return amount;
+    return (cents / 100).toFixed(2);
   }
 
-  function positionSuffix() {
+  function cornerParts() {
     var pos = config.badgePosition || 'top-left';
     var valid = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
     if (valid.indexOf(pos) === -1) pos = 'top-left';
-    return pos;
+    var parts = pos.split('-');
+    return { vertical: parts[0], horizontal: parts[1] };
   }
 
-  /* ---------- Card badges (collections/search) ---------- */
+  /* ---------- Card badges: measured positioning + native badge hiding ---------- */
 
   function extractRestockDate(tags) {
     if (!config.restockTagPrefix) return null;
@@ -69,79 +74,148 @@
 
   function createBadge() {
     var span = document.createElement('span');
-    span.className = 'pob-badge pob-badge--card pob-badge--pos-' + positionSuffix();
+    span.className = 'pob-badge pob-badge--card';
     span.setAttribute('data-pob-badge', '');
     span.textContent = config.badgeText || 'Pre-order';
     return span;
   }
 
-  function createDateEl(dateString, isCard) {
+  function createDateEl(dateString) {
     var span = document.createElement('span');
-    span.className = 'pob-restock-date' + (isCard ? ' pob-restock-date--card pob-restock-date--pos-' + positionSuffix() : '');
+    span.className = 'pob-restock-date pob-restock-date--card';
     span.setAttribute('data-pob-restock-date', '');
     span.textContent = (config.restockLabel || 'Expected restock:') + ' ' + formatDateForDisplay(dateString);
     return span;
   }
 
-  function getImageFrame(img) {
-    if (img.hasAttribute('data-pob-framed')) return img.parentElement;
-    var parent = img.parentElement;
-    if (parent) {
-      var style = window.getComputedStyle(parent);
-      var onlyChild = parent.children.length === 1;
-      var clipped = style.overflow === 'hidden' || style.overflowX === 'hidden' || style.overflowY === 'hidden';
-      var positioned = style.position === 'relative' || style.position === 'absolute' || style.position === 'sticky';
-      if (onlyChild && (clipped || positioned)) {
-        img.setAttribute('data-pob-framed', '');
-        if (style.position === 'static') parent.style.position = 'relative';
-        return parent;
+  function ensureRelativeContainer(el) {
+    var style = window.getComputedStyle(el);
+    if (style.position === 'static') el.style.position = 'relative';
+  }
+
+  /**
+   * Positions a stack of badge elements against the real, measured position
+   * of <img> inside <container> — regardless of how much bigger the
+   * container is than the image itself (e.g. if title/price live in the
+   * same box). Each element in the stack is offset from the previous one,
+   * so any number of badges stack cleanly without overlapping.
+   */
+  function positionStack(container, img, elements) {
+    if (!elements.length) return;
+    var corner = cornerParts();
+    var containerRect = container.getBoundingClientRect();
+    var imgRect = img.getBoundingClientRect();
+
+    var fromTop = imgRect.top - containerRect.top;
+    var fromLeft = imgRect.left - containerRect.left;
+    var fromRight = containerRect.right - imgRect.right;
+    var fromBottom = containerRect.bottom - imgRect.bottom;
+
+    var isTop = corner.vertical === 'top';
+    var isLeft = corner.horizontal === 'left';
+    var gap = 6;
+    var cursor = 10;
+
+    elements.forEach(function (el) {
+      el.style.top = '';
+      el.style.bottom = '';
+      el.style.left = '';
+      el.style.right = '';
+
+      if (isLeft) {
+        el.style.left = (fromLeft + 10) + 'px';
+      } else {
+        el.style.right = (fromRight + 10) + 'px';
       }
-    }
-    var wrapper = document.createElement('span');
-    wrapper.setAttribute('data-pob-wrap', '');
-    wrapper.style.position = 'relative';
-    wrapper.style.display = 'block';
-    wrapper.style.lineHeight = '0';
-    img.parentNode.insertBefore(wrapper, img);
-    wrapper.appendChild(img);
-    img.setAttribute('data-pob-framed', '');
-    return wrapper;
+
+      if (isTop) {
+        el.style.top = (fromTop + cursor) + 'px';
+      } else {
+        el.style.bottom = (fromBottom + cursor) + 'px';
+      }
+
+      cursor += el.offsetHeight + gap;
+    });
+  }
+
+  function setNativeBadgesHidden(anchor, hide) {
+    if (!hideList.length) return;
+    var all = anchor.querySelectorAll('*');
+    all.forEach(function (el) {
+      if (el.closest('[data-pob-badge], [data-pob-restock-date]')) return;
+      if (el.children.length > 0) return;
+      var text = (el.textContent || '').trim().toLowerCase();
+      if (hideList.indexOf(text) === -1) return;
+
+      if (hide) {
+        if (!el.hasAttribute('data-pob-hidden-native')) {
+          el.setAttribute('data-pob-hidden-native', '');
+          el.setAttribute('data-pob-prev-display', el.style.display || '');
+          el.style.display = 'none';
+        }
+      } else if (el.hasAttribute('data-pob-hidden-native')) {
+        el.style.display = el.getAttribute('data-pob-prev-display') || '';
+        el.removeAttribute('data-pob-hidden-native');
+        el.removeAttribute('data-pob-prev-display');
+      }
+    });
   }
 
   var cardState = new Map();
 
+  function repositionCard(anchor) {
+    var state = cardState.get(anchor);
+    if (!state || !state.img) return;
+    var elements = [];
+    if (state.badgeEl) elements.push(state.badgeEl);
+    if (state.dateEl) elements.push(state.dateEl);
+    positionStack(state.container, state.img, elements);
+  }
+
   function updateCard(anchor, status) {
     var state = cardState.get(anchor);
+
     if (!status.show) {
       if (state) {
         if (state.badgeEl) state.badgeEl.remove();
         if (state.dateEl) state.dateEl.remove();
         cardState.delete(anchor);
       }
+      setNativeBadgesHidden(anchor, false);
       return;
     }
-    var img = anchor.querySelector('img');
-    var container = img ? getImageFrame(img) : anchor;
 
-    if (!state || state.container !== container) {
-      if (state) {
-        if (state.badgeEl) state.badgeEl.remove();
-        if (state.dateEl) state.dateEl.remove();
-      }
+    var img = anchor.querySelector('img');
+    if (!img) return;
+    var container = img.parentElement || anchor;
+    ensureRelativeContainer(container);
+
+    if (!state) {
       var badgeEl = createBadge();
       container.appendChild(badgeEl);
       var dateEl = null;
       if (status.restockDate) {
-        dateEl = createDateEl(status.restockDate, true);
+        dateEl = createDateEl(status.restockDate);
         container.appendChild(dateEl);
       }
-      cardState.set(anchor, { badgeEl: badgeEl, dateEl: dateEl, container: container });
-    } else if (status.restockDate && !state.dateEl) {
-      state.dateEl = createDateEl(status.restockDate, true);
-      container.appendChild(state.dateEl);
-    } else if (!status.restockDate && state.dateEl) {
-      state.dateEl.remove();
-      state.dateEl = null;
+      state = { badgeEl: badgeEl, dateEl: dateEl, container: container, img: img };
+      cardState.set(anchor, state);
+    } else {
+      if (status.restockDate && !state.dateEl) {
+        state.dateEl = createDateEl(status.restockDate);
+        state.container.appendChild(state.dateEl);
+      } else if (!status.restockDate && state.dateEl) {
+        state.dateEl.remove();
+        state.dateEl = null;
+      }
+    }
+
+    setNativeBadgesHidden(anchor, true);
+
+    if (img.complete) {
+      repositionCard(anchor);
+    } else {
+      img.addEventListener('load', function () { repositionCard(anchor); }, { once: true });
     }
   }
 
@@ -192,9 +266,17 @@
       if (document.visibilityState !== 'visible') return;
       cardState.forEach(function (_, anchor) { processAnchor(anchor, true); });
     }, interval);
+
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        cardState.forEach(function (_, anchor) { repositionCard(anchor); });
+      }, 150);
+    });
   }
 
-  /* ---------- Pre-order modal (self-contained, no dependency on theme markup) ---------- */
+  /* ---------- Pre-order modal ---------- */
 
   var modalOverlay = null;
 
@@ -400,7 +482,13 @@
         badge.setAttribute('data-pob-badge', '');
         badge.textContent = data.badgeText || 'Pre-order';
         host.appendChild(badge);
-        if (data.restockDate) host.appendChild(createDateEl(data.restockDate, false));
+        if (data.restockDate) {
+          var dateEl = document.createElement('span');
+          dateEl.className = 'pob-restock-date';
+          dateEl.setAttribute('data-pob-restock-date', '');
+          dateEl.textContent = (data.restockLabel || 'Expected restock:') + ' ' + formatDateForDisplay(data.restockDate);
+          host.appendChild(dateEl);
+        }
       }
 
       function findCartForm() {
