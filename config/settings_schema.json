@@ -2434,6 +2434,13 @@
       "label": "Pre-order button text",
       "default": "Pre-order",
       "info": "Shown on the Add to Cart button itself when a variant is truly out of stock but pre-order is enabled for it."
+    },
+    {
+      "type": "text",
+      "id": "preorder_hide_native_badges",
+      "label": "Native badges to hide when Pre-order shows",
+      "default": "Sale, Sold out",
+      "info": "Comma-separated exact labels (e.g. Sale, Sold out) to hide on a card so they don't overlap the Pre-order badge."
     }
   ]
 }
