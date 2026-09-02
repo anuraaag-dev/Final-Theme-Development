@@ -464,7 +464,15 @@
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: matchedVariant.id, quantity: qty })
+        body: JSON.stringify({
+          id: matchedVariant.id,
+          quantity: qty,
+          properties: {
+            'Pre-order': 'Yes',
+            'Pre-order requested on': new Date().toISOString().slice(0, 10),
+            'Expected restock': data.restockDate || 'Not yet set'
+          }
+        })
       })
         .then(function (res) {
           if (!res.ok) {
