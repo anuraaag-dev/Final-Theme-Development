@@ -109,7 +109,7 @@
     "fsb_tier1_threshold": 100,
     "fsb_tier1_discount_percent": "20",
     "fsb_tier2_threshold": 500,
-    "preorder_badge_position": "bottom-left",
+    "preorder_badge_position": "top-right",
     "fsb_tier1_discount_code": "10%OFF!",
     "fsb_tier2_discount_code": "FREESHIPPING",
     "fsb_tier3_discount_code": "FREESHIPPING",
