@@ -9,7 +9,8 @@
     "restockTagPrefix": {{ settings.preorder_restock_tag_prefix | default: 'restock-' | json }},
     "restockLabel": {{ settings.preorder_restock_label | default: 'Expected restock:' | json }},
     "refreshSeconds": {{ settings.preorder_refresh_seconds | default: 45 | json }},
-    "badgePosition": {{ settings.preorder_badge_position | default: 'top-left' | json }}
+    "badgePosition": {{ settings.preorder_badge_position | default: 'top-left' | json }},
+    "hideNativeBadges": {{ settings.preorder_hide_native_badges | default: 'Sale, Sold out' | json }}
   }
 </script>
 <style>
