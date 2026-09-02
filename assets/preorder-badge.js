@@ -37,7 +37,7 @@
     return { vertical: parts[0], horizontal: parts[1] };
   }
 
-  /* ---------- Card badges: measured positioning + native badge hiding ---------- */
+  /* ---------- Card badges ---------- */
 
   function extractRestockDate(tags) {
     if (!config.restockTagPrefix) return null;
@@ -94,11 +94,71 @@
   }
 
   /**
+   * Finds an <img> for this card even when the specific anchor that was
+   * found (e.g. a title-only link) doesn't itself contain one. Climbs up
+   * through ancestors — a separate anchor for the image, wrapped in a
+   * shared card container, is a common pattern — and stops at the first
+   * ancestor whose descendants include an <img>.
+   */
+  function findCardImage(anchor) {
+    var img = anchor.querySelector('img');
+    if (img) return img;
+    var node = anchor.parentElement;
+    var depth = 0;
+    while (node && depth < 8) {
+      img = node.querySelector('img');
+      if (img) return img;
+      node = node.parentElement;
+      depth++;
+    }
+    return null;
+  }
+
+  /**
+   * Finds a wider ancestor likely to represent the whole card (for hiding
+   * native "Sale"/"Sold out" text that may live outside the image's
+   * immediate wrapper). Climbs further than findCardImage, stopping at a
+   * list item or after a generous depth cap.
+   */
+  function findWideCardRoot(anchor) {
+    var node = anchor;
+    var candidate = anchor;
+    for (var i = 0; i < 10 && node; i++) {
+      candidate = node;
+      var tag = node.tagName ? node.tagName.toLowerCase() : '';
+      if (tag === 'li') return node;
+      node = node.parentElement;
+    }
+    return candidate;
+  }
+
+  function setNativeBadgesHidden(root, hide) {
+    if (!hideList.length || !root) return;
+    var all = root.querySelectorAll('*');
+    all.forEach(function (el) {
+      if (el.closest('[data-pob-badge], [data-pob-restock-date]')) return;
+      if (el.children.length > 0) return;
+      var text = (el.textContent || '').trim().toLowerCase();
+      if (hideList.indexOf(text) === -1) return;
+
+      if (hide) {
+        if (!el.hasAttribute('data-pob-hidden-native')) {
+          el.setAttribute('data-pob-hidden-native', '');
+          el.setAttribute('data-pob-prev-display', el.style.display || '');
+          el.style.display = 'none';
+        }
+      } else if (el.hasAttribute('data-pob-hidden-native')) {
+        el.style.display = el.getAttribute('data-pob-prev-display') || '';
+        el.removeAttribute('data-pob-hidden-native');
+        el.removeAttribute('data-pob-prev-display');
+      }
+    });
+  }
+
+  /**
    * Positions a stack of badge elements against the real, measured position
-   * of <img> inside <container> — regardless of how much bigger the
-   * container is than the image itself (e.g. if title/price live in the
-   * same box). Each element in the stack is offset from the previous one,
-   * so any number of badges stack cleanly without overlapping.
+   * of <img> inside <container>, so any number of badges stack cleanly
+   * regardless of how the container's size relates to the image's size.
    */
   function positionStack(container, img, elements) {
     if (!elements.length) return;
@@ -138,33 +198,13 @@
     });
   }
 
-  function setNativeBadgesHidden(anchor, hide) {
-    if (!hideList.length) return;
-    var all = anchor.querySelectorAll('*');
-    all.forEach(function (el) {
-      if (el.closest('[data-pob-badge], [data-pob-restock-date]')) return;
-      if (el.children.length > 0) return;
-      var text = (el.textContent || '').trim().toLowerCase();
-      if (hideList.indexOf(text) === -1) return;
-
-      if (hide) {
-        if (!el.hasAttribute('data-pob-hidden-native')) {
-          el.setAttribute('data-pob-hidden-native', '');
-          el.setAttribute('data-pob-prev-display', el.style.display || '');
-          el.style.display = 'none';
-        }
-      } else if (el.hasAttribute('data-pob-hidden-native')) {
-        el.style.display = el.getAttribute('data-pob-prev-display') || '';
-        el.removeAttribute('data-pob-hidden-native');
-        el.removeAttribute('data-pob-prev-display');
-      }
-    });
-  }
-
+  // Keyed by product handle (not by anchor) — a product commonly has
+  // multiple anchors on a card (image link + title link), and we only
+  // want one badge per product, not one per anchor.
   var cardState = new Map();
 
-  function repositionCard(anchor) {
-    var state = cardState.get(anchor);
+  function repositionCard(handle) {
+    var state = cardState.get(handle);
     if (!state || !state.img) return;
     var elements = [];
     if (state.badgeEl) elements.push(state.badgeEl);
@@ -172,50 +212,54 @@
     positionStack(state.container, state.img, elements);
   }
 
-  function updateCard(anchor, status) {
-    var state = cardState.get(anchor);
+  function updateCard(handle, anchor, status) {
+    var existing = cardState.get(handle);
 
     if (!status.show) {
-      if (state) {
-        if (state.badgeEl) state.badgeEl.remove();
-        if (state.dateEl) state.dateEl.remove();
-        cardState.delete(anchor);
+      if (existing) {
+        if (existing.badgeEl) existing.badgeEl.remove();
+        if (existing.dateEl) existing.dateEl.remove();
+        if (existing.hideRoot) setNativeBadgesHidden(existing.hideRoot, false);
+        cardState.delete(handle);
       }
-      setNativeBadgesHidden(anchor, false);
       return;
     }
 
-    var img = anchor.querySelector('img');
+    if (existing) {
+      if (status.restockDate && !existing.dateEl) {
+        existing.dateEl = createDateEl(status.restockDate);
+        existing.container.appendChild(existing.dateEl);
+      } else if (!status.restockDate && existing.dateEl) {
+        existing.dateEl.remove();
+        existing.dateEl = null;
+      }
+      repositionCard(handle);
+      return;
+    }
+
+    var img = findCardImage(anchor);
     if (!img) return;
+
     var container = img.parentElement || anchor;
     ensureRelativeContainer(container);
 
-    if (!state) {
-      var badgeEl = createBadge();
-      container.appendChild(badgeEl);
-      var dateEl = null;
-      if (status.restockDate) {
-        dateEl = createDateEl(status.restockDate);
-        container.appendChild(dateEl);
-      }
-      state = { badgeEl: badgeEl, dateEl: dateEl, container: container, img: img };
-      cardState.set(anchor, state);
-    } else {
-      if (status.restockDate && !state.dateEl) {
-        state.dateEl = createDateEl(status.restockDate);
-        state.container.appendChild(state.dateEl);
-      } else if (!status.restockDate && state.dateEl) {
-        state.dateEl.remove();
-        state.dateEl = null;
-      }
+    var badgeEl = createBadge();
+    container.appendChild(badgeEl);
+    var dateEl = null;
+    if (status.restockDate) {
+      dateEl = createDateEl(status.restockDate);
+      container.appendChild(dateEl);
     }
 
-    setNativeBadgesHidden(anchor, true);
+    var hideRoot = findWideCardRoot(anchor);
+    setNativeBadgesHidden(hideRoot, true);
+
+    cardState.set(handle, { badgeEl: badgeEl, dateEl: dateEl, container: container, img: img, hideRoot: hideRoot });
 
     if (img.complete) {
-      repositionCard(anchor);
+      repositionCard(handle);
     } else {
-      img.addEventListener('load', function () { repositionCard(anchor); }, { once: true });
+      img.addEventListener('load', function () { repositionCard(handle); }, { once: true });
     }
   }
 
@@ -223,7 +267,7 @@
     var handle = extractHandle(anchor.getAttribute('href') || '');
     if (!handle) return;
     fetchProduct(handle, bypassCache).then(function (product) {
-      if (product) updateCard(anchor, computeCardStatus(product));
+      if (product) updateCard(handle, anchor, computeCardStatus(product));
     });
   }
 
@@ -264,14 +308,18 @@
     var interval = (config.refreshSeconds || 45) * 1000;
     setInterval(function () {
       if (document.visibilityState !== 'visible') return;
-      cardState.forEach(function (_, anchor) { processAnchor(anchor, true); });
+      cardState.forEach(function (state, handle) {
+        fetchProduct(handle, true).then(function (product) {
+          if (product) updateCard(handle, null, computeCardStatus(product));
+        });
+      });
     }, interval);
 
     var resizeTimer = null;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
-        cardState.forEach(function (_, anchor) { repositionCard(anchor); });
+        cardState.forEach(function (_, handle) { repositionCard(handle); });
       }, 150);
     });
   }
