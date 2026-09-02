@@ -551,9 +551,44 @@
         return document.querySelector('form[action*="/cart/add"]');
       }
 
+      function toggleAcceleratedCheckout(form, show) {
+        var scope = form.closest('product-form-component') || form.parentElement || document;
+        var buttons = scope.querySelectorAll('.shopify-payment-button');
+        buttons.forEach(function (el) {
+          if (show) {
+            if (!el.hasAttribute('data-pob-hidden-accel')) {
+              el.setAttribute('data-pob-hidden-accel', '');
+              el.setAttribute('data-pob-prev-display', el.style.display || '');
+              el.style.display = 'none';
+            }
+          } else if (el.hasAttribute('data-pob-hidden-accel')) {
+            el.style.display = el.getAttribute('data-pob-prev-display') || '';
+            el.removeAttribute('data-pob-hidden-accel');
+            el.removeAttribute('data-pob-prev-display');
+          }
+        });
+      }
+
+      function watchAcceleratedCheckout(form) {
+        var scope = form.closest('product-form-component') || form.parentElement || document.body;
+        if (scope.hasAttribute('data-pob-accel-observed')) return;
+        scope.setAttribute('data-pob-accel-observed', '');
+
+        var mo = new MutationObserver(function () {
+          toggleAcceleratedCheckout(form, currentShowState);
+        });
+        mo.observe(scope, { childList: true, subtree: true });
+      }
+
+      var currentShowState = false;
+
       function ensurePreorderButton(show) {
         var form = findCartForm();
         if (!form) return;
+
+        currentShowState = show;
+        watchAcceleratedCheckout(form);
+        toggleAcceleratedCheckout(form, show);
 
         var nativeSubmit = form.querySelector('button[type="submit"]');
         var existingBtn = form.parentElement ? form.parentElement.querySelector('[data-pob-cta-button="' + data.handle + '"]') : null;
