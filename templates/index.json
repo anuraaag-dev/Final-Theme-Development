@@ -197,7 +197,6 @@
         "enable_loop": true,
         "show_arrows": true,
         "show_dots": true,
-        "wholesale_discount_percent": 10,
         "show_vendor": true,
         "show_rating": false,
         "show_compare_price": true,
@@ -354,7 +353,6 @@
         "enable_loop": true,
         "show_arrows": true,
         "show_dots": true,
-        "wholesale_discount_percent": 10,
         "show_vendor": true,
         "show_rating": false,
         "show_compare_price": true,
@@ -1000,6 +998,48 @@
         "tier3_discount": 15,
         "p_color": "#000000"
       }
+    },
+    "animated_carousel_p3atWt": {
+      "type": "animated-carousel",
+      "name": "Animated Carousel",
+      "settings": {
+        "heading": "Collections",
+        "subheading": "",
+        "show_discover_link": true,
+        "discover_text": "Discover All",
+        "discover_url": "",
+        "collection_1": "activewear",
+        "collection_2": "mens-clothing",
+        "collection_3": "new-arrivals",
+        "collection_4": "womens-clothing",
+        "collection_5": "",
+        "show_arrows": true,
+        "show_pagination": true,
+        "enable_autoplay": false,
+        "autoplay_interval": 5,
+        "enable_hover_effects": true,
+        "animation_duration": 550,
+        "animation_easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "section_height": 620,
+        "center_card_width": 420,
+        "center_card_height": 560,
+        "side_card_width": 260,
+        "side_card_height": 340,
+        "card_spacing": 20,
+        "border_radius": 6,
+        "text_alignment": "left",
+        "title_font_size": 18,
+        "title_font_weight": "500",
+        "text_color": "#ffffff",
+        "section_background_color": "#111111",
+        "overlay_color": "#000000",
+        "overlay_opacity": 10,
+        "overlay_intensity": 60,
+        "padding_top": 40,
+        "padding_bottom": 40,
+        "padding_left": 32,
+        "padding_right": 32
+      }
     }
   },
   "order": [
@@ -1017,6 +1057,7 @@
     "brand_story_slider_Knke4L",
     "shopable_video_X6CF9T",
     "recently_viewed_products_mzP4rX",
-    "bundle_builder_cUQG9G"
+    "bundle_builder_cUQG9G",
+    "animated_carousel_p3atWt"
   ]
 }
