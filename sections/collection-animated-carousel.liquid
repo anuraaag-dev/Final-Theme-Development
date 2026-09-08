@@ -1,0 +1,1033 @@
+{%- doc -%}
+  Collection Carousel — a 5-collection circular carousel with a large
+  featured center card, two visible side cards, and a full-bleed
+  background image (the active collection's image) that slides
+  directionally as the user navigates.
+
+  Architecture note: both the background layers and the collection cards
+  share one "slot" system (-2, -1, 0, 1, 2 relative to the active index).
+  Navigating right/left simply shifts every element's slot by one; CSS
+  transitions animate the resulting transform change automatically, which
+  is what produces the directional slide without any manual per-direction
+  animation code.
+{%- enddoc -%}
+
+{%- liquid
+  assign s = section.settings
+  assign sec_id = section.id
+
+  # Build a comma-separated list of the selected collections' handles,
+  # skipping any of the 5 pickers the merchant left empty. Liquid has no
+  # generic "push to array" tag, so a string joined then split back into
+  # an array is the standard way to end up with a clean, correctly-
+  # numbered array (forloop.index0 lines up with only the filled-in
+  # slots, not the raw 1..5 setting positions).
+  assign handles = ''
+  for i in (1..5)
+    assign key = 'collection_' | append: i
+    assign coll = s[key]
+    if coll != blank
+      assign handles = handles | append: coll.handle | append: ','
+    endif
+  endfor
+  assign handles = handles | split: ','
+  assign total = handles.size
+
+  assign overlay_alpha = s.overlay_opacity | times: 1.0 | divided_by: 100
+  assign scrim_alpha = s.overlay_intensity | times: 1.0 | divided_by: 100
+-%}
+
+<section
+  id="CollectionCarousel-{{ sec_id }}"
+  class="cc"
+  data-collection-carousel
+  data-autoplay="{{ s.enable_autoplay }}"
+  data-autoplay-interval="{{ s.autoplay_interval }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="cc__bg" aria-hidden="true">
+    {%- for handle in handles -%}
+      {%- liquid
+        assign coll = collections[handle]
+        assign rel = forloop.index0 | modulo: total
+        assign slot = rel
+        assign total_minus_1 = total | minus: 1
+        assign total_minus_2 = total | minus: 2
+        if total > 2
+          if rel == total_minus_1
+            assign slot = -1
+          elsif total > 3 and rel == total_minus_2
+            assign slot = -2
+          elsif total > 4 and rel == 2
+            assign slot = 2
+          endif
+        endif
+
+        assign bg_url = coll.image | image_url: width: 1600
+        if coll.image == blank
+          assign bg_url = s.fallback_image | image_url: width: 1600
+        endif
+      -%}
+      <div
+        class="cc__bg-layer"
+        data-slot="{{ slot }}"
+        data-bg-index="{{ forloop.index0 }}"
+        style="background-image: url({{ bg_url }});"
+      ></div>
+    {%- endfor -%}
+
+    <div class="cc__scrim" aria-hidden="true"></div>
+    <div class="cc__overlay" aria-hidden="true"></div>
+  </div>
+
+  <div class="cc__content">
+    <div class="cc__header">
+      {%- if s.heading != blank -%}<h2 class="cc__heading">{{ s.heading }}</h2>{%- endif -%}
+      {%- if s.subheading != blank -%}<p class="cc__subheading">{{ s.subheading }}</p>{%- endif -%}
+      {%- if s.show_discover_link and s.discover_url != blank -%}
+        <a href="{{ s.discover_url }}" class="cc__discover">
+          <span class="cc__discover-dot" aria-hidden="true"></span>{{ s.discover_text }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if total == 0 -%}
+      <p class="cc__setup-note">Select at least 2 collections in this section's settings to activate the carousel.</p>
+    {%- else -%}
+      <div
+        class="cc__stage"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="{{ s.heading | default: 'Collections' | escape }}"
+        tabindex="0"
+        data-cc-stage
+      >
+        {%- for handle in handles -%}
+          {%- liquid
+            assign coll = collections[handle]
+            assign rel = forloop.index0 | modulo: total
+            assign slot = rel
+            assign total_minus_1 = total | minus: 1
+            assign total_minus_2 = total | minus: 2
+            if total > 2
+              if rel == total_minus_1
+                assign slot = -1
+              elsif total > 3 and rel == total_minus_2
+                assign slot = -2
+              elsif total > 4 and rel == 2
+                assign slot = 2
+              endif
+            endif
+
+            assign card_image = coll.image | image_url: width: 900
+            if coll.image == blank
+              assign card_image = s.fallback_image | image_url: width: 900
+            endif
+          -%}
+          <a
+            href="{{ coll.url }}"
+            class="cc__card"
+            data-slot="{{ slot }}"
+            data-index="{{ forloop.index0 }}"
+            data-cc-card
+            {% if slot == 0 %}aria-current="true"{% else %}aria-current="false"{% endif %}
+          >
+            <span class="cc__card-image-wrap">
+              {%- if card_image != blank -%}
+                <img
+                  class="cc__card-image"
+                  src="{{ card_image }}"
+                  srcset="{{ coll.image | image_url: width: 450 }} 450w, {{ coll.image | image_url: width: 900 }} 900w"
+                  sizes="(max-width: 749px) 60vw, 420px"
+                  alt="{{ coll.title | escape }}"
+                  loading="{% if forloop.index0 == 0 %}eager{% else %}lazy{% endif %}"
+                  width="900"
+                  height="1125"
+                >
+              {%- endif -%}
+              <span class="cc__card-scrim" aria-hidden="true"></span>
+            </span>
+            <span class="cc__card-title">{{ coll.title }}</span>
+          </a>
+        {%- endfor -%}
+      </div>
+
+      {%- if s.show_arrows -%}
+        <button type="button" class="cc__arrow cc__arrow--prev" aria-label="Previous collection" data-cc-prev>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button type="button" class="cc__arrow cc__arrow--next" aria-label="Next collection" data-cc-next>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      {%- endif -%}
+
+      {%- if s.show_pagination -%}
+        <div class="cc__dots" role="tablist" aria-label="Select collection">
+          {%- for handle in handles -%}
+            {%- assign coll = collections[handle] -%}
+            <button
+              type="button"
+              class="cc__dot{% if forloop.index0 == 0 %} is-active{% endif %}"
+              role="tab"
+              aria-label="Go to {{ coll.title | escape }}"
+              aria-selected="{% if forloop.index0 == 0 %}true{% else %}false{% endif %}"
+              data-cc-dot
+              data-index="{{ forloop.index0 }}"
+            ></button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  #CollectionCarousel-{{ sec_id }} {
+    --cc-text-color: {{ s.text_color }};
+    --cc-title-size: {{ s.title_font_size }}px;
+    --cc-title-weight: {{ s.title_font_weight }};
+    --cc-radius: {{ s.border_radius }}px;
+    --cc-gap: {{ s.card_spacing }}px;
+    --cc-center-w: {{ s.center_card_width }}px;
+    --cc-center-h: {{ s.center_card_height }}px;
+    --cc-side-w: {{ s.side_card_width }}px;
+    --cc-side-h: {{ s.side_card_height }}px;
+    --cc-height: {{ s.section_height }}px;
+    --cc-pad-top: {{ s.padding_top }}px;
+    --cc-pad-bottom: {{ s.padding_bottom }}px;
+    --cc-pad-left: {{ s.padding_left }}px;
+    --cc-pad-right: {{ s.padding_right }}px;
+    --cc-duration: {{ s.animation_duration }}ms;
+    --cc-ease: {{ s.animation_easing }};
+    --cc-overlay-color: {{ s.overlay_color | color_modify: 'alpha', overlay_alpha }};
+    --cc-scrim-alpha: {{ scrim_alpha }};
+    --cc-text-align: {{ s.text_alignment }};
+
+    position: relative;
+    display: block;
+    height: var(--cc-height);
+    min-height: 340px;
+    background: {{ s.section_background_color }};
+    overflow: hidden;
+    padding: var(--cc-pad-top) var(--cc-pad-right) var(--cc-pad-bottom) var(--cc-pad-left);
+    color: var(--cc-text-color);
+    font-family: var(--font-body--family, inherit);
+  }
+
+  #CollectionCarousel-{{ sec_id }} * {
+    box-sizing: border-box;
+  }
+
+  /* ---- Background ---- */
+  #CollectionCarousel-{{ sec_id }} .cc__bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__bg-layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform var(--cc-duration) var(--cc-ease), opacity var(--cc-duration) var(--cc-ease);
+    will-change: transform, opacity;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__bg-layer[data-slot="0"] { transform: translateX(0%);    opacity: 1; z-index: 2; }
+  #CollectionCarousel-{{ sec_id }} .cc__bg-layer[data-slot="1"] { transform: translateX(100%);  opacity: 0; z-index: 1; }
+  #CollectionCarousel-{{ sec_id }} .cc__bg-layer[data-slot="-1"]{ transform: translateX(-100%); opacity: 0; z-index: 1; }
+  #CollectionCarousel-{{ sec_id }} .cc__bg-layer[data-slot="2"] { transform: translateX(200%);  opacity: 0; z-index: 0; }
+  #CollectionCarousel-{{ sec_id }} .cc__bg-layer[data-slot="-2"]{ transform: translateX(-200%); opacity: 0; z-index: 0; }
+
+  /* Fixed, always-on legibility scrim (independent of the merchant's own
+     overlay color/opacity below it) so header text and card titles stay
+     readable regardless of how bright an individual collection photo is. */
+  #CollectionCarousel-{{ sec_id }} .cc__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, calc(var(--cc-scrim-alpha) * 0.55)) 0%,
+      rgba(0, 0, 0, 0) 32%,
+      rgba(0, 0, 0, 0) 60%,
+      rgba(0, 0, 0, calc(var(--cc-scrim-alpha) * 0.75)) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Merchant-configurable flat tint, layered above the scrim. */
+  #CollectionCarousel-{{ sec_id }} .cc__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: var(--cc-overlay-color);
+    pointer-events: none;
+  }
+
+  /* ---- Content ---- */
+  #CollectionCarousel-{{ sec_id }} .cc__content {
+    position: relative;
+    z-index: 4;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__heading {
+    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin: 0;
+    color: var(--cc-text-color);
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__subheading {
+    margin: 6px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    max-width: 46ch;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__discover {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cc-text-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__discover:hover {
+    opacity: 1;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__discover-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    display: inline-block;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__setup-note {
+    margin: auto;
+    padding: 16px 20px;
+    border: 1px dashed currentColor;
+    border-radius: 6px;
+    opacity: 0.75;
+    text-align: center;
+  }
+
+  /* ---- Stage / cards ---- */
+  #CollectionCarousel-{{ sec_id }} .cc__stage {
+    position: relative;
+    flex: 1;
+    outline: none;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__stage:focus-visible {
+    outline: 2px solid var(--cc-text-color);
+    outline-offset: 6px;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: var(--cc-text-color);
+    border-radius: var(--cc-radius);
+    overflow: hidden;
+    transition: transform var(--cc-duration) var(--cc-ease), opacity var(--cc-duration) var(--cc-ease);
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card[data-slot="0"] {
+    width: var(--cc-center-w);
+    height: var(--cc-center-h);
+    transform: translate(-50%, -50%) translateX(0);
+    opacity: 1;
+    z-index: 3;
+    pointer-events: auto;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card[data-slot="1"] {
+    width: var(--cc-side-w);
+    height: var(--cc-side-h);
+    transform: translate(-50%, -50%) translateX(calc(var(--cc-center-w) / 2 + var(--cc-gap) + var(--cc-side-w) / 2));
+    opacity: 1;
+    z-index: 2;
+    pointer-events: auto;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card[data-slot="-1"] {
+    width: var(--cc-side-w);
+    height: var(--cc-side-h);
+    transform: translate(-50%, -50%) translateX(calc(-1 * (var(--cc-center-w) / 2 + var(--cc-gap) + var(--cc-side-w) / 2)));
+    opacity: 1;
+    z-index: 2;
+    pointer-events: auto;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card[data-slot="2"],
+  #CollectionCarousel-{{ sec_id }} .cc__card[data-slot="-2"] {
+    width: var(--cc-side-w);
+    height: var(--cc-side-h);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card[data-slot="2"] {
+    transform: translate(-50%, -50%) translateX(calc(var(--cc-center-w) / 2 + var(--cc-gap) * 2 + var(--cc-side-w) * 1.5));
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card[data-slot="-2"] {
+    transform: translate(-50%, -50%) translateX(calc(-1 * (var(--cc-center-w) / 2 + var(--cc-gap) * 2 + var(--cc-side-w) * 1.5)));
+  }
+
+  #CollectionCarousel-{{ sec_id }}[data-hover-effects="true"] .cc__card[data-slot="0"]:hover {
+    transform: translate(-50%, -50%) translateX(0) scale(1.015);
+  }
+
+  #CollectionCarousel-{{ sec_id }}[data-hover-effects="true"] .cc__card[data-slot="1"]:hover {
+    transform: translate(-50%, -50%) translateX(calc(var(--cc-center-w) / 2 + var(--cc-gap) + var(--cc-side-w) / 2)) scale(1.03);
+  }
+
+  #CollectionCarousel-{{ sec_id }}[data-hover-effects="true"] .cc__card[data-slot="-1"]:hover {
+    transform: translate(-50%, -50%) translateX(calc(-1 * (var(--cc-center-w) / 2 + var(--cc-gap) + var(--cc-side-w) / 2))) scale(1.03);
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card-image-wrap {
+    position: relative;
+    flex: 1;
+    display: block;
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 45%);
+    pointer-events: none;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__card-title {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    font-size: var(--cc-title-size);
+    font-weight: var(--cc-title-weight);
+    text-align: var(--cc-text-align);
+    line-height: 1.2;
+  }
+
+  /* ---- Arrows ---- */
+  #CollectionCarousel-{{ sec_id }} .cc__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(4px);
+    color: var(--cc-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: background 0.2s ease;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__arrow:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__arrow--prev { left: 16px; }
+  #CollectionCarousel-{{ sec_id }} .cc__arrow--next { right: 16px; }
+
+  /* ---- Pagination dots ---- */
+  #CollectionCarousel-{{ sec_id }} .cc__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  #CollectionCarousel-{{ sec_id }} .cc__dot.is-active {
+    background: var(--cc-text-color);
+    transform: scale(1.25);
+  }
+
+  /* ---- Tablet ---- */
+  @media screen and (max-width: 989px) {
+    #CollectionCarousel-{{ sec_id }} {
+      --cc-center-w: calc(var(--cc-center-w) * 0.82);
+      --cc-center-h: calc(var(--cc-center-h) * 0.82);
+      --cc-side-w: calc(var(--cc-side-w) * 0.82);
+      --cc-side-h: calc(var(--cc-side-h) * 0.82);
+      --cc-gap: calc(var(--cc-gap) * 0.7);
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media screen and (max-width: 749px) {
+    #CollectionCarousel-{{ sec_id }} {
+      --cc-center-w: calc(var(--cc-center-w) * 0.6);
+      --cc-center-h: calc(var(--cc-center-h) * 0.62);
+      --cc-side-w: calc(var(--cc-side-w) * 0.55);
+      --cc-side-h: calc(var(--cc-side-h) * 0.55);
+      --cc-gap: calc(var(--cc-gap) * 0.45);
+      --cc-pad-left: calc(var(--cc-pad-left) * 0.6);
+      --cc-pad-right: calc(var(--cc-pad-right) * 0.6);
+    }
+
+    #CollectionCarousel-{{ sec_id }} .cc__arrow {
+      width: 34px;
+      height: 34px;
+    }
+
+    #CollectionCarousel-{{ sec_id }} .cc__arrow--prev { left: 8px; }
+    #CollectionCarousel-{{ sec_id }} .cc__arrow--next { right: 8px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #CollectionCarousel-{{ sec_id }} .cc__bg-layer,
+    #CollectionCarousel-{{ sec_id }} .cc__card {
+      transition-duration: 1ms !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var section = document.getElementById('CollectionCarousel-{{ sec_id }}');
+    if (!section) return;
+
+    section.setAttribute('data-hover-effects', {{ s.enable_hover_effects | json }});
+
+    var stage = section.querySelector('[data-cc-stage]');
+    var cards = Array.prototype.slice.call(section.querySelectorAll('[data-cc-card]'));
+    var bgLayers = Array.prototype.slice.call(section.querySelectorAll('.cc__bg-layer'));
+    var dots = Array.prototype.slice.call(section.querySelectorAll('[data-cc-dot]'));
+    var prevBtn = section.querySelector('[data-cc-prev]');
+    var nextBtn = section.querySelector('[data-cc-next]');
+
+    var total = cards.length;
+    if (total === 0) return;
+
+    var current = 0;
+
+    // Mirrors the Liquid slot calculation used for the initial server-
+    // rendered markup, so runtime navigation continues seamlessly from
+    // whatever was already painted (no jump on first interaction).
+    function slotFor(index) {
+      var rel = ((index - current) % total + total) % total;
+      if (total <= 2) return rel;
+      if (rel === 0) return 0;
+      if (rel === total - 1) return -1;
+      if (total > 3 && rel === total - 2) return -2;
+      if (total > 4 && rel === 2) return 2;
+      return rel;
+    }
+
+    function render() {
+      cards.forEach(function (card, i) {
+        var slot = slotFor(i);
+        card.setAttribute('data-slot', slot);
+        card.setAttribute('aria-current', slot === 0 ? 'true' : 'false');
+      });
+      bgLayers.forEach(function (layer, i) {
+        layer.setAttribute('data-slot', slotFor(i));
+      });
+      dots.forEach(function (dot, i) {
+        var active = i === current;
+        dot.classList.toggle('is-active', active);
+        dot.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+    }
+
+    function goTo(index) {
+      current = ((index % total) + total) % total;
+      render();
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    // Cards are real <a href> elements so they work with no JS at all
+    // (the SSR-rendered center card is already a valid link) and remain
+    // crawlable. JS only intercepts clicks on the two SIDE cards to
+    // re-center the carousel instead of navigating away; the center
+    // card's own click is left alone and navigates normally.
+    cards.forEach(function (card, i) {
+      card.addEventListener('click', function (e) {
+        var slot = parseInt(card.getAttribute('data-slot'), 10);
+        if (slot !== 0) {
+          e.preventDefault();
+          goTo(i);
+          resetAutoplay();
+        }
+      });
+    });
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { prev(); resetAutoplay(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { next(); resetAutoplay(); });
+
+    dots.forEach(function (dot, i) {
+      dot.addEventListener('click', function () { goTo(i); resetAutoplay(); });
+    });
+
+    if (stage) {
+      stage.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') { e.preventDefault(); next(); resetAutoplay(); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); resetAutoplay(); }
+      });
+
+      // Basic touch swipe support for mobile/tablet.
+      var touchStartX = 0;
+      var touchDeltaX = 0;
+      stage.addEventListener('touchstart', function (e) {
+        touchStartX = e.touches[0].clientX;
+        touchDeltaX = 0;
+        stopAutoplay();
+      }, { passive: true });
+      stage.addEventListener('touchmove', function (e) {
+        touchDeltaX = e.touches[0].clientX - touchStartX;
+      }, { passive: true });
+      stage.addEventListener('touchend', function () {
+        if (Math.abs(touchDeltaX) > 40) {
+          if (touchDeltaX < 0) { next(); } else { prev(); }
+        }
+        startAutoplay();
+      });
+    }
+
+    // ---- Autoplay ----
+    var autoplayEnabled = section.getAttribute('data-autoplay') === 'true';
+    var autoplayInterval = (parseFloat(section.getAttribute('data-autoplay-interval')) || 5) * 1000;
+    var timer = null;
+
+    function startAutoplay() {
+      if (!autoplayEnabled || total < 2) return;
+      stopAutoplay();
+      timer = setInterval(next, autoplayInterval);
+    }
+
+    function stopAutoplay() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function resetAutoplay() {
+      if (autoplayEnabled) {
+        stopAutoplay();
+        startAutoplay();
+      }
+    }
+
+    if (autoplayEnabled) {
+      section.addEventListener('mouseenter', stopAutoplay);
+      section.addEventListener('mouseleave', startAutoplay);
+      section.addEventListener('focusin', stopAutoplay);
+      section.addEventListener('focusout', startAutoplay);
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) { stopAutoplay(); } else { startAutoplay(); }
+      });
+    }
+
+    render();
+    startAutoplay();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Animated Carousel",
+  "tag": "section",
+  "class": "section section--collection-carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Collections"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading (optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_discover_link",
+      "label": "Show \"discover all\" link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "discover_text",
+      "label": "Discover link text",
+      "default": "Discover All"
+    },
+    {
+      "type": "url",
+      "id": "discover_url",
+      "label": "Discover link URL"
+    },
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "paragraph",
+      "content": "Select 3–5 collections. Fewer than 2 will disable the carousel; exactly 2 will show without side-card wraparound."
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "Fallback image",
+      "info": "Used for any selected collection that has no image of its own."
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination dots",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_autoplay",
+      "label": "Enable autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_interval",
+      "label": "Autoplay interval",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_effects",
+      "label": "Enable hover effects",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Animation duration",
+      "min": 200,
+      "max": 1200,
+      "step": 50,
+      "unit": "ms",
+      "default": 550
+    },
+    {
+      "type": "select",
+      "id": "animation_easing",
+      "label": "Animation easing",
+      "options": [
+        { "value": "ease", "label": "Ease" },
+        { "value": "ease-in-out", "label": "Ease in-out" },
+        { "value": "ease-out", "label": "Ease out" },
+        { "value": "cubic-bezier(0.22, 1, 0.36, 1)", "label": "Smooth (recommended)" },
+        { "value": "linear", "label": "Linear" }
+      ],
+      "default": "cubic-bezier(0.22, 1, 0.36, 1)"
+    },
+    {
+      "type": "header",
+      "content": "Sizing & Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "label": "Section height",
+      "min": 320,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "default": 620
+    },
+    {
+      "type": "range",
+      "id": "center_card_width",
+      "label": "Center card width",
+      "min": 240,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 420
+    },
+    {
+      "type": "range",
+      "id": "center_card_height",
+      "label": "Center card height",
+      "min": 280,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "default": 560
+    },
+    {
+      "type": "range",
+      "id": "side_card_width",
+      "label": "Side card width",
+      "min": 140,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 260
+    },
+    {
+      "type": "range",
+      "id": "side_card_height",
+      "label": "Side card height",
+      "min": 180,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 340
+    },
+    {
+      "type": "range",
+      "id": "card_spacing",
+      "label": "Card spacing",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Typography & Colors"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Card title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Card title font size",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Card title font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color (fallback, shown before/without an image)",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 10,
+      "info": "A flat tint over the whole background image."
+    },
+    {
+      "type": "range",
+      "id": "overlay_intensity",
+      "label": "Overlay intensity (text legibility scrim)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 60,
+      "info": "Independent from the flat overlay above — controls a fixed dark gradient at the top and bottom of the section that keeps text readable regardless of the photo underneath."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Left padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Right padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    }
+  ],
+  "presets": [
+    {
+      "name": "Animated Carousel"
+    }
+  ]
+}
+{% endschema %}
