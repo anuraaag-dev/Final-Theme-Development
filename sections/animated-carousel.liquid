@@ -198,6 +198,7 @@
     --cc-pad-left: {{ s.padding_left }}px;
     --cc-pad-right: {{ s.padding_right }}px;
     --cc-duration: {{ s.animation_duration }}ms;
+    --cc-bg-duration: {{ s.bg_animation_duration }}ms;
     --cc-ease: {{ s.animation_easing }};
     --cc-overlay-color: {{ s.overlay_color | color_modify: 'alpha', overlay_alpha }};
     --cc-scrim-alpha: {{ scrim_alpha }};
@@ -205,6 +206,12 @@
 
     position: relative;
     display: block;
+    width: 100vw;
+    max-width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
     height: var(--cc-height);
     min-height: 340px;
     background: {{ s.section_background_color }};
@@ -230,7 +237,7 @@
     inset: 0;
     background-size: cover;
     background-position: center;
-    transition: transform var(--cc-duration) var(--cc-ease), opacity var(--cc-duration) var(--cc-ease);
+    transition: transform var(--cc-bg-duration) var(--cc-ease), opacity var(--cc-bg-duration) var(--cc-ease);
     will-change: transform, opacity;
   }
 
@@ -808,12 +815,23 @@
     {
       "type": "range",
       "id": "animation_duration",
-      "label": "Animation duration",
+      "label": "Card animation duration",
       "min": 200,
-      "max": 1600,
+      "max": 1200,
       "step": 50,
       "unit": "ms",
       "default": 550
+    },
+    {
+      "type": "range",
+      "id": "bg_animation_duration",
+      "label": "Background slide duration",
+      "info": "How slowly the full-bleed background image slides when you switch cards. Kept separate from card animation duration so the background can move more slowly/dramatically than the cards.",
+      "min": 300,
+      "max": 3000,
+      "step": 50,
+      "unit": "ms",
+      "default": 1100
     },
     {
       "type": "select",
